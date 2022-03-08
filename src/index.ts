@@ -1,4 +1,4 @@
-import { generateSeed, getKeyringFromSeed } from "./account"
+import { generateSeed, getKeyringFromSeed } from "./functions/account"
 
 const testt = async () => {
   const account = await generateSeed()
@@ -8,4 +8,4 @@ const testt = async () => {
 }
 testt()
 
-export * from "./account"
+export * from "./functions/account"

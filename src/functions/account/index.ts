@@ -9,7 +9,7 @@ export const generateSeed = async () => {
 }
 
 export const getKeyringFromSeed = async (seed: string) => {
-    await cryptoWaitReady()
-    const keyring = new Keyring({ type: "sr25519" })
-    return keyring.createFromUri(seed)
-  }
+  await cryptoWaitReady()
+  const keyring = new Keyring({ type: "sr25519" })
+  return keyring.createFromUri(seed)
+}
