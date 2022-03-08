@@ -1,8 +1,23 @@
 {
     "transform": {
-        "^.+\\.(t|j)sx?$": "ts-jest"
+        "^.+\\.(t|j)sx?$": "babel-jest"
     },
+    "transformIgnorePatterns": [],
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "testEnvironment": "node",
+    "modulePathIgnorePatterns": ["<rootDir>/dist/"],
+    "clearMocks": true,
+    "collectCoverage": false,
+    "coverageDirectory": "coverage",
+    "globals": {
+        "ts-jest": {
+            "isolatedModules": true,
+            "tsconfig": {
+                "allowJs": true
+            }
+        }
+    }
+
 }
