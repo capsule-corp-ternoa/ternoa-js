@@ -4,13 +4,11 @@ import { isValidAddress } from "../utils/polkadot"
 
 test("Should generate a new seed", async () => {
     const account = await generateSeed()
-    expect(true)
     expect(mnemonicValidate(account.seed)).toBe(true)
     expect(isValidAddress(account.address)).toBe(true)
 })
 
 test("A valid seed should return a keypair", async () => {
-  expect(true)
     const account = await generateSeed()
     const keyring = await getKeyringFromSeed(account.seed)
     const address = keyring.address
