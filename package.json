@@ -2,11 +2,13 @@
   "name": "ternoa-js",
   "version": "0.0.0",
   "description": "Ternoa library of function to interact with the blockchain and manipulate transactions",
-  "main": "build/src/index.ts",
+  "main": "build/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "start": "ts-node index.ts",
-    "dev": "nodemon index.ts",
-    "build": "tsc --project ./",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "prepare": "npm run build",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint -c .eslintrc",
     "test": "jest --config jestconfig.json"
