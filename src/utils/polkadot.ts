@@ -1,7 +1,7 @@
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
-import BN from 'bn.js';
-import { getApi } from "./blockchain";
+import BN from "bn.js"
+import { getApi } from "./blockchain"
 
 export const isValidAddress = (address: string) => {
   try {
@@ -22,16 +22,15 @@ export const unFormatBalance = async (_input: number) => {
   let result
 
   if (isDecimalValue) {
-      if (siUnitPower - isDecimalValue[2].length < -basePower) {
-          result = new BN(-1)
-      }
-      const div = new BN(input.replace(/\.\d*$/, ''))
-      // const modString = input.replace(/^\d+\./, '').substr(0, api.registry.chainDecimals[0])
-      const modString = input.replace(/^\d+\./, '').substring(0, api.registry.chainDecimals[0] + 1)
-      const mod = new BN(modString)
-      result = div.mul(BN_TEN.pow(siPower)).add(mod.mul(BN_TEN.pow(new BN(basePower + siUnitPower - modString.length))))
+    if (siUnitPower - isDecimalValue[2].length < -basePower) {
+      result = new BN(-1)
+    }
+    const div = new BN(input.replace(/\.\d*$/, ""))
+    const modString = input.replace(/^\d+\./, "").substring(0, api.registry.chainDecimals[0] + 1)
+    const mod = new BN(modString)
+    result = div.mul(BN_TEN.pow(siPower)).add(mod.mul(BN_TEN.pow(new BN(basePower + siUnitPower - modString.length))))
   } else {
-      result = new BN(input.replace(/[^\d]/g, '')).mul(BN_TEN.pow(siPower))
+    result = new BN(input.replace(/[^\d]/g, "")).mul(BN_TEN.pow(siPower))
   }
-  return result;
+  return result
 }

@@ -13,6 +13,7 @@
     "lint": "eslint -c .eslintrc",
     "test": "jest --config jestconfig.json"
   },
+  "pre-commit": ["lint", "format", "prepare"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capsule-corp-ternoa/ternoa-js.git"
