@@ -16,20 +16,21 @@ export const createTransaction = async (txPallet: string, txExtrinsic: string, t
 
 // create a signable transaction from an address and an unsigned transaction
 export const createSignableTransaction = async (
-  address: string,
-  tx: SubmittableExtrinsic<"promise", ISubmittableResult>,
-) => {
+  address: string, tx: SubmittableExtrinsic<"promise", ISubmittableResult>,) => {
   const api = await getApi()
-  const nextNonce = await api.rpc.system.accountNextIndex(address)
+  const nextNonce = await api.rpc.system.accountNextIndex(        address
+    )
   const payload = api.createType("SignerPayload", {
-    method: tx,
-    nonce: nextNonce,
-    genesisHash: api.genesisHash,
-    blockHash: api.genesisHash,
-    runtimeVersion: api.runtimeVersion,
-    version: api.extrinsicVersion,
+                method: tx,
+nonce: nextNonce,
+            genesisHash: api.genesisHash,
+            blockHash: api.genesisHash,
+            runtimeVersion: api.runtimeVersion,
+            version: api.extrinsicVersion,
   })
+  console.log("a")
   return payload.toPayload()
+
 }
 
 // sign signable string with seed and get signed payload
