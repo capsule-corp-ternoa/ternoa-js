@@ -8,12 +8,10 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "prepare": "npm run build",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint -c .eslintrc",
     "test": "jest --config jestconfig.json"
   },
-  "pre-commit": ["lint", "format", "prepare"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capsule-corp-ternoa/ternoa-js.git"
@@ -38,6 +36,7 @@
     "babel-jest": "^27.5.1",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.5.0",
+    "husky": "^7.0.4",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
