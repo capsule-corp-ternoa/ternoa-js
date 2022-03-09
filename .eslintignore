@@ -1,0 +1,10 @@
+!**/.eslintrc*
+node_modules*
+build
+*.json
+.prettierrc
+.gitignore
+*.md
+*.log
+*.lock
+*.d.ts
