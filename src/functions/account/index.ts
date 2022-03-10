@@ -2,6 +2,7 @@ import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import { Keyring } from "@polkadot/keyring"
 import { getQuery } from "../blockchain"
 import BN from "bn.js"
+import { chainQuery, txPallets } from "../../constants"
 
 export const generateSeed = async () => {
   await cryptoWaitReady()
@@ -18,6 +19,6 @@ export const getKeyringFromSeed = async (seed: string) => {
 
 //TO TEST
 export const getBalance = async (address: string) => {
-  const balance: { free: BN } = ((await getQuery("system", "account", [address])) as any).data
+  const balance: { free: BN } = ((await getQuery(txPallets.system, chainQuery.account, [address])) as any).data
   return balance.free
 }
