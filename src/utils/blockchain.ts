@@ -7,7 +7,7 @@ dotenv.config()
 let api: ApiPromise
 
 const CHAIN_ENDPOINT = process.env.CHAIN_ENDPOINT || "wss://testnet.ternoa.com"
-const COMMON_API_URL = process.env.COMMON_API_URL || "https://ternoa-api.testnet.ternoa.com"
+const COMMON_API_URL = process.env.COMMON_API_URL
 export const TEST_SEED = process.env.TEST_SEED
 
 export const getChainSpec = async () => await axios.get(`${COMMON_API_URL}/api/chaintypes`)

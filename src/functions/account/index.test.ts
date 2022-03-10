@@ -14,3 +14,6 @@ test("A valid seed should return a keypair", async () => {
   const address = keyring.address
   expect(address).toBe(account.address)
 })
+
+//GET BALANCE SHOULD WORK with filled account
+//GET BALANCE SHOULD WORK with empty account
