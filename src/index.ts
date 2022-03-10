@@ -1,4 +1,3 @@
-
 import { runTransaction } from "./functions/blockchain"
 import { getKeyringFromSeed } from "./functions/account"
 import { unFormatBalance } from "./utils/polkadot"

@@ -8,9 +8,10 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "lint": "eslint src --ext .js,.ts",
+    "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "test": "jest --config jestconfig.json"
+    "test": "jest --config jestconfig.json",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
