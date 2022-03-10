@@ -8,8 +8,8 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
+    "lint": "eslint src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint -c .eslintrc",
     "test": "jest --config jestconfig.json"
   },
   "repository": {
@@ -33,9 +33,11 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.1",
+    "@typescript-eslint/parser": "^5.14.0",
     "babel-jest": "^27.5.1",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jest": "^26.1.1",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
