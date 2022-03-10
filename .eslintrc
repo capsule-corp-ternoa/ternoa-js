@@ -5,5 +5,8 @@
     "jest/globals": true,
     "node": true
   },
-  "plugins": ["@typescript-eslint", "jest"]
+  "plugins": ["@typescript-eslint", "jest"],
+  "rules":{
+    "@typescript-eslint/no-explicit-any": "off"
+  }
 }
