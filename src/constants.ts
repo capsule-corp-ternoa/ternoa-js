@@ -30,6 +30,20 @@ export enum txActions {
   setLogoUri = "setLogoUri",
 }
 
+export enum txEvent {
+  nftsCreated = "Created",
+  nftsBurned = "Burned",
+  nftsTransfered = "Transfered",
+  CapsuleIpfsReferenceChanged = "CapsuleIpfsReferenceChanged",
+  CapsuleCreated = "CapsuleCreated",
+  CapsuleRemoved = "CapsuleRemoved",
+  MarketplaceCreated = "MarketplaceCreated",
+  ExtrinsicSuccess = "ExtrinsicSuccess",
+  ExtrinsicFailed = "ExtrinsicFailed",
+  BatchCompleted = "BatchCompleted",
+  BatchInterrupted = "BatchInterrupted",
+}
+
 export enum chainQuery {
   nftMintFee = "nftMintFee",
   capsuleMintFee = "capsuleMintFee",
