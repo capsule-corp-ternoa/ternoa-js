@@ -7,6 +7,7 @@ import * as blockchain from "./functions/blockchain"
 const test = async () => {
   try {
     //test transaction
+    // pub address : 5GesFQSwhmuMKAHcDrfm21Z5xrq6kW93C1ch2Xosq1rXx2Eh
     const keyring = await account.getKeyringFromSeed(
       "soccer traffic version fault humor tackle bid tape obvious wild fish coin",
     )
