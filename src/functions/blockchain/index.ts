@@ -1,69 +1,21 @@
 import { SubmittableExtrinsic } from "@polkadot/api/types"
 import { getApi } from "../../utils/blockchain"
-import type { ISubmittableResult, SignerPayloadJSON, IKeyringPair } from "@polkadot/types/types"
-import { getBalance } from "../account"
+import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
+// import { getBalance } from "../account"
 import BN from "bn.js"
 import { txActions, txPallets } from "../../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getCapsuleMintFee } from "../capsule"
 
-//Generic function to get any query doable on polkadot UI
-export const getQuery = async (module: string, call: string, args: any[] = []) => {
-  const api = await getApi()
-  return await api.query[module][call](...args)
-}
-
-// create an unsigned transaction
-export const createTransaction = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
-  const api = await getApi()
-  console.log("tx hex", api.tx[txPallet][txExtrinsic](...txArgs).toHex())
-  return api.tx[txPallet][txExtrinsic](...txArgs)
-}
-
-// create a signable transaction from an address and an unsigned transaction
-export const createSignableTransaction = async (
-  address: string,
-  tx: SubmittableExtrinsic<"promise", ISubmittableResult>,
-) => {
-  const api = await getApi()
-  const nextNonce = await api.rpc.system.accountNextIndex(address)
-  const payload = api.createType("SignerPayload", {
-    method: tx,
-    nonce: nextNonce,
-    genesisHash: api.genesisHash,
-    blockHash: api.genesisHash,
-    runtimeVersion: api.runtimeVersion,
-    version: api.extrinsicVersion,
-    address: address,
-  })
-  return payload.toPayload()
-}
-
-// sign signable string with seed and get signed payload
-export const getSignedTransaction = async (keyring: IKeyringPair, payload: SignerPayloadJSON) => {
-  const api = await getApi()
-  const { signature } = api.createType("ExtrinsicPayload", payload, { version: api.extrinsicVersion }).sign(keyring)
-  return signature
-}
-
-// submit transaction with signed payload
-export const submitTransaction = async (signedPayload: `0x${string}`, payload: SignerPayloadJSON) => {
-  const api = await getApi()
-  console.log("payload", payload)
-  // check balannnnnnce here
-  const tx = api.tx("0xb4040300000687ecfe54a6970a799958522f58646c446891535cc54fa5cd0d7c3a8f6ab10513000064a7b3b6e00d")
-  tx.addSignature(payload.address, signedPayload, payload)
-  const hash = await tx.send()
-  return hash.toHex()
-}
-
 // get estimation of transaction cost in gas
 export const getTransactionGasFee = async (
   tx: SubmittableExtrinsic<"promise", ISubmittableResult>,
   address: string,
 ) => {
-  const info = await tx.paymentInfo(address)
+  const api = await getApi()
+  const txCopy = api.tx(tx.toHex())
+  const info = await txCopy.paymentInfo(address)
   return info.partialFee
 }
 
@@ -90,22 +42,83 @@ export const getTransactionTreasuryFee = async (tx: SubmittableExtrinsic<"promis
   }
 }
 
-export const getTransactionFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>, address: string) => {
+export const getTransactionFees = async (txHex: `0x${string}`, address: string) => {
+  const api = await getApi()
+  const tx = api.tx(txHex)
   const extrinsicFee = await getTransactionGasFee(tx, address)
   const treasuryFee = await getTransactionTreasuryFee(tx)
   return extrinsicFee.add(treasuryFee)
 }
 
-// run a transaction from beginning to end
-export const runTransaction = async (txPallet: string, txExtrinsic: string, txArgs: any[], keyring: IKeyringPair) => {
+//Generic function to get any query doable on polkadot UI
+export const getQuery = async (module: string, call: string, args: any[] = []) => {
+  const api = await getApi()
+  return await api.query[module][call](...args)
+}
+
+// create an unsigned transaction
+export const createTransaction = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
+  const api = await getApi()
+  return api.tx[txPallet][txExtrinsic](...txArgs)
+}
+
+// create an unsigned transaction in hex format
+export const getHexFromTx = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
   const tx = await createTransaction(txPallet, txExtrinsic, txArgs)
-  const balance = await getBalance(keyring.address)
-  const fees = await getTransactionFees(tx, keyring.address)
-  if (balance.cmp(fees) === -1) throw new Error("Insufficient funds for gas or treasury")
-  const payload = await createSignableTransaction(keyring.address, tx)
-  const signedPayload = await getSignedTransaction(keyring, payload)
-  const hash = await submitTransaction(signedPayload, payload)
-  return hash
+  return tx.toHex()
+}
+
+// create a signable transaction from an address and an unsigned transaction
+export const getSignedString = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
+  const api = await getApi()
+  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce: -1, blockHash: api.genesisHash, era: 0 })
+  return txSigned.toHex()
+}
+
+// sign signable string with seed and get signed payload
+export const submitTransaction = async (txHex: `0x${string}`) => {
+  const api = await getApi()
+  return await api.tx(txHex).send()
+}
+
+// sign signable string with seed and get signed payload
+export const subscribeAndSubmitTransaction = async (
+  txHex: `0x${string}`,
+  callback: (result: ISubmittableResult) => void,
+) => {
+  const api = await getApi()
+  let finalHash = undefined
+  const unsub = await api.tx(txHex).send(async (result) => {
+    try {
+      await callback(result)
+      if (result.status.isFinalized && unsub && typeof unsub === "function") {
+        unsub()
+        finalHash = result.txHash.toHex()
+      }
+    } catch (err) {
+      if (unsub && typeof unsub === "function") {
+        unsub()
+      }
+      throw err
+    }
+  })
+  return finalHash
+}
+
+export const runTransaction = async (
+  txPallet: string,
+  txExtrinsic: string,
+  txArgs: any[],
+  keyring: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const signableTx = await getHexFromTx(txPallet, txExtrinsic, txArgs)
+  const signedTx = await getSignedString(keyring, signableTx)
+  if (callback) {
+    return await subscribeAndSubmitTransaction(signedTx, callback)
+  } else {
+    return await submitTransaction(signedTx)
+  }
 }
 
 // Batches ...
