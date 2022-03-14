@@ -1,13 +1,13 @@
-import { getQuery } from "."
+import { query } from "."
 import { chainQuery, txPallets } from "../../constants"
 
 test("Should be able to query storage data", async () => {
-  const data = await getQuery(txPallets.nfts, chainQuery.nftMintFee)
+  const data = await query(txPallets.nfts, chainQuery.nftMintFee)
   expect(data).toBeDefined()
 })
 test("Should throw error with inexisting storage", async () => {
   await expect(async () => {
-    await getQuery("toBe", "orNotToBe")
+    await query("toBe", "orNotToBe")
   }).rejects.toThrow(TypeError)
 })
 
@@ -19,10 +19,6 @@ test("Should throw error with inexisting storage", async () => {
 
 // signTransaction with valid seed
 // signTransaction with invalid seed
-
-// getTransactionFeesEstimate should return fees for simple transaction (eg:; balance transfer)
-// getTransactionTreasury fee should return fees for valid transaction (create / createNFT)
-// getTransactionTreasury fee should return 0 for transaction different than create / createFromNft
 
 // submit a simple transaction with 1 caps
 

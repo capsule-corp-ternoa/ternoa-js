@@ -1,8 +1,12 @@
 import BN from "bn.js"
 import { chainQuery, txPallets } from "../../constants"
-import { getQuery } from "../blockchain"
+import { query } from "../blockchain"
 
+/**
+ * Get the amount of caps needed to mint a capsule
+ * @returns the mint fee
+ */
 export const getCapsuleMintFee = async () => {
-  const fee: any = await getQuery(txPallets.capsules, chainQuery.capsuleMintFee)
+  const fee: any = await query(txPallets.capsules, chainQuery.capsuleMintFee)
   return fee as BN
 }
