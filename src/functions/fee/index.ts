@@ -14,10 +14,7 @@ import { getBalance } from "../account"
  * @param address public address of the sender
  * @returns the fee estimation
  */
-export const getTransactionGasFee = async (
-  tx: SubmittableExtrinsic<"promise", ISubmittableResult>,
-  address: string,
-) => {
+export const getTxGasFee = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>, address: string) => {
   const api = await getApi()
   const txCopy = api.tx(tx.toHex())
   const info = await txCopy.paymentInfo(address)
@@ -29,7 +26,7 @@ export const getTransactionGasFee = async (
  * @param tx transaction object
  * @returns the fee estimation
  */
-export const getTransactionTreasuryFee = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
+export const getTxTreasuryFee = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
   switch (`${tx.method.section}_${tx.method.method}`) {
     case `${txPallets.nfts}_${txActions.create}`: {
       return await getNftMintFee()
@@ -57,11 +54,11 @@ export const getTransactionTreasuryFee = async (tx: SubmittableExtrinsic<"promis
  * @param address public address of the sender
  * @returns the sum of the gas fee and the treasury fee
  */
-export const getTransactionFees = async (txHex: `0x${string}`, address: string) => {
+export const getTxFees = async (txHex: `0x${string}`, address: string) => {
   const api = await getApi()
   const tx = api.tx(txHex)
-  const extrinsicFee = await getTransactionGasFee(tx, address)
-  const treasuryFee = await getTransactionTreasuryFee(tx)
+  const extrinsicFee = await getTxGasFee(tx, address)
+  const treasuryFee = await getTxTreasuryFee(tx)
   return extrinsicFee.add(treasuryFee)
 }
 
@@ -71,6 +68,6 @@ export const getTransactionFees = async (txHex: `0x${string}`, address: string) 
  */
 export const checkBalanceForTx = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
   const balance = await getBalance(tx.signer.toString())
-  const fees = await getTransactionFees(tx.toHex(), tx.signer.toString())
+  const fees = await getTxFees(tx.toHex(), tx.signer.toString())
   if (balance.cmp(fees) === -1) throw new Error("Insufficient funds for gas or treasury")
 }
