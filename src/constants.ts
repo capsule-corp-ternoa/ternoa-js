@@ -15,9 +15,10 @@ export enum txActions {
   burn = "burn",
   create = "create",
   transfer = "transfer",
+  transferAll = "transferAll",
+  transferKeepAlive = "transferKeepAlive",
   finishSeries = "finishSeries",
   batch = "batch",
-  transferKeepAlive = "transferKeepAlive",
   createFromNft = "createFromNft",
   remove = "remove",
   setIpfsReference = "setIpfsReference",
@@ -49,4 +50,8 @@ export enum chainQuery {
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",
+}
+
+export enum chainConstants {
+  existentialDeposit = "existentialDeposit",
 }

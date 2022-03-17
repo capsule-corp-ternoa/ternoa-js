@@ -6,7 +6,7 @@ import { txActions, txPallets } from "../../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getCapsuleMintFee } from "../capsule"
-import { getBalance } from "../account"
+import { getBalance } from "../balance"
 
 /**
  * Get the gas fee estimation for a transaction and an address

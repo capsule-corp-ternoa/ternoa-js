@@ -31,6 +31,17 @@ export const query = async (module: string, call: string, args: any[] = [], call
 }
 
 /**
+ * Generic function to get a chain constant
+ * @param section the section required to get the chain constant (eg. "balances")
+ * @param constantName the constantName depending on the section (eg. "existentialDeposit")
+ * @returns the constant value
+ */
+export const consts = async (section: string, constantName: string) => {
+  const api = await getApi()
+  return api.consts[section][constantName]
+}
+
+/**
  * Check if a tx result is successful
  * @param result generic result passed as a parameter in a tx callback
  * @returns an object with a boolean success field indicating if tx is successful
