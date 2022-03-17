@@ -66,6 +66,6 @@
     "graphql-request": "^4.0.0"
   },
   "files": [
-    "build/**/*"
+    "build/*"
   ]
 }
