@@ -1,8 +1,38 @@
 {
   "name": "ternoa-js",
   "version": "0.0.6",
-  "description": "Ternoa library of function to interact with the blockchain and manipulate transactions",
-  "main": "build/index.js",
+  "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
+  "main": "./build/index.js",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    },
+    "./account": {
+      "types": "./build/functions/account/index.d.ts",
+      "default": "./build/functions/account/index.js"
+    },
+    "./blockchain": {
+      "types": "./build/functions/blockchain/index.d.ts",
+      "default": "./build/functions/blockchain/index.js"
+    },
+    "./capsule": {
+      "types": "./build/functions/capsule/index.d.ts",
+      "default": "./build/functions/capsule/index.js"
+    },
+    "./fee": {
+      "types": "./build/functions/fee/index.d.ts",
+      "default": "./build/functions/fee/index.js"
+    },
+    "./marketplace": {
+      "types": "./build/functions/marketplace/index.d.ts",
+      "default": "./build/functions/marketplace/index.js"
+    },
+    "./nft": {
+      "types": "./build/functions/nft/index.d.ts",
+      "default": "./build/functions/nft/index.js"
+    }
+  },
   "types": "build/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
