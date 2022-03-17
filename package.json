@@ -5,32 +5,32 @@
   "main": "./build/index.js",
   "exports": {
     ".": {
-      "types": "./build/index.d.ts",
-      "default": "./build/index.js"
+      "types": "./index.d.ts",
+      "default": "./index.js"
     },
     "./account": {
-      "types": "./build/functions/account/index.d.ts",
-      "default": "./build/functions/account/index.js"
+      "types": "./functions/account/index.d.ts",
+      "default": "./functions/account/index.js"
     },
     "./blockchain": {
-      "types": "./build/functions/blockchain/index.d.ts",
-      "default": "./build/functions/blockchain/index.js"
+      "types": "./functions/blockchain/index.d.ts",
+      "default": "./functions/blockchain/index.js"
     },
     "./capsule": {
-      "types": "./build/functions/capsule/index.d.ts",
-      "default": "./build/functions/capsule/index.js"
+      "types": "./functions/capsule/index.d.ts",
+      "default": "./functions/capsule/index.js"
     },
     "./fee": {
-      "types": "./build/functions/fee/index.d.ts",
-      "default": "./build/functions/fee/index.js"
+      "types": "./functions/fee/index.d.ts",
+      "default": "./functions/fee/index.js"
     },
     "./marketplace": {
-      "types": "./build/functions/marketplace/index.d.ts",
-      "default": "./build/functions/marketplace/index.js"
+      "types": "./functions/marketplace/index.d.ts",
+      "default": "./functions/marketplace/index.js"
     },
     "./nft": {
-      "types": "./build/functions/nft/index.d.ts",
-      "default": "./build/functions/nft/index.js"
+      "types": "./functions/nft/index.d.ts",
+      "default": "./functions/nft/index.js"
     }
   },
   "types": "build/index.d.ts",
