@@ -24,6 +24,9 @@ async function createPackageFile() {
     },
   }
 
+  delete newPackageData.scripts
+  delete newPackageData.devDependencies
+
   const targetPath = resolve(buildPath, "./package.json")
   writeJson(targetPath, newPackageData)
   console.log(`Created package.json in ${targetPath}`)
