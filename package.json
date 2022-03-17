@@ -3,41 +3,12 @@
   "version": "0.0.8",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "main": "./build/index.js",
-  "exports": {
-    ".": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
-    },
-    "./account": {
-      "types": "./functions/account/index.d.ts",
-      "default": "./functions/account/index.js"
-    },
-    "./blockchain": {
-      "types": "./functions/blockchain/index.d.ts",
-      "default": "./functions/blockchain/index.js"
-    },
-    "./capsule": {
-      "types": "./functions/capsule/index.d.ts",
-      "default": "./functions/capsule/index.js"
-    },
-    "./fee": {
-      "types": "./functions/fee/index.d.ts",
-      "default": "./functions/fee/index.js"
-    },
-    "./marketplace": {
-      "types": "./functions/marketplace/index.d.ts",
-      "default": "./functions/marketplace/index.js"
-    },
-    "./nft": {
-      "types": "./functions/nft/index.d.ts",
-      "default": "./functions/nft/index.js"
-    }
-  },
-  "types": "build/index.d.ts",
+  "types": "./build/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "rimraf build && tsc && npm run build:frank-build",
+    "build:frank-build": "node ./src/scripts/frank-build.mjs",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest --config jestconfig.json --detectOpenHandles --forceExit",
@@ -55,6 +26,14 @@
     "substrate"
   ],
   "author": "Ghali Leouarz",
+  "contributors": [
+    {
+      "name": "Igor Papandinas"
+    },
+    {
+      "name": "Victor Salomon"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/capsule-corp-ternoa/ternoa-js/issues"
@@ -87,6 +66,7 @@
     "graphql-request": "^4.0.0"
   },
   "files": [
-    "build/**/*"
+    "build/*.js",
+    "build/**/*.js"
   ]
 }
