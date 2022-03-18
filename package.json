@@ -3,6 +3,7 @@
   "version": "0.0.14",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "main": "./build/index.js",
+  "type": "module",
   "types": "./build/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
@@ -34,7 +35,7 @@
       "name": "Victor Salomon"
     }
   ],
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/capsule-corp-ternoa/ternoa-js/issues"
   },

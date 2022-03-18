@@ -50,12 +50,3 @@
 // }
 
 // test()
-
-export * as account from "./functions/account"
-export * as blockchain from "./functions/blockchain"
-export * as capsule from "./functions/capsule"
-export * as fee from "./functions/fee"
-export * as marketplace from "./functions/marketplace"
-export * as nft from "./functions/nft"
-export * as utils from "./utils/blockchain"
-export * as constants from "./constants"

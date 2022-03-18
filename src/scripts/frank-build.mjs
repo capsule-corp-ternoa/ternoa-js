@@ -21,6 +21,8 @@ async function createPackageFile() {
       "./fee": "./functions/fee/index.js",
       "./marketplace": "./functions/marketplace/index.js",
       "./nft": "./functions/nft/index.js",
+      "./utils": "./utils/blockchain.js",
+      "./constants": "./constants.js",
     },
   }
 
@@ -44,7 +46,7 @@ async function run() {
   try {
     await createPackageFile()
     await includeFileInBuild("./README.md")
-    // await includeFileInBuild("./LICENSE")
+    await includeFileInBuild("./LICENSE")
   } catch (err) {
     console.error(err)
     process.exit(1)
