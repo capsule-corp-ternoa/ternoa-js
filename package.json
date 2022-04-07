@@ -2,14 +2,15 @@
   "name": "ternoa-js",
   "version": "0.0.16",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
-  "main": "./build/index.js",
+  "engines": {
+    "node": ">=14.13.1 || >=16.0.0"
+  },
   "type": "module",
-  "types": "./build/index.d.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon src/index.ts",
+    "start": "ts-node --esm src/index.ts",
+    "dev": "nodemon --esm src/index.ts",
     "build": "rimraf build && tsc && npm run build:frank-build",
-    "build:frank-build": "node ./src/scripts/frank-build.mjs",
+    "build:frank-build": "node ./src/scripts/frank-build.js",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest --config jestconfig.json --detectOpenHandles --forceExit",
