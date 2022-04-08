@@ -5,12 +5,13 @@
   "engines": {
     "node": ">=14.13.1 || >=16.0.0"
   },
-  "type": "module",
+  "type": "commonjs",
+  "main": "./src/index.js",
   "scripts": {
-    "start": "ts-node --esm src/index.ts",
-    "dev": "nodemon --esm src/index.ts",
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
     "build": "rimraf build && tsc && npm run build:frank-build",
-    "build:frank-build": "node ./src/scripts/frank-build.js",
+    "build:frank-build": "node ./src/scripts/frank-build.mjs",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest --config jestconfig.json --detectOpenHandles --forceExit",

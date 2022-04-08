@@ -2,11 +2,10 @@
   "compilerOptions": {
     "declaration": true,
     "target": "es6",
-    "module": "ES2015",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "module": "commonjs",
     "rootDir": "src",
     "outDir": "build",
+    "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true
   },
