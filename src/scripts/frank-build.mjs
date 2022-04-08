@@ -11,6 +11,7 @@ async function createPackageFile() {
   const newPackageData = {
     ...packageData,
     type: "module",
+    main: "index.js",
     module: "index.js",
     types: "index.d.ts",
     exports: {
@@ -57,7 +58,6 @@ async function createPackageFile() {
     },
   }
 
-  delete newPackageData.main
   delete newPackageData.scripts
   delete newPackageData.devDependencies
   delete newPackageData.files
