@@ -10,19 +10,47 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
+    type: "module",
     main: "./index.js",
     types: "./index.d.ts",
     exports: {
-      ".": "./index.js",
-      "./account": "./functions/account/index.js",
-      "./balance": "./functions/balance/index.js",
-      "./blockchain": "./functions/blockchain/index.js",
-      "./capsule": "./functions/capsule/index.js",
-      "./fee": "./functions/fee/index.js",
-      "./marketplace": "./functions/marketplace/index.js",
-      "./nft": "./functions/nft/index.js",
-      "./utils": "./utils/blockchain.js",
-      "./constants": "./constants.js",
+      ".": {
+        types: "./index.d.ts",
+        default: "./index.js",
+      },
+      "./account": {
+        types: "./account/index.d.ts",
+        default: "./account/index.js",
+      },
+      "./balance": {
+        types: "./balance/index.d.ts",
+        default: "./balance/index.js",
+      },
+      "./blockchain": {
+        types: "./blockchain/index.d.ts",
+        default: "./blockchain/index.js",
+      },
+      "./capsule": {
+        types: "./capsule/index.d.ts",
+        default: "./capsule/index.js",
+      },
+      "./fee": {
+        types: "./fee/index.d.ts",
+        default: "./fee/index.js",
+      },
+      "./marketplace": {
+        types: "./marketplace/index.d.ts",
+        default: "./marketplace/index.js",
+      },
+      "./nft": {
+        types: "./nft/index.d.ts",
+        default: "./nft/index.js",
+      },
+      "./constants": {
+        types: "./constants.d.ts",
+        default: "./constants.js",
+      },
+      "./package.json": "./package.json",
     },
   }
 
