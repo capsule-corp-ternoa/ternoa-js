@@ -1,8 +1,7 @@
 import BN from "bn.js"
 import type { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
 import { chainQuery, txActions, txPallets } from "../../constants"
-import { unFormatBalance } from "../../utils/blockchain"
-import { query, runTx } from "../blockchain"
+import { query, runTx, unFormatBalance } from "../blockchain"
 
 /**
  * Get the balance of an account

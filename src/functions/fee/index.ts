@@ -1,7 +1,7 @@
 import { SubmittableExtrinsic } from "@polkadot/api/types"
 import BN from "bn.js"
 import type { ISubmittableResult } from "@polkadot/types/types"
-import { getApi } from "../../utils/blockchain"
+import { getApi } from "../blockchain"
 import { txActions, txPallets } from "../../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"

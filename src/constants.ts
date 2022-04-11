@@ -19,6 +19,7 @@ export enum txActions {
   transferKeepAlive = "transferKeepAlive",
   finishSeries = "finishSeries",
   batch = "batch",
+  batchAll = "batchAll",
   createFromNft = "createFromNft",
   remove = "remove",
   setIpfsReference = "setIpfsReference",

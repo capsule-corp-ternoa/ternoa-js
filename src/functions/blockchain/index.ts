@@ -1,7 +1,50 @@
-import { getApi } from "../../utils/blockchain"
+import { cryptoWaitReady } from "@polkadot/util-crypto"
+import { ApiPromise, WsProvider } from "@polkadot/api"
 import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
-import { txEvent, txPallets } from "../../constants"
+import { decodeAddress, encodeAddress } from "@polkadot/keyring"
+import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
+import BN from "bn.js"
+import { txActions, txEvent, txPallets } from "../../constants"
 import { checkBalanceForTx } from "../fee"
+
+const DEFAULT_CHAIN_ENDPOINT = "wss://dev.chaos.ternoa.com"
+
+let api: ApiPromise
+let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
+
+/**
+ * Initialize polkadot api with selected or default wss endpoint
+ * @param chain chain endpoint
+ */
+export const initializeApi = async (chain = chainEndpoint) => {
+  await cryptoWaitReady()
+  safeDisconnect()
+  const wsProvider = new WsProvider(chain)
+  api = await ApiPromise.create({
+    provider: wsProvider,
+  })
+  chainEndpoint = chain
+}
+
+/**
+ * Get initialized polkadot api
+ * @returns api
+ */
+export const getApi = async () => {
+  if (!isApiConnected()) await initializeApi()
+  return api
+}
+
+export const isApiConnected = () => {
+  return Boolean(api && api.isConnected)
+}
+
+/**
+ * Disconnects API
+ */
+export const safeDisconnect = async () => {
+  if (isApiConnected()) await api.disconnect()
+}
 
 /**
  * Unsubscibe from any chain subscription (transaction, rpc call, chain query)
@@ -65,7 +108,6 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
   }
 }
 
-// create an unsigned transaction
 /**
  * Create a tx
  * @param txPallet pallet of the tx
@@ -90,7 +132,6 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
   return tx.toHex()
 }
 
-// sign signable string with keyring and tx hex
 /**
  * Sign a transaction
  * @param keyring keyring pair to sign the data
@@ -103,14 +144,17 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
   return txSigned.toHex()
 }
 
-// send tx on blockchain
 /**
  * Send a signed tx on the blockchain
  * @param txHex tx hex of the signed tx to be submitted
  * @param callback callback function to enable subscription, if not given, no subscription will be made
  * @returns hash of the transaction
  */
-export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
+export const submitTx = async (
+  txHex: `0x${string}`,
+  callback?: (result: ISubmittableResult) => void,
+  shouldUnsub = true,
+) => {
   const api = await getApi()
   const tx = api.tx(txHex)
   await checkBalanceForTx(tx)
@@ -120,11 +164,11 @@ export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmit
     const unsub = await tx.send(async (result) => {
       try {
         await callback(result)
-        if (result.status.isFinalized) {
+        if (shouldUnsub && result.status.isFinalized) {
           safeUnsubscribe(unsub)
         }
       } catch (err) {
-        safeUnsubscribe(unsub)
+        if (shouldUnsub) safeUnsubscribe(unsub)
         throw err
       }
     })
@@ -132,7 +176,6 @@ export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmit
   return tx.hash.toHex()
 }
 
-// Execute a transaction on blockchain
 /**
  * Create, sign and submit a transaction on blockchain
  * @param txPallet pallet of the tx
@@ -146,12 +189,104 @@ export const runTx = async (
   txPallet: string,
   txExtrinsic: string,
   txArgs: any[],
-  keyring: IKeyringPair,
+  keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
+  shouldUnsub?: boolean,
 ) => {
   const signableTx = await createTxHex(txPallet, txExtrinsic, txArgs)
+  if (!keyring) return signableTx
   const signedTx = await signTx(keyring, signableTx)
-  return await submitTx(signedTx, callback)
+  return await submitTx(signedTx, callback, shouldUnsub)
 }
 
-// Batches ...
+/**
+ * Create a batch transaction
+ * @param txHexes transactions to execute in batch call
+ * @returns a submittable extrinsic
+ */
+export const batchTx = async (txHexes: `0x${string}`[]) => {
+  const api = await getApi()
+  const tx = createTx(
+    txPallets.utility,
+    txActions.batch,
+    txHexes.map((x) => api.tx(x)),
+  )
+  return tx
+}
+
+/**
+ * Create a batch transaction in hex format
+ * @param txHexes transactions to execute in batch call
+ * @returns the hex of the tx to execute
+ */
+export const batchTxHex = async (txHexes: `0x${string}`[]) => {
+  const tx = await batchTx(txHexes)
+  return tx.toHex()
+}
+
+/**
+ * Create a batch all transaction
+ * @param txHexes transactions to execute in batch call
+ * @returns a submittable extrinsic
+ */
+export const batchAllTx = async (txHexes: `0x${string}`[]) => {
+  const api = await getApi()
+  const tx = createTx(
+    txPallets.utility,
+    txActions.batchAll,
+    txHexes.map((x) => api.tx(x)),
+  )
+  return tx
+}
+
+/**
+ * Create a batch all transaction in hex format
+ * @param txHexes transactions to execute in batch call
+ * @returns the hex of the tx to execute
+ */
+export const batchAllTxHex = async (txHexes: `0x${string}`[]) => {
+  const tx = await batchAllTx(txHexes)
+  return tx.toHex()
+}
+
+/**
+ * check if address is valid polkadot address
+ * @param address
+ * @returns
+ */
+export const isValidAddress = (address: string) => {
+  try {
+    encodeAddress(isHex(address) ? hexToU8a(address) : decodeAddress(address))
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+/**
+ * format balance from number to BN
+ * @param _input number input
+ * @returns BN output
+ */
+export const unFormatBalance = async (_input: number) => {
+  const input = String(_input)
+  const api = await getApi()
+  const siPower = new BN(api.registry.chainDecimals[0])
+  const basePower = api.registry.chainDecimals[0]
+  const siUnitPower = 0
+  const isDecimalValue = input.match(/^(\d+)\.(\d+)$/)
+  let result
+
+  if (isDecimalValue) {
+    if (siUnitPower - isDecimalValue[2].length < -basePower) {
+      result = new BN(-1)
+    }
+    const div = new BN(input.replace(/\.\d*$/, ""))
+    const modString = input.replace(/^\d+\./, "").substring(0, api.registry.chainDecimals[0] + 1)
+    const mod = new BN(modString)
+    result = div.mul(BN_TEN.pow(siPower)).add(mod.mul(BN_TEN.pow(new BN(basePower + siUnitPower - modString.length))))
+  } else {
+    result = new BN(input.replace(/[^\d]/g, "")).mul(BN_TEN.pow(siPower))
+  }
+  return result
+}

@@ -18,5 +18,7 @@
                 "allowJs": true
             }
         }
-    }
+    },
+    "globalSetup": "./src/scripts/test-setup.ts",
+    "globalTeardown": "./src/scripts/test-teardown.ts"
 }
