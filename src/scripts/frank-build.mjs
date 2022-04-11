@@ -10,7 +10,7 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
-    type: "module",
+    // type: "module",
     main: "./index.js",
     types: "./index.d.ts",
     // exports: {
