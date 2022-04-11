@@ -13,45 +13,45 @@ async function createPackageFile() {
     type: "module",
     main: "./index.js",
     types: "./index.d.ts",
-    exports: {
-      ".": {
-        types: "./index.d.ts",
-        default: "./index.js",
-      },
-      "./account": {
-        types: "./account/index.d.ts",
-        default: "./account/index.js",
-      },
-      "./balance": {
-        types: "./balance/index.d.ts",
-        default: "./balance/index.js",
-      },
-      "./blockchain": {
-        types: "./blockchain/index.d.ts",
-        default: "./blockchain/index.js",
-      },
-      "./capsule": {
-        types: "./capsule/index.d.ts",
-        default: "./capsule/index.js",
-      },
-      "./fee": {
-        types: "./fee/index.d.ts",
-        default: "./fee/index.js",
-      },
-      "./marketplace": {
-        types: "./marketplace/index.d.ts",
-        default: "./marketplace/index.js",
-      },
-      "./nft": {
-        types: "./nft/index.d.ts",
-        default: "./nft/index.js",
-      },
-      "./constants": {
-        types: "./constants.d.ts",
-        default: "./constants.js",
-      },
-      "./package.json": "./package.json",
-    },
+    // exports: {
+    //   ".": {
+    //     types: "./index.d.ts",
+    //     default: "./index.js",
+    //   },
+    //   "./account": {
+    //     types: "./account/index.d.ts",
+    //     default: "./account/index.js",
+    //   },
+    //   "./balance": {
+    //     types: "./balance/index.d.ts",
+    //     default: "./balance/index.js",
+    //   },
+    //   "./blockchain": {
+    //     types: "./blockchain/index.d.ts",
+    //     default: "./blockchain/index.js",
+    //   },
+    //   "./capsule": {
+    //     types: "./capsule/index.d.ts",
+    //     default: "./capsule/index.js",
+    //   },
+    //   "./fee": {
+    //     types: "./fee/index.d.ts",
+    //     default: "./fee/index.js",
+    //   },
+    //   "./marketplace": {
+    //     types: "./marketplace/index.d.ts",
+    //     default: "./marketplace/index.js",
+    //   },
+    //   "./nft": {
+    //     types: "./nft/index.d.ts",
+    //     default: "./nft/index.js",
+    //   },
+    //   "./constants": {
+    //     types: "./constants.d.ts",
+    //     default: "./constants.js",
+    //   },
+    //   "./package.json": "./package.json",
+    // },
   }
 
   delete newPackageData.scripts
