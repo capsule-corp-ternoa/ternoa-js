@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, copyFileSync, readdirSync, unlinkSync, renameSync, rmdirSync, rmSync } from "fs"
+import { readFileSync, writeFileSync, copyFileSync, readdirSync, unlinkSync, renameSync, rmSync } from "fs"
 import { resolve, join, basename } from "path"
 
 const packagePath = process.cwd()
@@ -11,7 +11,6 @@ async function createPackageFile() {
   const newPackageData = {
     ...packageData,
     main: "index.cjs",
-    // type: "module",
     module: "index.js",
     types: "index.d.ts",
     exports: {
