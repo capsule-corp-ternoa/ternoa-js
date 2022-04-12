@@ -1,6 +1,6 @@
 import BN from "bn.js"
 import { query } from "../blockchain"
-import { chainQuery, txPallets } from "../../constants"
+import { chainQuery, txPallets } from "../constants"
 
 /**
  * Get the amount of caps needed to mint a NFT

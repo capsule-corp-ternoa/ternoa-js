@@ -1,7 +1,7 @@
 import { BN } from "bn.js"
 import dotenv from "dotenv"
-import { getKeyringFromSeed } from "../functions/account"
-import { getBalance, transferKeepAlive } from "../functions/balance"
+import { getKeyringFromSeed } from "../../account"
+import { getBalance, transferKeepAlive } from "../../balance"
 import { PAIRSSR25519 } from "../testingPairs"
 
 dotenv.config()

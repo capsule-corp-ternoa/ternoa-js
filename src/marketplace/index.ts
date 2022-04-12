@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { chainQuery, txPallets } from "../../constants"
+import { chainQuery, txPallets } from "../constants"
 import { query } from "../blockchain"
 
 /**

@@ -1,8 +1,8 @@
 import BN from "bn.js"
 import dotenv from "dotenv"
-import { getKeyringFromSeed } from "../functions/account"
-import { getBalance, transferAll } from "../functions/balance"
-import { safeDisconnect } from "../functions/blockchain"
+import { getKeyringFromSeed } from "../../account"
+import { getBalance, transferAll } from "../../balance"
+import { safeDisconnect } from "../../blockchain"
 import { PAIRSSR25519 } from "../testingPairs"
 
 dotenv.config()

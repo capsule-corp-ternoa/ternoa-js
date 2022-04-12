@@ -4,7 +4,7 @@ import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
-import { txActions, txEvent, txPallets } from "../../constants"
+import { txActions, txEvent, txPallets } from "../constants"
 import { checkBalanceForTx } from "../fee"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://dev.chaos.ternoa.com"

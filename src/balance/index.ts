@@ -1,6 +1,6 @@
 import BN from "bn.js"
 import type { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
-import { chainQuery, txActions, txPallets } from "../../constants"
+import { chainQuery, txActions, txPallets } from "../constants"
 import { query, runTx, unFormatBalance } from "../blockchain"
 
 /**

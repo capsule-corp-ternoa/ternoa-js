@@ -19,6 +19,6 @@
             }
         }
     },
-    "globalSetup": "./src/scripts/test-setup.ts",
-    "globalTeardown": "./src/scripts/test-teardown.ts"
+    "globalSetup": "./src/_misc/scripts/test-setup.ts",
+    "globalTeardown": "./src/_misc/scripts/test-teardown.ts"
 }
