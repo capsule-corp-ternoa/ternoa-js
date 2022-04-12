@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, copyFileSync } from "fs"
+import { readFileSync, writeFileSync, copyFileSync, readdirSync, unlinkSync, renameSync, rmdirSync, rmSync } from "fs"
 import { resolve, join, basename } from "path"
 
 const packagePath = process.cwd()
@@ -77,11 +77,34 @@ async function includeFileInBuild(file) {
   console.log(`Copied ${sourcePath} to ${targetPath}`)
 }
 
+async function prepareCJSFiles(path = "./build/cjs") {
+  const files = readdirSync(path)
+  for (const file of files){
+    if (file.endsWith('.js')){
+      const newFileName = file.split('.')[0] + '.cjs'
+      renameSync(`${path}/${file}`, `${path}/${newFileName}`)
+      const newPath = path.split('/').filter(x => x!=='cjs').join('/')
+      copyFileSync(`${path}/${newFileName}`, `${newPath}/${newFileName}`)
+    } else if (file.endsWith('.d.ts')) {
+      unlinkSync(`${path}/${file}`)
+    } else {
+      await prepareCJSFiles(`${path}/${file}`)
+    }
+  }
+}
+
+async function prepareCJSBuild() {
+  rmSync("./build/cjs", {recursive:true, force:true})
+  console.log('CJS build succesfully done')
+}
+
 async function run() {
   try {
     await createPackageFile()
     await includeFileInBuild("./README.md")
     await includeFileInBuild("./LICENSE")
+    await prepareCJSFiles()
+    await prepareCJSBuild()
   } catch (err) {
     console.error(err)
     process.exit(1)
