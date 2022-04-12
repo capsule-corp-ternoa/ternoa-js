@@ -9,7 +9,7 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "build": "rimraf build && tsc && npm run build:frank-build",
+    "build": "rimraf build && tsc --target esnext --module esnext --moduleResolution node && npm run build:frank-build",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
