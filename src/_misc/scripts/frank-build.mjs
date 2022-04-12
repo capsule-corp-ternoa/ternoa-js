@@ -13,6 +13,7 @@ async function createPackageFile() {
     module: "./index.js",
     main: "./index.cjs",
     types: "./index.d.ts",
+    type: "module",
     exports: {
       ".": {
         types: "./index.d.ts",
