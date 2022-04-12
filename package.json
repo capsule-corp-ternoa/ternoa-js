@@ -10,7 +10,7 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "rimraf build && npm run build:esm && npm run build:cjs && npm run build:frank-build",
-    "build:esm": "tsc --target esnext --module esnext --moduleResolution node --outDir build/esm",
+    "build:esm": "tsc --target esnext --module esnext --moduleResolution node --outDir build",
     "build:cjs": "tsc --target es6 --module commonjs --outDir build/cjs",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
     "lint": "eslint ./src --ext .js,.ts",
@@ -68,8 +68,5 @@
     "dotenv": "^16.0.0",
     "graphql": "^16.3.0",
     "graphql-request": "^4.0.0"
-  },
-  "files": [
-    "build/**/*"
-  ]
+  }
 }

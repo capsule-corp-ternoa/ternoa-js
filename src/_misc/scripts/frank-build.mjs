@@ -10,15 +10,60 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
-    type: "module",
-    module: "./esm/index.js",
-    main: "./cjs/index.js",
+    module: "./index.js",
+    main: "./index.cjs",
     types: "./index.d.ts",
+    exports: {
+      ".": {
+        types: "./index.d.ts",
+        default: "./index.js",
+        require: "./index.cjs"
+      },
+      "./account": {
+        types: "./account/index.d.ts",
+        default: "./account/index.js",
+        require: "./account/index.cjs"
+      },
+      "./balance": {
+        types: "./balance/index.d.ts",
+        default: "./balance/index.js",
+        require: "./balance/index.cjs"
+      },
+      "./blockchain": {
+        types: "./blockchain/index.d.ts",
+        default: "./blockchain/index.js",
+        require: "./blockchain/index.cjs"
+      },
+      "./capsule": {
+        types: "./capsule/index.d.ts",
+        default: "./capsule/index.js",
+        require: "./capsule/index.cjs"
+      },
+      "./fee": {
+        types: "./fee/index.d.ts",
+        default: "./fee/index.js",
+        require: "./fee/index.cjs"
+      },
+      "./marketplace": {
+        types: "./marketplace/index.d.ts",
+        default: "./marketplace/index.js",
+        require: "./marketplace/index.cjs"
+      },
+      "./nft": {
+        types: "./nft/index.d.ts",
+        default: "./nft/index.js",
+        require: "./nft/index.cjs"
+      },
+      "./constants": {
+        types: "./constants.d.ts",
+        default: "./constants.js",
+        require: "./constants.cjs"
+      },
+    },
   }
 
   delete newPackageData.scripts
   delete newPackageData.devDependencies
-  delete newPackageData.files
 
   const targetPath = resolve(buildPath, "./package.json")
   writeJson(targetPath, newPackageData)
