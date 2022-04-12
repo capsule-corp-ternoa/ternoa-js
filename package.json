@@ -9,7 +9,9 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "build": "rimraf build && tsc --target esnext --module esnext --moduleResolution node && npm run build:frank-build",
+    "build": "rimraf build && npm run build:esm && npm run build:cjs && npm run build:frank-build",
+    "build:esm": "tsc --target esnext --module esnext --moduleResolution node --outDir build/esm",
+    "build:cjs": "tsc --target es6 --module commonjs --outDir build/cjs",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",

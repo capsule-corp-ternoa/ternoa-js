@@ -4,7 +4,7 @@
     "target": "ES6",
     "module": "CommonJS",
     "rootDir": "src",
-    "outDir": "build",
+    // "outDir": "build",
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
