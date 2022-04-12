@@ -10,55 +10,55 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
-    module: "./index.js",
-    main: "./index.cjs",
-    types: "./index.d.ts",
+    main: "index.cjs",
     type: "module",
+    module: "index.js",
+    types: "index.d.ts",
     exports: {
       ".": {
         types: "./index.d.ts",
+        require: "./index.cjs",
         default: "./index.js",
-        require: "./index.cjs"
       },
       "./account": {
         types: "./account/index.d.ts",
+        require: "./account/index.cjs",
         default: "./account/index.js",
-        require: "./account/index.cjs"
       },
       "./balance": {
         types: "./balance/index.d.ts",
+        require: "./balance/index.cjs",
         default: "./balance/index.js",
-        require: "./balance/index.cjs"
       },
       "./blockchain": {
         types: "./blockchain/index.d.ts",
+        require: "./blockchain/index.cjs",
         default: "./blockchain/index.js",
-        require: "./blockchain/index.cjs"
       },
       "./capsule": {
         types: "./capsule/index.d.ts",
+        require: "./capsule/index.cjs",
         default: "./capsule/index.js",
-        require: "./capsule/index.cjs"
       },
       "./fee": {
         types: "./fee/index.d.ts",
+        require: "./fee/index.cjs",
         default: "./fee/index.js",
-        require: "./fee/index.cjs"
       },
       "./marketplace": {
         types: "./marketplace/index.d.ts",
+        require: "./marketplace/index.cjs",
         default: "./marketplace/index.js",
-        require: "./marketplace/index.cjs"
       },
       "./nft": {
         types: "./nft/index.d.ts",
+        require: "./nft/index.cjs",
         default: "./nft/index.js",
-        require: "./nft/index.cjs"
       },
       "./constants": {
         types: "./constants.d.ts",
+        require: "./constants.cjs",
         default: "./constants.js",
-        require: "./constants.cjs"
       },
     },
   }
