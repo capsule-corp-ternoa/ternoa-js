@@ -1,17 +1,22 @@
 {
   "name": "ternoa-js",
-  "version": "0.0.2",
-  "description": "Ternoa library of function to interact with the blockchain and manipulate transactions",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "version": "0.0.34",
+  "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
+  "engines": {
+    "node": ">=14.13.1 || >=16.0.0"
+  },
+  "main": "./src/index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
-    "prepare": "npm run build",
+    "build": "rimraf build && npm run build:esm && npm run build:cjs && npm run build:frank-build",
+    "build:esm": "tsc --target esnext --module esnext --moduleResolution node --outDir build",
+    "build:cjs": "tsc --target es6 --module commonjs --outDir build/cjs",
+    "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
+    "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "eslint -c .eslintrc",
-    "test": "jest --config jestconfig.json"
+    "test": "jest --config jestconfig.json --detectOpenHandles --forceExit",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -25,7 +30,15 @@
     "substrate"
   ],
   "author": "Ghali Leouarz",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "Igor Papandinas"
+    },
+    {
+      "name": "Victor Salomon"
+    }
+  ],
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/capsule-corp-ternoa/ternoa-js/issues"
   },
@@ -34,9 +47,13 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
     "babel-jest": "^27.5.1",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jest": "^26.1.1",
+    "husky": "^7.0.4",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
@@ -46,11 +63,7 @@
   },
   "dependencies": {
     "@polkadot/api": "^7.11.1",
-    "dotenv": "^16.0.0",
-    "graphql": "^16.3.0",
-    "graphql-request": "^4.0.0"
-  },
-  "files": [
-    "build/**/*"
-  ]
+    "bn.js": "^5.2.0",
+    "dotenv": "^16.0.0"
+  }
 }

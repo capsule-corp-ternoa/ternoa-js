@@ -1,6 +1,6 @@
 import { mnemonicValidate } from "@polkadot/util-crypto"
 import { getKeyringFromSeed, generateSeed } from "./index"
-import { isValidAddress } from "../../utils/polkadot"
+import { isValidAddress } from "../blockchain"
 
 test("Should generate a new seed", async () => {
   const account = await generateSeed()
