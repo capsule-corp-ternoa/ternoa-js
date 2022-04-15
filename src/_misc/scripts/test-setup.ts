@@ -14,7 +14,7 @@ module.exports = async () => {
     const pairs = PAIRSSR25519
     const share = balance.div(new BN(pairs.length))
     for (const pair of pairs) {
-      await transferKeepAlive(keyring, pair.publicKey, share)
+      await transferKeepAlive(keyring.address, pair.publicKey, share)
     }
   }
 }

@@ -15,7 +15,7 @@ module.exports = async () => {
     const keyring = await getKeyringFromSeed(pair.seed)
     const balance = (await getBalance(keyring.address)).div(new BN(100)).mul(new BN(95))
     if (balance.cmp(new BN("1000000000000000000")) === 1) {
-      await transferAll(keyring, process.env.SEED_TEST_FUNDS_PUBLIC)
+      await transferAll(process.env.SEED_TEST_FUNDS_PUBLIC, true)
     }
   }
   await safeDisconnect()
