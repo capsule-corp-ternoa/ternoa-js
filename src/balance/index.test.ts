@@ -42,7 +42,7 @@ describe("Testing checkBalanceForTransfer", (): void => {
 describe("Testing transfer", (): void => {
   xit("Transfer some funds from the testing account", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    transfer(testAccount, destAccount.address, 1, (res: ISubmittableResult) => {
+    transfer(testAccount.address, destAccount.address, 1, testAccount, (res: ISubmittableResult) => {
       const { success } = isTransactionSuccess(res)
       expect(res.status.isInBlock).toBe(true)
       expect(success).toBe(true)
@@ -53,16 +53,22 @@ describe("Testing transfer", (): void => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const testAccountBalance = await getBalance(testAccount.address)
 
-    transferKeepAlive(testAccount, destAccount.address, testAccountBalance, async (res: ISubmittableResult) => {
-      await expect(isTransactionSuccess(res)).rejects.toThrow(Error("Transaction is not finalized or in block"))
-    })
+    transferKeepAlive(
+      testAccount.address,
+      destAccount.address,
+      testAccountBalance,
+      testAccount,
+      async (res: ISubmittableResult) => {
+        await expect(isTransactionSuccess(res)).rejects.toThrow(Error("Transaction is not finalized or in block"))
+      },
+    )
   })
 
   xit("Test account should have a balance with the existansial deposit amount on transferAll with keepAlive equal to true", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const existensialDeposit = await consts(txPallets.balances, chainConstants.existentialDeposit)
 
-    await transferAll(testAccount, destAccount.address, true, async (res: ISubmittableResult) => {
+    await transferAll(destAccount.address, true, testAccount, async (res: ISubmittableResult) => {
       const { success } = isTransactionSuccess(res)
       expect(res.status.isInBlock).toBe(true)
       expect(success).toBe(true)

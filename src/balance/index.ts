@@ -28,54 +28,62 @@ export const checkBalanceForTransfer = async (address: string, value: number | B
 
 /**
  * Transfer some liquid free balance to another account
- * @param keyring keyring pair to sign the data
- * @param address public address of the account to get balance for
+ * @param from public address of the account to get balance for
+ * @param to public address of the account to transfer amount to
  * @param value token amount to transfer
- * @returns hash of the transaction
+ * @param keyring keyring pair to sign the data
+ * @param callback callback function to enable subscription, if not given, no subscription will be made
+ * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
  */
 export const transfer = async (
-  keyring: IKeyringPair,
-  address: string,
+  from: string,
+  to: string,
   value: number | BN,
+  keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
   const amount = typeof value === "number" ? await unFormatBalance(value) : value
-  await checkBalanceForTransfer(keyring.address, amount)
-  const hash = await runTx(txPallets.balances, txActions.transfer, [address, amount], keyring, callback)
+  await checkBalanceForTransfer(from, amount)
+  const hash = await runTx(txPallets.balances, txActions.transfer, [to, amount], keyring, callback)
   return hash
 }
 
 /**
  * Transfer the entire transferable balance from the caller account
- * @param keyring keyring pair to sign the data
- * @param address public address of the account to get balance for
+ * @param to public address of the account to transfer amount to
  * @param keepAlive ensure that the transfer does not kill the account that retains the Existential Deposit
- * @returns hash of the transaction
+ * @param keyring keyring pair to sign the data
+ * @param callback callback function to enable subscription, if not given, no subscription will be made
+ * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
  */
 export const transferAll = async (
-  keyring: IKeyringPair,
-  address: string,
+  to: string,
   keepAlive = true,
+  keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  const hash = await runTx(txPallets.balances, txActions.transferAll, [address, keepAlive], keyring, callback)
+  const hash = await runTx(txPallets.balances, txActions.transferAll, [to, keepAlive], keyring, callback)
   return hash
 }
 
 /**
  * Transfer some liquid free balance to another account ensuring to not kill the account
+ * @param from public address of the account to get balance for
+ * @param to public address of the account to transfer amount to
+ * @param value token amount to transfer
  * @param keyring keyring pair to sign the data
- * @param address public address of the account to get balance for
- * @returns hash of the transaction
+ * @param callback callback function to enable subscription, if not given, no subscription will be made
+ * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
  */
 export const transferKeepAlive = async (
-  keyring: IKeyringPair,
-  address: string,
+  from: string,
+  to: string,
   value: number | BN,
+  keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
   const amount = typeof value === "number" ? await unFormatBalance(value) : value
-  await checkBalanceForTransfer(keyring.address, value)
-  const hash = await runTx(txPallets.balances, txActions.transferKeepAlive, [address, amount], keyring, callback)
+  await checkBalanceForTransfer(from, value)
+  const hash = await runTx(txPallets.balances, txActions.transferKeepAlive, [to, amount], keyring, callback)
   return hash
 }
