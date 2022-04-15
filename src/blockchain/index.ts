@@ -7,7 +7,7 @@ import BN from "bn.js"
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkBalanceForTx } from "../fee"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://dev.chaos.ternoa.com"
+const DEFAULT_CHAIN_ENDPOINT = "wss://chain-dev-latest.ternoa.dev"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
