@@ -108,6 +108,16 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
   }
 }
 
+export const checkTxAvailable = async (txPallet: string, txExtrinsic: string) => {
+  const api = await getApi()
+  try {
+    api.tx[txPallet][txExtrinsic]
+    return true
+  } catch (err) {
+    throw new Error(`${txPallet}_${txExtrinsic} not found, check the selected endpoint`)
+  }
+}
+
 /**
  * Create a tx
  * @param txPallet pallet of the tx
@@ -117,6 +127,7 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
  */
 const createTx = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
   const api = await getApi()
+  await checkTxAvailable(txPallet, txExtrinsic)
   return api.tx[txPallet][txExtrinsic](...txArgs)
 }
 
