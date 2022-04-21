@@ -1,7 +1,7 @@
 import BN from "bn.js"
 import dotenv from "dotenv"
 import { getKeyringFromSeed } from "../../account"
-import { getBalance, transferKeepAlive } from "../../balance"
+import { getBalance, transferAll } from "../../balance"
 import { safeDisconnect } from "../../blockchain"
 import { PAIRSSR25519 } from "../testingPairs"
 
@@ -19,12 +19,7 @@ module.exports = async () => {
     const keyring = await getKeyringFromSeed(pair.seed)
     const balance = await getBalance(keyring.address)
     if (balance.cmp(new BN("100000000000000000000")) === 1) {
-      await transferKeepAlive(
-        keyring.address,
-        process.env.SEED_TEST_FUNDS_PUBLIC,
-        balance.sub(new BN("100000000000000000000")),
-        keyring,
-      )
+      await transferAll(process.env.SEED_TEST_FUNDS_PUBLIC, false, keyring)
     }
   }
   await safeDisconnect()
