@@ -13,6 +13,7 @@
     "build:esm": "tsc --target esnext --module esnext --moduleResolution node --outDir build",
     "build:cjs": "tsc --target es6 --module commonjs --outDir build/cjs",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
+    "docs": "typedoc ./src/index.ts",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest --config jestconfig.json --detectOpenHandles --forceExit --silent=false --runInBand",
@@ -59,6 +60,7 @@
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.7.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.2"
   },
   "dependencies": {
