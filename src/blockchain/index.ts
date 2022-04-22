@@ -47,14 +47,6 @@ export const safeDisconnect = async () => {
 }
 
 /**
- * Unsubscibe from any chain subscription (transaction, rpc call, chain query)
- * @param unsub function to unsub returned by polkadot api
- */
-export const safeUnsubscribe = (unsub: any) => {
-  if (unsub && typeof unsub === "function") unsub()
-}
-
-/**
  * Generic function to make a chain query
  * @param module the section required to make the chain query (eg. "system")
  * @param call the call depending on the section (eg. "account")
@@ -161,25 +153,21 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
  * @param callback callback function to enable subscription, if not given, no subscription will be made
  * @returns hash of the transaction
  */
-export const submitTx = async (
-  txHex: `0x${string}`,
-  callback?: (result: ISubmittableResult) => void,
-  shouldUnsub = true,
-) => {
+export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
   const api = await getApi()
   const tx = api.tx(txHex)
   await checkBalanceForTx(tx)
-  if (!callback) {
+  if (callback === undefined) {
     await tx.send()
   } else {
     const unsub = await tx.send(async (result) => {
       try {
         await callback(result)
-        if (shouldUnsub && result.status.isFinalized) {
-          safeUnsubscribe(unsub)
+        if (result.status.isFinalized) {
+          unsub()
         }
       } catch (err) {
-        if (shouldUnsub) safeUnsubscribe(unsub)
+        unsub()
         throw err
       }
     })
@@ -202,12 +190,11 @@ export const runTx = async (
   txArgs: any[],
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
-  shouldUnsub?: boolean,
 ) => {
   const signableTx = await createTxHex(txPallet, txExtrinsic, txArgs)
   if (!keyring) return signableTx
   const signedTx = await signTx(keyring, signableTx)
-  return await submitTx(signedTx, callback, shouldUnsub)
+  return await submitTx(signedTx, callback)
 }
 
 /**
@@ -242,6 +229,8 @@ export const batchTxHex = async (txHexes: `0x${string}`[]) => {
  */
 export const batchAllTx = async (txHexes: `0x${string}`[]) => {
   const api = await getApi()
+  console.log({ txHexes, txHex0: txHexes[0] })
+  console.log({ test: api.tx(txHexes[0]) })
   const tx = createTx(
     txPallets.utility,
     txActions.batchAll,
