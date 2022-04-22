@@ -1,6 +1,7 @@
-import { hexToU8a, isHex } from "@polkadot/util"
+import { isHex } from "@polkadot/util"
+import type { ISubmittableResult } from "@polkadot/types/types"
 
-import { consts, createTxHex, query, signTx } from "."
+import { batchTxHex, consts, createTxHex, isTransactionSuccess, query, runTx, signTx, submitTx } from "."
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -39,7 +40,7 @@ describe("Testing create transaction", (): void => {
   })
   it("Should throw error with incorrect pallet/extrinsic", async () => {
     await expect(async () => {
-      await createTxHex("toBe", "orNotToBe", [])
+      await createTxHex("toBe", "orNotToBe")
     }).rejects.toThrow(Error("toBe_orNotToBe not found, check the selected endpoint"))
   })
 })
@@ -54,27 +55,119 @@ describe("Testing sign transaction", (): void => {
     const signedTxHex = await signTx(testAccount, txHex)
     expect(isHex(signedTxHex)).toBe(true)
   })
-  it("Should throw error with an invalid keyring", async () => {
-    await expect(async () => {
-      const { test: testAccount } = await createTestPairs()
-      const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-        testAccount.address,
-        "10000000000000000000",
-      ])
-      await signTx({ address: "wrongKeyring", addressRaw: undefined, publicKey: undefined, sign: undefined }, txHex)
-    }).rejects.toThrow(Error)
+})
+
+describe("Testing submit transaction", (): void => {
+  it("Should return a correct submited transaction hash hex", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "1000000000000000000",
+    ])
+    const signedTxHex = await signTx(testAccount, txHex)
+    const submitTxHex = await submitTx(signedTxHex)
+    expect(isHex(submitTxHex)).toBe(true)
+  })
+
+  it("Should return a correct submited transaction hash hex with in block callback notification", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "10000000000000000000",
+    ])
+    const signedTxHex = await signTx(testAccount, txHex)
+    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
+      if (res.status.isInBlock) {
+        const { success } = isTransactionSuccess(res)
+        expect(success).toBe(true)
+      } else {
+        try {
+          const { success } = isTransactionSuccess(res)
+          expect(success).toBe(true)
+        } catch (err) {
+          expect(err).toEqual(Error("Transaction is not finalized or in block"))
+        }
+      }
+    })
+    expect(isHex(submitTxHex)).toBe(true)
+  })
+
+  it("Should reject the transaction if the free balance is lower than the amount specified", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "100000000000000000000000000",
+    ])
+    const signedTxHex = await signTx(testAccount, txHex)
+    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
+      if (res.status.isInBlock) {
+        const { success } = isTransactionSuccess(res)
+        expect(success).toBe(false)
+      } else {
+        try {
+          const { success } = isTransactionSuccess(res)
+          expect(success).toBe(false)
+        } catch (err) {
+          expect(err).toEqual(Error("Transaction is not finalized or in block"))
+        }
+      }
+    })
+    expect(isHex(submitTxHex)).toBe(true)
   })
 })
 
-// signTransaction with valid seed
-// signTransaction with invalid seed
+describe("Testing run transaction", (): void => {
+  it("Should return a correct transaction hash hex ready to be signed", async () => {
+    const { dest: destAccount } = await createTestPairs()
+    const runTxHex = await runTx(txPallets.balances, txActions.transfer, [destAccount.address, "1000000000000000000"])
+    expect(isHex(runTxHex)).toBe(true)
+  })
 
-// submit a simple transaction with 1 caps
+  it("Should return a correct submited transaction hash hex", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const runTxHex = await runTx(
+      txPallets.balances,
+      txActions.transfer,
+      [destAccount.address, "1000000000000000000"],
+      testAccount,
+    )
+    expect(isHex(runTxHex)).toBe(true)
+  })
+})
 
-// run transaction with simple balance transfer 1 caps
-// run invalid transaction with balance transfer 1 caps from empty account
+describe("Testing transaction status", (): void => {
+  it("Should throw an error if transaction is not in block or finalized", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "1000000000000000000",
+    ])
+    const signedTxHex = await signTx(testAccount, txHex)
+    const submitTxHex = await submitTx(signedTxHex, async (res: ISubmittableResult) => {
+      if (res.status.isReady) {
+        await expect(async () => {
+          await isTransactionSuccess(res)
+        }).rejects.toThrow(Error("Transaction is not finalized or in block"))
+      }
+    })
+    expect(isHex(submitTxHex)).toBe(true)
+  })
+})
 
-// batch
+// describe("Testing transactions batch", (): void => {
+//   it("Should return a correct transactions batch hex", async () => {
+//     const { dest: destAccount } = await createTestPairs()
+//     const txHex1 = await createTxHex(txPallets.balances, txActions.transfer, [
+//       destAccount.address,
+//       "1000000000000000000",
+//     ])
+//     const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [
+//       destAccount.address,
+//       "2000000000000000000",
+//     ])
+//     const batchTx = await batchTxHex([txHex1])
+//     expect(isHex(batchTx)).toBe(true)
+//   })
+// })
+
 // batchAll
-
-// safeUnsub

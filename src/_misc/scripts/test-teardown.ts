@@ -13,7 +13,7 @@ module.exports = async () => {
   if (!process.env.SEED_TEST_FUNDS_PUBLIC)
     throw new Error("Test can't finish without public seed address to send test funds")
   const pairs = PAIRSSR25519
-  await timer(5000)
+  await timer(15000)
   //If some pairs contains caps, we send all to funds account
   for (const pair of pairs) {
     const keyring = await getKeyringFromSeed(pair.seed)
