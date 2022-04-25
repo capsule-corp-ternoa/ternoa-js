@@ -50,9 +50,7 @@ describe("Testing transfer", (): void => {
     })
   })
 
-  //This test is weird, actually, we try to get an error at a specific moment (before it's in block).
-  //The transferKeepAlive works tho, which is not detailled in test
-  it("Transfer all funds with TransferKeepAlive should should throw an Error: 'Transaction is not finalized or in block'", async (): Promise<void> => {
+  it("Transfer all funds with TransferKeepAlive should throw an Error: 'Transaction is not finalized or in block'", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const testAccountBalance = await getBalance(testAccount.address)
 

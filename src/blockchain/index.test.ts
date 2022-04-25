@@ -146,7 +146,7 @@ describe("Testing transaction status", (): void => {
     const submitTxHex = await submitTx(signedTxHex, async (res: ISubmittableResult) => {
       if (res.status.isReady) {
         await expect(async () => {
-          await isTransactionSuccess(res)
+          isTransactionSuccess(res)
         }).rejects.toThrow(Error("Transaction is not finalized or in block"))
       }
     })
