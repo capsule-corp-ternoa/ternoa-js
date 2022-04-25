@@ -204,11 +204,7 @@ export const runTx = async (
  */
 export const batchTx = async (txHexes: `0x${string}`[]) => {
   const api = await getApi()
-  const tx = createTx(
-    txPallets.utility,
-    txActions.batch,
-    txHexes.map((x) => api.tx(x)),
-  )
+  const tx = createTx(txPallets.utility, txActions.batch, [txHexes.map((x) => api.tx(x))])
   return tx
 }
 
@@ -229,13 +225,7 @@ export const batchTxHex = async (txHexes: `0x${string}`[]) => {
  */
 export const batchAllTx = async (txHexes: `0x${string}`[]) => {
   const api = await getApi()
-  console.log({ txHexes, txHex0: txHexes[0] })
-  console.log({ test: api.tx(txHexes[0]) })
-  const tx = createTx(
-    txPallets.utility,
-    txActions.batchAll,
-    txHexes.map((x) => api.tx(x)),
-  )
+  const tx = createTx(txPallets.utility, txActions.batchAll, [txHexes.map((x) => api.tx(x))])
   return tx
 }
 

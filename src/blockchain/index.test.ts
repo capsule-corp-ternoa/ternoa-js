@@ -1,7 +1,7 @@
 import { isHex } from "@polkadot/util"
 import type { ISubmittableResult } from "@polkadot/types/types"
 
-import { batchTxHex, consts, createTxHex, isTransactionSuccess, query, runTx, signTx, submitTx } from "."
+import { batchTxHex, batchAllTxHex, consts, createTxHex, isTransactionSuccess, query, runTx, signTx, submitTx } from "."
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -154,20 +154,32 @@ describe("Testing transaction status", (): void => {
   })
 })
 
-// describe("Testing transactions batch", (): void => {
-//   it("Should return a correct transactions batch hex", async () => {
-//     const { dest: destAccount } = await createTestPairs()
-//     const txHex1 = await createTxHex(txPallets.balances, txActions.transfer, [
-//       destAccount.address,
-//       "1000000000000000000",
-//     ])
-//     const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [
-//       destAccount.address,
-//       "2000000000000000000",
-//     ])
-//     const batchTx = await batchTxHex([txHex1])
-//     expect(isHex(batchTx)).toBe(true)
-//   })
-// })
+describe("Testing transactions batch and batchAll", (): void => {
+  it("Should return a correct transactions batch hex", async () => {
+    const { dest: destAccount } = await createTestPairs()
+    const txHex1 = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "1000000000000000000",
+    ])
+    const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "2000000000000000000",
+    ])
+    const batchTx = await batchTxHex([txHex1, txHex2])
+    expect(isHex(batchTx)).toBe(true)
+  })
 
-// batchAll
+  it("Should return a correct transactions batchAll hex", async () => {
+    const { dest: destAccount } = await createTestPairs()
+    const txHex1 = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "1000000000000000000",
+    ])
+    const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [
+      destAccount.address,
+      "2000000000000000000",
+    ])
+    const batchAllTx = await batchAllTxHex([txHex1, txHex2])
+    expect(isHex(batchAllTx)).toBe(true)
+  })
+})
