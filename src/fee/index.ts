@@ -63,10 +63,10 @@ export const getTxFees = async (txHex: `0x${string}`, address: string) => {
 }
 
 /**
- * Check if a signed tx sender has enough balance to submit
+ * Check if a signed tx sender has enough funds to pay transaction gas fees on tx submit
  * @param tx signed transaction object
  */
-export const checkBalanceForTx = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
+export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
   const balance = await getBalance(tx.signer.toString())
   const fees = await getTxFees(tx.toHex(), tx.signer.toString())
   if (balance.cmp(fees) === -1) throw new Error("Insufficient funds for gas or treasury")

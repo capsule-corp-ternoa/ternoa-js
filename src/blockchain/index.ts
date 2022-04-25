@@ -5,7 +5,7 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
 import { txActions, txEvent, txPallets } from "../constants"
-import { checkBalanceForTx } from "../fee"
+import { checkFundsForTxFees } from "../fee"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://chain-dev-latest.ternoa.dev"
 
@@ -156,7 +156,7 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
 export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
   const api = await getApi()
   const tx = api.tx(txHex)
-  await checkBalanceForTx(tx)
+  await checkFundsForTxFees(tx)
   if (callback === undefined) {
     await tx.send()
   } else {
