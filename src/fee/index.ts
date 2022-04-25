@@ -10,23 +10,25 @@ import { getBalance } from "../balance"
 
 /**
  * Get the gas fee estimation for a transaction and an address
- * @param tx transaction object
+ * @param txHex transaction hex
  * @param address public address of the sender
  * @returns the fee estimation
  */
-export const getTxGasFee = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>, address: string) => {
+export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
   const api = await getApi()
-  const txCopy = api.tx(tx.toHex())
-  const info = await txCopy.paymentInfo(address)
+  const tx = api.tx(txHex)
+  const info = await tx.paymentInfo(address)
   return info.partialFee
 }
 
 /**
  * Get the fee needed by Ternoa treasury for a transaction
- * @param tx transaction object
+ * @param txHex transaction hex
  * @returns the fee estimation
  */
-export const getTxTreasuryFee = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
+export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
+  const api = await getApi()
+  const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
     case `${txPallets.nfts}_${txActions.create}`: {
       return await getNftMintFee()
@@ -55,10 +57,8 @@ export const getTxTreasuryFee = async (tx: SubmittableExtrinsic<"promise", ISubm
  * @returns the sum of the gas fee and the treasury fee
  */
 export const getTxFees = async (txHex: `0x${string}`, address: string) => {
-  const api = await getApi()
-  const tx = api.tx(txHex)
-  const extrinsicFee = await getTxGasFee(tx, address)
-  const treasuryFee = await getTxTreasuryFee(tx)
+  const extrinsicFee = await getTxGasFee(txHex, address)
+  const treasuryFee = await getTxTreasuryFee(txHex)
   return extrinsicFee.add(treasuryFee)
 }
 

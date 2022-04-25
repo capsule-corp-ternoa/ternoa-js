@@ -1,9 +1,7 @@
-// import { getMarketplaceMintFee } from "."
+import { isBN } from "bn.js"
+import { getMarketplaceMintFee } from "."
 
-// test("Should be able to query storage data", async () => {
-//   expect(await getMarketplaceMintFee()).toBeDefined()
-// })
-
-test("no empty test suite", async () => {
-  expect(true)
+test.skip("Checking the fees to mint a marketplace", async () => {
+  const marketplaceMintFee = await getMarketplaceMintFee()
+  expect(isBN(marketplaceMintFee)).toBe(true)
 })
