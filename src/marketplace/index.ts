@@ -3,8 +3,9 @@ import { chainQuery, txPallets } from "../constants"
 import { query } from "../blockchain"
 
 /**
- * Get the amount of caps needed to mint a marketplace
- * @returns the mint fee
+ * @name getMarketplaceMintFee
+ * @summary Get the amount of caps needed to mint a marketplace.
+ * @returns Marketplace mint fee
  */
 export const getMarketplaceMintFee = async () => {
   const fee: any = await query(txPallets.marketplace, chainQuery.marketplaceMintFee)

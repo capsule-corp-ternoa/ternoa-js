@@ -9,10 +9,11 @@ import { getCapsuleMintFee } from "../capsule"
 import { getBalance } from "../balance"
 
 /**
- * Get the gas fee estimation for a transaction and an address
- * @param txHex transaction hex
- * @param address public address of the sender
- * @returns the fee estimation
+ * @name getTxGasFee
+ * @summary Get the gas fee estimation for a transaction.
+ * @param txHex Transaction hex
+ * @param address Public address of the sender
+ * @returns Transaction fee estimation
  */
 export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
   const api = await getApi()
@@ -22,9 +23,11 @@ export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
 }
 
 /**
- * Get the fee needed by Ternoa treasury for a transaction
- * @param txHex transaction hex
- * @returns the fee estimation
+ * @name getTxGasFee
+ * @summary Get the fee needed by Ternoa treasury for specific transaction services.
+ * @description Some Ternoa's services required additional fees on top of chain gas fees, for example: minting a marketplace, minting an NFT or creating a capsule.
+ * @param txHex Transaction hex
+ * @returns Fee estimation
  */
 export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
   const api = await getApi()
@@ -51,10 +54,11 @@ export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
 }
 
 /**
- * Get the total fees for a transaction hex and an address
- * @param txHex hex of the transaction
- * @param address public address of the sender
- * @returns the sum of the gas fee and the treasury fee
+ * @name getTxFees
+ * @summary Get the total fees for a transaction hex.
+ * @param txHex Hex of the transaction
+ * @param address Public address of the sender
+ * @returns Total estimated fee which is the sum of the chain gas fee and the treasury fee
  */
 export const getTxFees = async (txHex: `0x${string}`, address: string) => {
   const extrinsicFee = await getTxGasFee(txHex, address)
@@ -63,8 +67,9 @@ export const getTxFees = async (txHex: `0x${string}`, address: string) => {
 }
 
 /**
- * Check if a signed tx sender has enough funds to pay transaction gas fees on tx submit
- * @param tx signed transaction object
+ * @name checkFundsForTxFees
+ * @summary Check if a signed transaction sender has enough funds to pay transaction gas fees on transaction submit.
+ * @param tx Signed transaction object
  */
 export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
   const balance = await getBalance(tx.signer.toString())

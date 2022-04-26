@@ -13,8 +13,10 @@ let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
 
 /**
- * Initialize polkadot api with selected or default wss endpoint
- * @param chain chain endpoint
+ * @name initializeApi
+ * @summary Initialize substrate api with selected or default wss endpoint.
+ * @description The default chainEndpoint is "wss://chain-dev-latest.ternoa.dev"
+ * @param chain Chain endpoint
  */
 export const initializeApi = async (chain = chainEndpoint) => {
   await cryptoWaitReady()
@@ -27,32 +29,51 @@ export const initializeApi = async (chain = chainEndpoint) => {
 }
 
 /**
- * Get initialized polkadot api
- * @returns api
+ * @name getApi
+ * @summary Get initialized substrate Api instance.
+ * @returns Promise containing the actual Api instance, a wrapper around the RPC and interfaces of the chain.
  */
 export const getApi = async () => {
   if (!isApiConnected()) await initializeApi()
   return api
 }
 
+/**
+ * @name isApiConnected
+ * @summary Check if the Api instance existed and if it is connected.
+ * @returns Boolean, true if the underlying provider is connected, false otherwise
+ */
 export const isApiConnected = () => {
   return Boolean(api && api.isConnected)
 }
 
 /**
- * Disconnects API
+ * @name safeDisconnect
+ * @summary Disconnect safely from the underlying provider, halting all network traffic
  */
 export const safeDisconnect = async () => {
   if (isApiConnected()) await api.disconnect()
 }
 
 /**
- * Generic function to make a chain query
- * @param module the section required to make the chain query (eg. "system")
- * @param call the call depending on the section (eg. "account")
- * @param args array of args for the call
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns a function to unsub if callback is given, else the result of the call
+ * @name query
+ * @summary Generic function to make a chain query.
+ * @example
+ * <BR>
+ *
+ * ```javascript
+ * // you can query without any args
+ * const data = await query('balances', 'totalIssuance');
+ *
+ * // or you can pass args parameters to the storage query
+ * const data = await query('system', 'account', ['5GesFQSwhmuMKAHcDrfm21Z5xrq6kW93C1ch2Xosq1rXx2Eh']);
+ *
+ * ```
+ * @param module The section required to make the chain query (eg. "system")
+ * @param call The call depending on the section (eg. "account")
+ * @param args Array of args for the call
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Result of the query storage call
  */
 export const query = async (module: string, call: string, args: any[] = [], callback?: (result: any) => void) => {
   const api = await getApi()
@@ -66,10 +87,18 @@ export const query = async (module: string, call: string, args: any[] = [], call
 }
 
 /**
- * Generic function to get a chain constant
- * @param section the section required to get the chain constant (eg. "balances")
- * @param constantName the constantName depending on the section (eg. "existentialDeposit")
- * @returns the constant value
+ * @name consts
+ * @summary Generic function to get a chain constant.
+ * @example
+ * <BR>
+ *
+ * ```javascript
+ * console.log(api.consts.balances.existentialDeposit.toString())
+ * ```
+ *
+ * @param section The section required to get the chain constant (eg. "balances")
+ * @param constantName The constantName depending on the section (eg. "existentialDeposit")
+ * @returns The constant value
  */
 export const consts = async (section: string, constantName: string) => {
   const api = await getApi()
@@ -77,10 +106,11 @@ export const consts = async (section: string, constantName: string) => {
 }
 
 /**
- * Check if a tx result is successful
- * @param result generic result passed as a parameter in a tx callback
- * @returns an object with a boolean success field indicating if tx is successful
- * and a indexInterrupted field to indicate where the tx stopped in case of a batch
+ * @name isTransactionSuccess
+ * @summary Check if a transaction result is successful.
+ * @param result Generic result passed as a parameter in a transaction callback
+ * @returns Object containing a boolean success field indicating if transaction is successful
+ * and a indexInterrupted field to indicate where the transaction stopped in case of a batch
  */
 export const isTransactionSuccess = (result: ISubmittableResult): { success: boolean; indexInterrupted?: number } => {
   if (!(result.status.isInBlock || result.status.isFinalized))
@@ -100,6 +130,13 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
   }
 }
 
+/**
+ * @name checkTxAvailable
+ * @summary Check if the pallet module and the subsequent extrinsic method exist in the Api instance.
+ * @param txPallet Pallet module of the transaction
+ * @param txExtrinsic Subsequent extrinsic method of the transaction
+ * @returns Boolean, true if the pallet module and the subsequent extrinsic method exist, throw an Error otherwise
+ */
 export const checkTxAvailable = async (txPallet: string, txExtrinsic: string) => {
   const api = await getApi()
   try {
@@ -111,11 +148,12 @@ export const checkTxAvailable = async (txPallet: string, txExtrinsic: string) =>
 }
 
 /**
- * Create a tx
- * @param txPallet pallet of the tx
- * @param txExtrinsic extrinsic of the tx
- * @param txArgs arguments of the tx
- * @returns a tx object unsigned
+ * @name createTx
+ * @summary Create a transaction.
+ * @param txPallet Pallet module of the transaction
+ * @param txExtrinsic Subsequent extrinsic method of the transaction
+ * @param txArgs Arguments of the transaction
+ * @returns Transaction object unsigned
  */
 const createTx = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
   const api = await getApi()
@@ -124,11 +162,12 @@ const createTx = async (txPallet: string, txExtrinsic: string, txArgs: any[] = [
 }
 
 /**
- * Create a tx
- * @param txPallet pallet of the tx
- * @param txExtrinsic extrinsic of the tx
- * @param txArgs arguments of the tx
- * @returns the hex value of the tx to be constructed again elsewhere
+ * @name createTxHex
+ * @summary Create a transaction in hex format.
+ * @param txPallet Pallet module of the transaction
+ * @param txExtrinsic Subsequent extrinsic method of the transaction
+ * @param txArgs Arguments of the transaction
+ * @returns Hex value of the transaction
  */
 export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
   const tx = await createTx(txPallet, txExtrinsic, txArgs)
@@ -136,10 +175,11 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
 }
 
 /**
- * Sign a transaction
- * @param keyring keyring pair to sign the data
- * @param txHex tx hex of the unsigned tx to be signed
- * @returns the hex value of the signed tx to be constructed again elsewhere
+ * @name signTx
+ * @summary Sign a transaction.
+ * @param keyring Keyring pair to sign the data
+ * @param txHex Tx hex of the unsigned transaction to be signed
+ * @returns Hex value of the signed transaction
  */
 export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
   const api = await getApi()
@@ -148,10 +188,11 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
 }
 
 /**
- * Send a signed tx on the blockchain
- * @param txHex tx hex of the signed tx to be submitted
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns hash of the transaction
+ * @name submitTx
+ * @summary Send a signed transaction on the blockchain.
+ * @param txHex Transaction hex of the signed transaction to be submitted
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction
  */
 export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
   const api = await getApi()
@@ -176,13 +217,14 @@ export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmit
 }
 
 /**
- * Create, sign and submit a transaction on blockchain
- * @param txPallet pallet of the tx
- * @param txExtrinsic extrinsic of the tx
- * @param txArgs arguments of the tx
- * @param keyring keyring pair to sign the data
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns hash of the transaction
+ * @name runTx
+ * @summary Create, sign and submit a transaction on blockchain.
+ * @param txPallet Pallet module of the transaction
+ * @param txExtrinsic Subsequent extrinsic method of the transaction
+ * @param txArgs Arguments of the transaction
+ * @param keyring Keyring pair to sign the data, if not given, an unsigned transaction to be signed will be returned
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
  */
 export const runTx = async (
   txPallet: string,
@@ -198,9 +240,10 @@ export const runTx = async (
 }
 
 /**
- * Create a batch transaction
- * @param txHexes transactions to execute in batch call
- * @returns a submittable extrinsic
+ * @name batchTx
+ * @summary Create a batch transaction of dispatch calls.
+ * @param txHexes Transactions to execute in the batch call
+ * @returns Submittable extrinsic unsigned
  */
 export const batchTx = async (txHexes: `0x${string}`[]) => {
   const api = await getApi()
@@ -209,9 +252,10 @@ export const batchTx = async (txHexes: `0x${string}`[]) => {
 }
 
 /**
- * Create a batch transaction in hex format
- * @param txHexes transactions to execute in batch call
- * @returns the hex of the tx to execute
+ * @name batchTxHex
+ * @summary Create a batch transaction of dispatch calls in hex format.
+ * @param txHexes Transactions to execute in the batch call
+ * @returns Hex of the submittable extrinsic unsigned
  */
 export const batchTxHex = async (txHexes: `0x${string}`[]) => {
   const tx = await batchTx(txHexes)
@@ -219,9 +263,10 @@ export const batchTxHex = async (txHexes: `0x${string}`[]) => {
 }
 
 /**
- * Create a batch all transaction
- * @param txHexes transactions to execute in batch call
- * @returns a submittable extrinsic
+ * @name batchAllTx
+ * @summary Create a batchAll transaction of dispatch calls.
+ * @param txHexes Transactions to execute in the batch call
+ * @returns Submittable extrinsic unsigned
  */
 export const batchAllTx = async (txHexes: `0x${string}`[]) => {
   const api = await getApi()
@@ -230,9 +275,10 @@ export const batchAllTx = async (txHexes: `0x${string}`[]) => {
 }
 
 /**
- * Create a batch all transaction in hex format
- * @param txHexes transactions to execute in batch call
- * @returns the hex of the tx to execute
+ * @name batchAllTxHex
+ * @summary Create a batchAll transaction of dispatch calls in hex format.
+ * @param txHexes Transactions to execute in the batch call
+ * @returns Hex of the submittable extrinsic unsigned
  */
 export const batchAllTxHex = async (txHexes: `0x${string}`[]) => {
   const tx = await batchAllTx(txHexes)
@@ -240,9 +286,10 @@ export const batchAllTxHex = async (txHexes: `0x${string}`[]) => {
 }
 
 /**
- * check if address is valid polkadot address
+ * @name isValidAddress
+ * @summary Check if an address is a valid Ternoa address.
  * @param address
- * @returns
+ * @returns Boolean, true if the address is valid, false otherwise
  */
 export const isValidAddress = (address: string) => {
   try {
@@ -254,8 +301,9 @@ export const isValidAddress = (address: string) => {
 }
 
 /**
- * format balance from number to BN
- * @param _input number input
+ * @name unFormatBalance
+ * @summary Format balance from number to BN.
+ * @param _input Number input
  * @returns BN output
  */
 export const unFormatBalance = async (_input: number) => {

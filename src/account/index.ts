@@ -2,8 +2,9 @@ import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import { Keyring } from "@polkadot/keyring"
 
 /**
- * Generate a new account
- * @returns an object with the seed and the public address
+ * @name generateSeed
+ * @summary Generate a new account
+ * @returns An object with the seed and the public address
  */
 export const generateSeed = async () => {
   await cryptoWaitReady()
@@ -13,9 +14,10 @@ export const generateSeed = async () => {
 }
 
 /**
- * Create a keyring from a seed
+ * @name getKeyringFromSeed
+ * @summary Create a keyring from a seed
  * @param seed
- * @returns a keyring
+ * @returns A keyring pair
  */
 export const getKeyringFromSeed = async (seed: string) => {
   await cryptoWaitReady()
