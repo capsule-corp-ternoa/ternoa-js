@@ -1,7 +1,10 @@
-import { isBN } from "bn.js"
-import { checkBalanceToCreateMarketplace, getMarketplaceMintFee } from "."
+import BN, { isBN } from "bn.js"
+import { isHex } from "@polkadot/util"
+import { checkBalanceToCreateMarketplace, createMarketplace, getMarketplaceMintFee } from "."
 import { generateSeed } from "../account"
+import { createTestPairs } from "../_misc/testingPairs"
 
+// Warning : Tests never ran yet
 describe("Testing marketplace creation", (): void => {
   describe("Testing account balance and marketplace fees to mint marketplace", (): void => {
     xit("Insufficient funds should throw an Error: 'Insufficient funds to create a marketplace", async (): Promise<void> => {
@@ -15,7 +18,18 @@ describe("Testing marketplace creation", (): void => {
       expect(isBN(marketplaceMintFee)).toBe(true)
     })
   })
+
   xit("Should return a correct minted marketplace hash hex or message ", async (): Promise<void> => {
-    //to be tested
+    const { test: testAccount } = await createTestPairs()
+    const createNewMarketplace = await createMarketplace(
+      testAccount.address,
+      "Public",
+      new BN("100000000000000000000"),
+      "Victor Marketplace",
+      "https://victormarketplace.com",
+      "https://logovictormarketplace.com",
+      testAccount,
+    )
+    expect(isHex(createNewMarketplace)).toBe(true)
   })
 })

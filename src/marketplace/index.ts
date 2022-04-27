@@ -29,14 +29,14 @@ export const checkBalanceToCreateMarketplace = async (address: string) => {
  * @name createMarketplace
  * @summary Creates a new marketplace on blockchain.
  * @param owner Public address of the account to check balance for marketplace creation
- * @param kind kind of marketplace : It can be public or private
- * @param commissionFee Commission fee of the marketplace
+ * @param kind kind of marketplace : It can be public or private ? // Juste une string ?? Est ce qu'on doit tester que le message soit bien Public ou Private ?
+ * @param commissionFee Commission fee of the marketplace ? Est ce que si c'est un nb on doit le changer en BN ?
  * @param name Name of the new marketplace
  * @param uri Uri of the marketplace
  * @param logoUri Uri of the marketplace's logo.
  * @param keyring Keyring pair to sign the data
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Message (About Marketplace created with particular id). // Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed // Avant message (About Marketplace created with particular id)
  */
 export const createMarketplace = async (
   owner: string,
@@ -56,7 +56,7 @@ export const createMarketplace = async (
     keyring,
     callback,
   )
-  return tx //pas sur de ce qui doit être retourné entre un message et le hash.
+  return tx // pas de message non ? pour un message il faut mettre une callback.
 }
 
 //updateCommission
