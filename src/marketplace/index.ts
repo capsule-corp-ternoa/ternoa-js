@@ -49,6 +49,7 @@ export const createMarketplace = async (
   callback?: (result: ISubmittableResult) => void,
 ) => {
   await checkBalanceToCreateMarketplace(owner)
+  //tester le type de la blockchain uniquement === private ou public ?
   const tx = await runTx(
     txPallets.marketplace,
     txActions.create,
@@ -84,7 +85,6 @@ export const updateCommissionFee = async (
   return tx
 }
 
-//updateOwner
 /**
  * @name updateOwner
  * @summary Updates the marketplace owner.
@@ -104,7 +104,26 @@ export const updateOwner = async (
   return tx
 }
 
-//updateType
+/**
+ * @name updateType
+ * @summary Updates the marketplace type :Public or Private.
+ * @param marketplaceId Id of the existing marketplace
+ * @param kind kind of marketplace : It can be public or private
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const updateType = async (
+  marketplaceId: number,
+  kind: string,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  // tester le type de la blockchain uniquement === private ou public ?
+  // tester si le kind actuel === nouveau kind ? => handleKind : get marketplace data et comparer avec le kind passé en parametre et throw error
+  const tx = await runTx(txPallets.marketplace, txActions.setKind, [marketplaceId, kind], keyring, callback)
+  return tx
+}
 
 //updateName
 

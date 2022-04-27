@@ -6,6 +6,7 @@ import {
   getMarketplaceMintFee,
   updateCommissionFee,
   updateOwner,
+  updateType,
 } from "."
 import { generateSeed } from "../account"
 import { createTestPairs } from "../_misc/testingPairs"
@@ -30,7 +31,7 @@ describe("Testing marketplace creation", (): void => {
     const createNewMarketplace = await createMarketplace(
       testAccount.address,
       "Public",
-      new BN("100000000000000000000"),
+      10, //new BN("100000000000000000000"),
       "Random Marketplace",
       "https://randommarketplace.com",
       "https://logorandommarketplace.com",
@@ -41,14 +42,19 @@ describe("Testing marketplace creation", (): void => {
 })
 
 describe("Testing to update marketplace datas", (): void => {
-  xit("Should return the correct transaction hex when commission fee is updated", async (): Promise<void> => {
+  xit("Should return the correct transaction hex when the commission fee is updated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const updateFee = updateCommissionFee(1, 20, testAccount)
-    expect(isHex(updateFee)).toBe(true)
+    const setNewCommissionFee = updateCommissionFee(1, 20, testAccount)
+    expect(isHex(setNewCommissionFee)).toBe(true)
   })
-  xit("Should return the correct transaction hex when new owner is set", async (): Promise<void> => {
+  xit("Should return the correct transaction hex when a new owner is set", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const setNewOwner = updateOwner(1, testAccount.address, testAccount)
     expect(isHex(setNewOwner)).toBe(true)
+  })
+  xit("Should return the correct transaction hex when the kind is updated", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const updateKind = updateType(1, "Public", testAccount)
+    expect(isHex(updateKind)).toBe(true)
   })
 })
