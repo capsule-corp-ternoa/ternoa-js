@@ -85,6 +85,24 @@ export const updateCommissionFee = async (
 }
 
 //updateOwner
+/**
+ * @name updateOwner
+ * @summary Updates the marketplace owner.
+ * @param marketplaceId Id of the existing marketplace
+ * @param accountId Account address of the new owner
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const updateOwner = async (
+  marketplaceId: number,
+  accountId: string,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const tx = await runTx(txPallets.marketplace, txActions.setOwner, [marketplaceId, accountId], keyring, callback)
+  return tx
+}
 
 //updateType
 
