@@ -1,6 +1,6 @@
 import BN, { isBN } from "bn.js"
 import { isHex } from "@polkadot/util"
-import { checkBalanceToCreateMarketplace, createMarketplace, getMarketplaceMintFee } from "."
+import { checkBalanceToCreateMarketplace, createMarketplace, getMarketplaceMintFee, updateCommissionFee } from "."
 import { generateSeed } from "../account"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -25,11 +25,19 @@ describe("Testing marketplace creation", (): void => {
       testAccount.address,
       "Public",
       new BN("100000000000000000000"),
-      "Victor Marketplace",
-      "https://victormarketplace.com",
-      "https://logovictormarketplace.com",
+      "Random Marketplace",
+      "https://randommarketplace.com",
+      "https://logorandommarketplace.com",
       testAccount,
     )
     expect(isHex(createNewMarketplace)).toBe(true)
+  })
+})
+
+describe("Testing updates marketplace datas", (): void => {
+  xit("Should return the correct transaction hex after commission fee is updated", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const updateFee = updateCommissionFee(1, 10, testAccount)
+    expect(isHex(updateFee)).toBe(true)
   })
 })

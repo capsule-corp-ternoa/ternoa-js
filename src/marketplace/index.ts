@@ -59,7 +59,30 @@ export const createMarketplace = async (
   return tx // pas de message non ? pour un message il faut mettre une callback.
 }
 
-//updateCommission
+/**
+ * @name updateCommissionFee
+ * @summary Updates the marketplace commission fee.
+ * @param marketplaceId Id of the existing marketplace
+ * @param commissionFee Commission fee of the marketplace
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const updateCommissionFee = async (
+  marketplaceId: number,
+  commissionFee: number | BN,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const tx = await runTx(
+    txPallets.marketplace,
+    txActions.setCommissionFee,
+    [marketplaceId, commissionFee],
+    keyring,
+    callback,
+  )
+  return tx
+}
 
 //updateOwner
 
