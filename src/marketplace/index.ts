@@ -3,6 +3,16 @@ import { chainQuery, txActions, txPallets } from "../constants"
 import { query, runTx } from "../blockchain"
 import { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
 import { getBalance } from "../balance"
+/**
+ * @name toUpperCase
+ * @summary Puts the first letter of a word in uppercase.
+ * @param string The string to be checked and changed
+ * @returns A string with first letter in upercase
+ */
+export const toUpperCase = (string: string) => {
+  const stringWithUpperCase = string.charAt(0).toUpperCase() + string.slice(1)
+  return stringWithUpperCase
+}
 
 /**
  * @name getMarketplaceMintFee
@@ -28,7 +38,7 @@ export const checkBalanceToCreateMarketplace = async (address: string) => {
 /**
  * @name checkMarketplaceKind
  * @summary Checks that the kind of a marketplace is set to 'Private' or 'Public'.
- * @param kind kind of marketplace : It must be public or private
+ * @param kind Kind of marketplace : It must be public or private
  */
 export const checkMarketplaceKind = async (kind: string) => {
   if (kind !== ("Public" || "Private"))
@@ -36,10 +46,34 @@ export const checkMarketplaceKind = async (kind: string) => {
 }
 
 /**
+ * @name compareDatas
+ * @summary Compares the current value of a marketplace attribute to the new one to avoid running a transaction if they are equal.
+ * @param marketplaceId Id of the existing marketplace
+ * @param marketplaceAttribute Attribute of the marketplace (ex: commission_fee)
+ * @param paramValue Value of the marketplace attribute to be compared
+ * @param paramName Name of the marketplace attribute to be compared
+ */
+export const compareDatas = async (
+  marketplaceId: number,
+  marketplaceAttribute: string,
+  paramValue: any,
+  paramName?: string,
+) => {
+  const marketplaceDatas: any = await getMarketplaceDatas(marketplaceId)
+  marketplaceDatas &&
+    paramValue != (null || undefined) &&
+    marketplaceDatas[marketplaceAttribute] &&
+    marketplaceDatas[marketplaceAttribute] === paramValue
+  throw new Error(
+    `The ${paramName ? paramName : marketplaceAttribute} of your marketplace is already set to : ${paramValue}`,
+  )
+}
+
+/**
  * @name createMarketplace
  * @summary Creates a new marketplace on blockchain.
  * @param owner Public address of the account to check balance for marketplace creation
- * @param kind kind of marketplace : It must be public or private
+ * @param kind Kind of marketplace : It must be public or private
  * @param commissionFee Commission fee of the marketplace ? Est ce que si c'est un nb on doit le changer en BN ?
  * @param name Name of the new marketplace
  * @param uri Uri of the marketplace
@@ -72,6 +106,27 @@ export const createMarketplace = async (
 }
 
 /**
+ * @name getMarketplaceDatas
+ * @summary Gets all the datas from a marketplace.
+ * @param marketplaceId The marketplace id
+ * @returns An object with all the marketplace datas ex:{Public, commission_fee, owner, (...)}
+ */
+export const getMarketplaceDatas = async (marketplaceId?: number) => {
+  const marketplaceDatas = await query(txPallets.marketplace, chainQuery.marketplaces, [marketplaceId])
+  return marketplaceDatas
+}
+
+/**
+ * @name getAllMarketplacesDatas
+ * @summary Gets all the datas from all the existings marketplaces.
+ * @returns An array of object with all the existings marketplaces datas
+ */
+export const getAllMarketplacesDatas = async () => {
+  const marketplacesDatas = await query(txPallets.marketplace, chainQuery.marketplaces)
+  return marketplacesDatas
+}
+
+/**
  * @name updateCommissionFee
  * @summary Updates the marketplace commission fee.
  * @param marketplaceId Id of the existing marketplace
@@ -86,6 +141,7 @@ export const updateCommissionFee = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
+  await compareDatas(marketplaceId, "commission_fee", commissionFee, "commission fee")
   const tx = await runTx(
     txPallets.marketplace,
     txActions.setCommissionFee,
@@ -111,13 +167,14 @@ export const updateOwner = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
+  await compareDatas(marketplaceId, "owner", accountId)
   const tx = await runTx(txPallets.marketplace, txActions.setOwner, [marketplaceId, accountId], keyring, callback)
   return tx
 }
 
 /**
  * @name updateType
- * @summary Updates the marketplace type/kind : Public or Private.
+ * @summary Updates the marketplace kind : Public or Private.
  * @param marketplaceId Id of the existing marketplace
  * @param kind kind of marketplace : It can be public or private
  * @param keyring Keyring pair to sign the data
@@ -132,28 +189,67 @@ export const updateType = async (
 ) => {
   const kindUppercase = toUpperCase(kind)
   await checkMarketplaceKind(kindUppercase)
-  // tester si le kind actuel === nouveau kind ? => handleKind : get marketplace data et comparer avec le kind passé en parametre et throw error
+  await compareDatas(marketplaceId, "kind", kindUppercase)
   const tx = await runTx(txPallets.marketplace, txActions.setKind, [marketplaceId, kindUppercase], keyring, callback)
   return tx
 }
 
-//updateName
-
-//updateURI
-
-//updateLogoURI
-
-//get
-
-//getAll
+/**
+ * @name updateName
+ * @summary Updates the marketplace name.
+ * @param marketplaceId Id of the existing marketplace
+ * @param name New name of the marketplace    // Warning pourquoi possible de télécharger un fichier ? Et ex commence par 0X ?
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const updateName = async (
+  marketplaceId: number,
+  name: string,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  await compareDatas(marketplaceId, "name", name)
+  const tx = await runTx(txPallets.marketplace, txActions.setName, [marketplaceId, name], keyring, callback)
+  return tx
+}
 
 /**
- * @name toUpperCase
- * @summary Puts the first letter of a string in uppercase.
- * @param string The word to be checked and changed
- * @returns A string with first letter in upercase
+ * @name updateUri
+ * @summary Updates the marketplace uri.
+ * @param marketplaceId Id of the existing marketplace
+ * @param uri New uri of the marketplace
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
  */
-export const toUpperCase = (string: string) => {
-  const stringWithUpperCase = string.charAt(0).toUpperCase() + string.slice(1)
-  return stringWithUpperCase
+export const updateUri = async (
+  marketplaceId: number,
+  uri: string,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  await compareDatas(marketplaceId, "uri", uri)
+  const tx = await runTx(txPallets.marketplace, txActions.setUri, [marketplaceId, uri], keyring, callback)
+  return tx
+}
+
+/**
+ * @name updateLogoUri
+ * @summary Updates the marketplace logo uri.
+ * @param marketplaceId Id of the existing marketplace
+ * @param logoUri New logo uri of the marketplace
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const updateLogoUri = async (
+  marketplaceId: number,
+  logoUri: string,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  await compareDatas(marketplaceId, "logo_uri", logoUri, "logo uri")
+  const tx = await runTx(txPallets.marketplace, txActions.setLogoUri, [marketplaceId, logoUri], keyring, callback)
+  return tx
 }

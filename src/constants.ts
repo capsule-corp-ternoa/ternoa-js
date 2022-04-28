@@ -50,6 +50,7 @@ export enum chainQuery {
   nftMintFee = "nftMintFee",
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
+  marketplaces = "marketplaces",
   account = "account",
 }
 
