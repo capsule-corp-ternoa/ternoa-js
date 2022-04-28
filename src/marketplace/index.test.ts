@@ -2,6 +2,7 @@ import BN, { isBN } from "bn.js"
 import { isHex } from "@polkadot/util"
 import {
   checkBalanceToCreateMarketplace,
+  checkMarketplaceKind,
   createMarketplace,
   getMarketplaceMintFee,
   updateCommissionFee,
@@ -13,25 +14,27 @@ import { createTestPairs } from "../_misc/testingPairs"
 
 // Warning : Tests never ran yet
 describe("Testing marketplace creation", (): void => {
-  describe("Testing account balance and marketplace fees to mint marketplace", (): void => {
-    xit("Insufficient funds should throw an Error: 'Insufficient funds to create a marketplace", async (): Promise<void> => {
-      const account = await generateSeed()
-      await expect(checkBalanceToCreateMarketplace(account.address)).rejects.toThrow(
-        Error("Insufficient funds to create a marketplace"),
-      )
-    })
-    xit("Should retrun the fee as a BN to mint a marketplace", async () => {
-      const marketplaceMintFee = await getMarketplaceMintFee()
-      expect(isBN(marketplaceMintFee)).toBe(true)
-    })
+  xit("Insufficient funds should throw an Error: 'Insufficient funds to create a marketplace", async (): Promise<void> => {
+    const account = await generateSeed()
+    await expect(checkBalanceToCreateMarketplace(account.address)).rejects.toThrow(
+      Error("Insufficient funds to create a marketplace"),
+    )
   })
-
+  xit("Should retrun the fee as a BN to mint a marketplace", async () => {
+    const marketplaceMintFee = await getMarketplaceMintFee()
+    expect(isBN(marketplaceMintFee)).toBe(true)
+  })
+  xit("Should throw an Error if the kind is not 'Public' or 'Private'", async (): Promise<void> => {
+    await expect(checkMarketplaceKind("notPrivatenotPublic")).rejects.toThrow(
+      Error("The kind of your marketplace must be set to 'Public' or 'Private'"),
+    )
+  })
   xit("Should return a correct minted marketplace hash hex or message ", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const createNewMarketplace = await createMarketplace(
       testAccount.address,
       "Public",
-      10, //new BN("100000000000000000000"),
+      10,
       "Random Marketplace",
       "https://randommarketplace.com",
       "https://logorandommarketplace.com",

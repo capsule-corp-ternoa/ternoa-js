@@ -6,7 +6,7 @@ import { getBalance } from "../balance"
 
 /**
  * @name getMarketplaceMintFee
- * @summary Get the amount of caps needed to mint a marketplace.
+ * @summary Gets the amount of caps needed to mint a marketplace.
  * @returns Marketplace mint fee
  */
 export const getMarketplaceMintFee = async () => {
@@ -16,7 +16,7 @@ export const getMarketplaceMintFee = async () => {
 
 /**
  * @name checkBalanceToCreateMarketplace
- * @summary Check if an account as enough funds to support the marketplace creation fee.
+ * @summary Checks if an account as enough funds to support the marketplace creation fee.
  * @param address Public address of the account to check balance for marketplace creation
  */
 export const checkBalanceToCreateMarketplace = async (address: string) => {
@@ -26,21 +26,31 @@ export const checkBalanceToCreateMarketplace = async (address: string) => {
 }
 
 /**
+ * @name checkMarketplaceKind
+ * @summary Checks that the kind of a marketplace is set to 'Private' or 'Public'.
+ * @param kind kind of marketplace : It must be public or private
+ */
+export const checkMarketplaceKind = async (kind: string) => {
+  if (kind !== ("Public" || "Private"))
+    throw new Error("The kind of your marketplace must be set to 'Public' or 'Private'")
+}
+
+/**
  * @name createMarketplace
  * @summary Creates a new marketplace on blockchain.
  * @param owner Public address of the account to check balance for marketplace creation
- * @param kind kind of marketplace : It can be public or private ? // Juste une string ?? Est ce qu'on doit tester que le message soit bien Public ou Private ?
+ * @param kind kind of marketplace : It must be public or private
  * @param commissionFee Commission fee of the marketplace ? Est ce que si c'est un nb on doit le changer en BN ?
  * @param name Name of the new marketplace
  * @param uri Uri of the marketplace
  * @param logoUri Uri of the marketplace's logo.
  * @param keyring Keyring pair to sign the data
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed // Avant message (About Marketplace created with particular id)
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
  */
 export const createMarketplace = async (
   owner: string,
-  kind: any,
+  kind: "Public" | "Private",
   commissionFee: number | BN,
   name: string,
   uri?: string,
@@ -48,16 +58,17 @@ export const createMarketplace = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
+  const kindUppercase = toUpperCase(kind)
+  await checkMarketplaceKind(kindUppercase)
   await checkBalanceToCreateMarketplace(owner)
-  //tester le type de la blockchain uniquement === private ou public ?
   const tx = await runTx(
     txPallets.marketplace,
     txActions.create,
-    [kind, commissionFee, name, uri, logoUri],
+    [kindUppercase, commissionFee, name, uri, logoUri],
     keyring,
     callback,
   )
-  return tx // pas de message non ? pour un message il faut mettre une callback.
+  return tx
 }
 
 /**
@@ -106,7 +117,7 @@ export const updateOwner = async (
 
 /**
  * @name updateType
- * @summary Updates the marketplace type :Public or Private.
+ * @summary Updates the marketplace type/kind : Public or Private.
  * @param marketplaceId Id of the existing marketplace
  * @param kind kind of marketplace : It can be public or private
  * @param keyring Keyring pair to sign the data
@@ -115,13 +126,14 @@ export const updateOwner = async (
  */
 export const updateType = async (
   marketplaceId: number,
-  kind: string,
+  kind: "Public" | "Private",
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  // tester le type de la blockchain uniquement === private ou public ?
+  const kindUppercase = toUpperCase(kind)
+  await checkMarketplaceKind(kindUppercase)
   // tester si le kind actuel === nouveau kind ? => handleKind : get marketplace data et comparer avec le kind passé en parametre et throw error
-  const tx = await runTx(txPallets.marketplace, txActions.setKind, [marketplaceId, kind], keyring, callback)
+  const tx = await runTx(txPallets.marketplace, txActions.setKind, [marketplaceId, kindUppercase], keyring, callback)
   return tx
 }
 
@@ -134,3 +146,14 @@ export const updateType = async (
 //get
 
 //getAll
+
+/**
+ * @name toUpperCase
+ * @summary Puts the first letter of a string in uppercase.
+ * @param string The word to be checked and changed
+ * @returns A string with first letter in upercase
+ */
+export const toUpperCase = (string: string) => {
+  const stringWithUpperCase = string.charAt(0).toUpperCase() + string.slice(1)
+  return stringWithUpperCase
+}
