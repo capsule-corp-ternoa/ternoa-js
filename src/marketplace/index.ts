@@ -42,7 +42,7 @@ export const checkBalanceToCreateMarketplace = async (address: string) => {
  */
 export const checkMarketplaceKind = async (kind: string) => {
   if (kind !== ("Public" || "Private"))
-    throw new Error("The kind of your marketplace must be set to 'Public' or 'Private'")
+    throw new Error("The kind of the marketplace must be set to 'Public' or 'Private'")
 }
 
 /**
@@ -65,7 +65,7 @@ export const compareDatas = async (
     marketplaceDatas[marketplaceAttribute] &&
     marketplaceDatas[marketplaceAttribute] === paramValue
   throw new Error(
-    `The ${paramName ? paramName : marketplaceAttribute} of your marketplace is already set to : ${paramValue}`,
+    `The ${paramName ? paramName : marketplaceAttribute} of the marketplace is already set to : ${paramValue}`,
   )
 }
 
@@ -109,17 +109,17 @@ export const createMarketplace = async (
  * @name getMarketplaceDatas
  * @summary Gets all the datas from a marketplace.
  * @param marketplaceId The marketplace id
- * @returns An object with all the marketplace datas ex:{Public, commission_fee, owner, (...)}
+ * @returns A JSON object with all the marketplace datas ex:{Public, commission_fee, owner, (...)} //PAS SUR DU JSON LA...
  */
-export const getMarketplaceDatas = async (marketplaceId?: number) => {
+export const getMarketplaceDatas = async (marketplaceId: number) => {
   const marketplaceDatas = await query(txPallets.marketplace, chainQuery.marketplaces, [marketplaceId])
-  return marketplaceDatas
+  return marketplaceDatas //.toJSON()
 }
 
 /**
  * @name getAllMarketplacesDatas
  * @summary Gets all the datas from all the existings marketplaces.
- * @returns An array of object with all the existings marketplaces datas
+ * @returns A JSON array of object with all the existings marketplaces datas //PAS SUR DU JSON LA...
  */
 export const getAllMarketplacesDatas = async () => {
   const marketplacesDatas = await query(txPallets.marketplace, chainQuery.marketplaces)

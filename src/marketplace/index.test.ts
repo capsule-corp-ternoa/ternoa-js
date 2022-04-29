@@ -5,6 +5,7 @@ import {
   checkMarketplaceKind,
   compareDatas,
   createMarketplace,
+  getAllMarketplacesDatas,
   getMarketplaceDatas,
   getMarketplaceMintFee,
   updateCommissionFee,
@@ -48,11 +49,14 @@ describe("Testing to create a new marketplace", (): void => {
 
 describe("Testing to get marketplace datas", (): void => {
   xit("Should return an object with datas from a specific marketplace", async (): Promise<void> => {
-    const marketplaceDatas = await getMarketplaceDatas(1)
-    expect(marketplaceDatas).toBeDefined() //maybe a better test can be provided
+    const datas = await getMarketplaceDatas(1)
+    //expect(datas[0].kind).toBe("Public" || "Private")
+    const marketplaceDatas = datas && JSON.parse(JSON.stringify(datas))
+    expect(marketplaceDatas.kind).toBe("Public" || "Private")
   })
   xit("Should return an array of objects with datas from all the existing marketplaces", async (): Promise<void> => {
-    // get All
+    const datas = await getAllMarketplacesDatas()
+    expect(datas[0][0].commission_fee).toBeDefined() // Pas sur de mon coup là..
   })
 })
 
