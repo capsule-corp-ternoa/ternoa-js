@@ -9,8 +9,11 @@ import {
   getMarketplaceDatas,
   getMarketplaceMintFee,
   updateCommissionFee,
+  updateLogoUri,
+  updateName,
   updateOwner,
   updateType,
+  updateUri,
 } from "."
 import { generateSeed } from "../account"
 import { createTestPairs } from "../_misc/testingPairs"
@@ -66,6 +69,7 @@ describe("Testing to update marketplace datas", (): void => {
       Error("The commission fee of your marketplace is already set to : 10"),
     )
   })
+  // For the tests below, what happen when the test is ran once. Updated data will be the same for the next ones...
   xit("Should return the correct transaction hex when the marketplace commission fee is updated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const setNewCommissionFee = updateCommissionFee(1, 20, testAccount)
@@ -82,12 +86,18 @@ describe("Testing to update marketplace datas", (): void => {
     expect(isHex(updateKind)).toBe(true)
   })
   xit("Should return the correct transaction hex when the marketplace name is updated", async (): Promise<void> => {
-    //updateName
+    const { test: testAccount } = await createTestPairs()
+    const setNewName = updateName(1, "NewName", testAccount)
+    expect(isHex(setNewName)).toBe(true)
   })
   xit("Should return the correct transaction hex when the marketplace uri is updated", async (): Promise<void> => {
-    //updateUri
+    const { test: testAccount } = await createTestPairs()
+    const setNewUri = updateUri(1, "https://newmarketplacelink.com", testAccount)
+    expect(isHex(setNewUri)).toBe(true)
   })
   xit("Should return the correct transaction hex when the marketplace logoUri is updated", async (): Promise<void> => {
-    //updateLogoUri
+    const { test: testAccount } = await createTestPairs()
+    const setNewLogoUri = updateLogoUri(1, "https://newmarketplacelogolink.com", testAccount)
+    expect(isHex(setNewLogoUri)).toBe(true)
   })
 })
