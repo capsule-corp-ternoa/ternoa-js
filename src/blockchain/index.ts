@@ -48,6 +48,16 @@ export const isApiConnected = () => {
 }
 
 /**
+ * @name getApiEndpoint
+ * @summary Provides the wss api endpoint
+ * @returns String, the api endpoint connected with.
+ */
+export const getApiEndpoint = async () => {
+  await getApi()
+  return chainEndpoint
+}
+
+/**
  * @name safeDisconnect
  * @summary Disconnect safely from the underlying provider, halting all network traffic
  */
