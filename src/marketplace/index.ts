@@ -51,22 +51,14 @@ export const checkMarketplaceKind = async (kind: string) => {
  * @param marketplaceId Id of the existing marketplace
  * @param marketplaceAttribute Attribute of the marketplace (ex: commission_fee)
  * @param paramValue Value of the marketplace attribute to be compared
- * @param paramName Name of the marketplace attribute to be compared
  */
-export const compareDatas = async (
-  marketplaceId: number,
-  marketplaceAttribute: string,
-  paramValue: any,
-  paramName?: string,
-) => {
+export const compareDatas = async (marketplaceId: number, marketplaceAttribute: string, paramValue: any) => {
   const marketplaceDatas: any = await getMarketplaceDatas(marketplaceId)
   marketplaceDatas &&
     paramValue != (null || undefined) &&
     marketplaceDatas[marketplaceAttribute] &&
     marketplaceDatas[marketplaceAttribute] === paramValue
-  throw new Error(
-    `The ${paramName ? paramName : marketplaceAttribute} of the marketplace is already set to : ${paramValue}`,
-  )
+  throw new Error(`The ${marketplaceAttribute.replace(/_/g, " ")} of the marketplace is already set to : ${paramValue}`)
 }
 
 /**
@@ -109,21 +101,21 @@ export const createMarketplace = async (
  * @name getMarketplaceDatas
  * @summary Gets all the datas from a marketplace.
  * @param marketplaceId The marketplace id
- * @returns A JSON object with all the marketplace datas ex:{Public, commission_fee, owner, (...)} //PAS SUR DU JSON LA...
+ * @returns A JSON object with all the marketplace datas ex:{Public, commission_fee, owner, (...)}
  */
 export const getMarketplaceDatas = async (marketplaceId: number) => {
   const marketplaceDatas = await query(txPallets.marketplace, chainQuery.marketplaces, [marketplaceId])
-  return marketplaceDatas //.toJSON()
+  return marketplaceDatas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
 }
 
 /**
  * @name getAllMarketplacesDatas
  * @summary Gets all the datas from all the existings marketplaces.
- * @returns A JSON array of object with all the existings marketplaces datas //PAS SUR DU JSON LA...
+ * @returns A JSON array of object with all the existings marketplaces datas
  */
 export const getAllMarketplacesDatas = async () => {
   const marketplacesDatas = await query(txPallets.marketplace, chainQuery.marketplaces)
-  return marketplacesDatas
+  return marketplacesDatas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
 }
 
 /**
@@ -141,7 +133,7 @@ export const updateCommissionFee = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  await compareDatas(marketplaceId, "commission_fee", commissionFee, "commission fee")
+  await compareDatas(marketplaceId, "commission_fee", commissionFee)
   const tx = await runTx(
     txPallets.marketplace,
     txActions.setCommissionFee,
@@ -249,7 +241,7 @@ export const updateLogoUri = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  await compareDatas(marketplaceId, "logo_uri", logoUri, "logo uri")
+  await compareDatas(marketplaceId, "logo_uri", logoUri)
   const tx = await runTx(txPallets.marketplace, txActions.setLogoUri, [marketplaceId, logoUri], keyring, callback)
   return tx
 }

@@ -35,7 +35,7 @@ describe("Testing to create a new marketplace", (): void => {
       Error("The kind of your marketplace must be set to 'Public' or 'Private'"),
     )
   })
-  xit("Should return a correct minted marketplace hash hex or message ", async (): Promise<void> => {
+  xit("Should return a correct minted marketplace hash hex", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const createNewMarketplace = await createMarketplace(
       testAccount.address,
@@ -50,7 +50,8 @@ describe("Testing to create a new marketplace", (): void => {
   })
 })
 
-describe("Testing to get marketplace datas", (): void => {
+describe("Testing to get marketplace(s) datas", (): void => {
+  // datas format retruned by both functions need to be confirmed in order to know if we need to parse datas
   xit("Should return an object with datas from a specific marketplace", async (): Promise<void> => {
     const datas = await getMarketplaceDatas(1)
     //expect(datas[0].kind).toBe("Public" || "Private")
@@ -59,13 +60,13 @@ describe("Testing to get marketplace datas", (): void => {
   })
   xit("Should return an array of objects with datas from all the existing marketplaces", async (): Promise<void> => {
     const datas = await getAllMarketplacesDatas()
-    expect(datas[0][0].commission_fee).toBeDefined() // Pas sur de mon coup là..
+    expect(datas[0][0].commission_fee).toBeDefined()
   })
 })
 
 describe("Testing to update marketplace datas", (): void => {
   xit("Should throw an Error if the marketplace data is already equal to the new data value", async (): Promise<void> => {
-    await expect(compareDatas(1, "commission_fee", 10, "commission fee")).rejects.toThrow(
+    await expect(compareDatas(1, "commission_fee", 10)).rejects.toThrow(
       Error("The commission fee of your marketplace is already set to : 10"),
     )
   })
