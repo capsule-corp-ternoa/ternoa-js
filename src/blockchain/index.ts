@@ -15,7 +15,7 @@ let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
 /**
  * @name initializeApi
  * @summary Initialize substrate api with selected or default wss endpoint.
- * @description The default chainEndpoint is "wss://chain-dev-latest.ternoa.dev"
+ * @description The default chainEndpoint is "wss://dev.chaos.ternoa.com"
  * @param chain Chain endpoint
  */
 export const initializeApi = async (chain = chainEndpoint) => {
