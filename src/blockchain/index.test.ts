@@ -19,7 +19,7 @@ describe("Testing consts", (): void => {
 
 describe("Testing query", (): void => {
   it("Should be able to query storage data", async () => {
-    const data = await query(txPallets.nfts, chainQuery.nftMintFee)
+    const data = await query(txPallets.system, chainQuery.number)
     expect(data).toBeDefined()
   })
   it("Should throw error with inexisting storage", async () => {
