@@ -4,9 +4,10 @@ import { chainQuery, txActions, txPallets } from "../constants"
 import { query, runTx, unFormatBalance } from "../blockchain"
 
 /**
- * Get the balance of an account
- * @param address public address of the account to get balance for
- * @returns the free balance of the address
+ * @name getBalance
+ * @summary Get the free balance of an account
+ * @param address Public address of the account to get free balance for
+ * @returns The free balance of the account
  */
 export const getBalance = async (address: string) => {
   const balance: { free: BN } = ((await query(txPallets.system, chainQuery.account, [address])) as any).data
@@ -14,9 +15,10 @@ export const getBalance = async (address: string) => {
 }
 
 /**
- * Check if an account as enough funds to ensure a transfer
- * @param address public address of the account to check balance for transfer
- * @param value token amount to transfer
+ * @name checkBalanceForTransfer
+ * @summary Check if an account as enough funds to ensure a transfer
+ * @param address Public address of the account to check balance for transfer
+ * @param value Token amount to transfer
  */
 export const checkBalanceForTransfer = async (address: string, value: number | BN) => {
   if (value <= 0) throw new Error("Value needs to be greater than 0")
@@ -27,13 +29,14 @@ export const checkBalanceForTransfer = async (address: string, value: number | B
 }
 
 /**
- * Transfer some liquid free balance to another account
- * @param from public address of the account to get balance for
- * @param to public address of the account to transfer amount to
- * @param value token amount to transfer
- * @param keyring keyring pair to sign the data
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
+ * @name transfer
+ * @summary Transfer some liquid free balance to another account
+ * @param from Public address of the account to get balance for
+ * @param to Public address of the account to transfer amount to
+ * @param value Token amount to transfer
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction or the hex value of the signable tx
  */
 export const transfer = async (
   from: string,
@@ -49,12 +52,13 @@ export const transfer = async (
 }
 
 /**
- * Transfer the entire transferable balance from the caller account
- * @param to public address of the account to transfer amount to
- * @param keepAlive ensure that the transfer does not kill the account that retains the Existential Deposit
- * @param keyring keyring pair to sign the data
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
+ * @name transferAll
+ * @summary Transfer the entire transferable balance from the caller account
+ * @param to Public address of the account to transfer amount to
+ * @param keepAlive Ensure that the transfer does not kill the account, it retains the Existential Deposit
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction or the hex value of the signable tx
  */
 export const transferAll = async (
   to: string,
@@ -67,13 +71,14 @@ export const transferAll = async (
 }
 
 /**
- * Transfer some liquid free balance to another account ensuring to not kill the account
- * @param from public address of the account to get balance for
- * @param to public address of the account to transfer amount to
- * @param value token amount to transfer
- * @param keyring keyring pair to sign the data
- * @param callback callback function to enable subscription, if not given, no subscription will be made
- * @returns hash of the transaction or the hex value of the signed tx to be used again elsewhere
+ * @name transferKeepAlive
+ * @summary Transfer some liquid free balance to another account with a check that the transfer will not kill the origin account
+ * @param from Public address of the account to get balance for
+ * @param to Public address of the account to transfer amount to
+ * @param value Token amount to transfer
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction or the hex value of the signable tx
  */
 export const transferKeepAlive = async (
   from: string,
