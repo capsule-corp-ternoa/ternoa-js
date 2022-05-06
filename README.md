@@ -23,7 +23,6 @@ Functions are organized by theme. In the exemple below, the import of _generateS
 
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
-
 ;(async () => {
   const account = await generateSeed()
   const keyring = await getKeyringFromSeed(account.seed)
@@ -39,7 +38,7 @@ It can be modified by passing a new endpoint as a parameter to the _initializeAp
 
 ## Documentation
 
-The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js-doc.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://ternoa-doc.netlify.app/).
+The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://ternoa-doc.netlify.app/).
 
 <!---
 ### Cookbook examples
