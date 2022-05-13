@@ -12,10 +12,7 @@ The easiest and fastest way to build on top of Ternoa Chain.
 npm install ternoa-js
 ```
 
-<!---
-Specify the typescript version required
-Suggest webpack/vite/react error fixing approach
--->
+> This package provides TypeScript types, but you will need TypeScript version 4.2 or higher to use them properly.
 
 ## Quick Start
 
@@ -51,7 +48,7 @@ The official SDK documentation is available: [ternoa-js sdk documentation](http:
 To build a new version of the library, run:
 
 ```bash
-$ npm run build
+npm run build
 ```
 
 ### Generating Documentation
