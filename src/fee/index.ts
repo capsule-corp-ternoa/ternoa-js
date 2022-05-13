@@ -23,7 +23,7 @@ export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
 }
 
 /**
- * @name getTxGasFee
+ * @name getTxTreasuryFee
  * @summary Get the fee needed by Ternoa treasury for specific transaction services.
  * @description Some Ternoa's services required additional fees on top of chain gas fees, for example: minting a marketplace, minting an NFT or creating a capsule.
  * @param txHex Transaction hex
