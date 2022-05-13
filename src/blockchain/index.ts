@@ -4,10 +4,12 @@ import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
+
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
+import { types } from "./types"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://dev.chaos.ternoa.com" //wss://chain-dev-latest.ternoa.dev
+const DEFAULT_CHAIN_ENDPOINT = "wss://staging.chaos.ternoa.com"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
@@ -15,7 +17,7 @@ let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
 /**
  * @name initializeApi
  * @summary Initialize substrate api with selected or default wss endpoint.
- * @description The default chainEndpoint is "wss://dev.chaos.ternoa.com"
+ * @description The default chainEndpoint is "wss://staging.chaos.ternoa.com"
  * @param chain Chain endpoint
  */
 export const initializeApi = async (chain = chainEndpoint) => {
@@ -24,6 +26,7 @@ export const initializeApi = async (chain = chainEndpoint) => {
   const wsProvider = new WsProvider(chain)
   api = await ApiPromise.create({
     provider: wsProvider,
+    types,
   })
   chainEndpoint = chain
 }
