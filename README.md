@@ -30,7 +30,7 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 })
 ```
 
-The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://chain-dev-latest.ternoa.dev"`.
+The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
 It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function in **ternoa-js/blockchain**.
 
 ## Documentation

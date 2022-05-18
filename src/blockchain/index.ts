@@ -9,7 +9,7 @@ import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
 import { types } from "./types"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://staging.chaos.ternoa.com"
+const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
@@ -17,7 +17,7 @@ let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
 /**
  * @name initializeApi
  * @summary Initialize substrate api with selected or default wss endpoint.
- * @description The default chainEndpoint is "wss://staging.chaos.ternoa.com"
+ * @description The default chainEndpoint is "wss://alphanet.ternoa.com"
  * @param chain Chain endpoint
  */
 export const initializeApi = async (chain = chainEndpoint) => {
