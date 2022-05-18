@@ -35,7 +35,7 @@ It can be modified by passing a new endpoint as a parameter to the _initializeAp
 
 ## Documentation
 
-The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://ternoa-doc.netlify.app/).
+The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://docs.ternoa.network/).
 
 <!---
 ### Cookbook examples
