@@ -6,7 +6,8 @@
     "node": true
   },
   "plugins": ["@typescript-eslint", "jest"],
-  "rules":{
+  "rules": {
     "@typescript-eslint/no-explicit-any": "off"
-  }
+  },
+  "ignorePatterns": ["build"]
 }

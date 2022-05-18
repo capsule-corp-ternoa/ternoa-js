@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, copyFileSync, readdirSync, unlinkSync, renameSync, rmSync } from "fs"
+import { readFileSync, writeFileSync, copyFileSync } from "fs"
 import { resolve, join, basename } from "path"
 
 const packagePath = process.cwd()
@@ -10,54 +10,67 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
-    main: "index.cjs",
-    module: "index.js",
-    types: "index.d.ts",
+    type: "module",
+    main: "./dist/cjs/index.js",
+    module: "./dist/esm/index.js",
+    types: "./dist/esm/index.d.ts",
     exports: {
       ".": {
-        types: "./index.d.ts",
-        require: "./index.cjs",
-        default: "./index.js",
+        types: "./dist/esm/index.d.ts",
+        require: "./dist/cjs/index.js",
+        default: "./dist/esm/index.js",
       },
       "./account": {
-        types: "./account/index.d.ts",
-        require: "./account/index.cjs",
-        default: "./account/index.js",
+        types: "./dist/esm/account/index.d.ts",
+        require: "./dist/cjs/account/index.js",
+        default: "./dist/esm/account/index.js",
       },
       "./balance": {
-        types: "./balance/index.d.ts",
-        require: "./balance/index.cjs",
-        default: "./balance/index.js",
+        types: "./dist/esm/balance/index.d.ts",
+        require: "./dist/cjs/balance/index.js",
+        default: "./dist/esm/balance/index.js",
       },
       "./blockchain": {
-        types: "./blockchain/index.d.ts",
-        require: "./blockchain/index.cjs",
-        default: "./blockchain/index.js",
+        types: "./dist/esm/blockchain/index.d.ts",
+        require: "./dist/cjs/blockchain/index.js",
+        default: "./dist/esm/blockchain/index.js",
       },
       "./capsule": {
-        types: "./capsule/index.d.ts",
-        require: "./capsule/index.cjs",
-        default: "./capsule/index.js",
+        types: "./dist/esm/capsule/index.d.ts",
+        require: "./dist/cjs/capsule/index.js",
+        default: "./dist/esm/capsule/index.js",
       },
       "./fee": {
-        types: "./fee/index.d.ts",
-        require: "./fee/index.cjs",
-        default: "./fee/index.js",
+        types: "./dist/esm/fee/index.d.ts",
+        require: "./dist/cjs/fee/index.js",
+        default: "./dist/esm/fee/index.js",
       },
       "./marketplace": {
-        types: "./marketplace/index.d.ts",
-        require: "./marketplace/index.cjs",
-        default: "./marketplace/index.js",
+        types: "./dist/esm/marketplace/index.d.ts",
+        require: "./dist/cjs/marketplace/index.js",
+        default: "./dist/esm/marketplace/index.js",
       },
       "./nft": {
-        types: "./nft/index.d.ts",
-        require: "./nft/index.cjs",
-        default: "./nft/index.js",
+        types: "./dist/esm/nft/index.d.ts",
+        require: "./dist/cjs/nft/index.js",
+        default: "./dist/esm/nft/index.js",
       },
       "./constants": {
-        types: "./constants.d.ts",
-        require: "./constants.cjs",
-        default: "./constants.js",
+        types: "./dist/esm/constants.d.ts",
+        require: "./dist/cjs/constants.js",
+        default: "./dist/esm/constants.js",
+      },
+    },
+    typesVersions: {
+      "*": {
+        account: ["./dist/esm/account/index.d.ts"],
+        balance: ["./dist/esm/balance/index.d.ts"],
+        blockchain: ["./dist/esm/blockchain/index.d.ts"],
+        capsule: ["./dist/esm/capsule/index.d.ts"],
+        fee: ["./dist/esm/fee/index.d.ts"],
+        marketplace: ["./dist/esm/marketplace/index.d.ts"],
+        nft: ["./dist/esm/nft/index.d.ts"],
+        constants: ["./dist/esm/constants/index.d.ts"],
       },
     },
   }
@@ -67,7 +80,12 @@ async function createPackageFile() {
 
   const targetPath = resolve(buildPath, "./package.json")
   writeJson(targetPath, newPackageData)
-  console.log(`Created package.json in ${targetPath}`)
+
+  const cjsPath = join(buildPath, "./dist/cjs")
+  const targetCjsPath = resolve(cjsPath, "./package.json")
+  writeJson(targetCjsPath, { type: "commonjs" })
+
+  console.log(`Created package.json in ${targetPath} and ${targetCjsPath}`)
 }
 
 async function includeFileInBuild(file) {
@@ -77,34 +95,11 @@ async function includeFileInBuild(file) {
   console.log(`Copied ${sourcePath} to ${targetPath}`)
 }
 
-async function prepareCJSFiles(path = "./build/cjs") {
-  const files = readdirSync(path)
-  for (const file of files){
-    if (file.endsWith('.js')){
-      const newFileName = file.split('.')[0] + '.cjs'
-      renameSync(`${path}/${file}`, `${path}/${newFileName}`)
-      const newPath = path.split('/').filter(x => x!=='cjs').join('/')
-      copyFileSync(`${path}/${newFileName}`, `${newPath}/${newFileName}`)
-    } else if (file.endsWith('.d.ts')) {
-      unlinkSync(`${path}/${file}`)
-    } else {
-      await prepareCJSFiles(`${path}/${file}`)
-    }
-  }
-}
-
-async function prepareCJSBuild() {
-  rmSync("./build/cjs", {recursive:true, force:true})
-  console.log('CJS build succesfully done')
-}
-
 async function run() {
   try {
     await createPackageFile()
     await includeFileInBuild("./README.md")
     await includeFileInBuild("./LICENSE")
-    await prepareCJSFiles()
-    await prepareCJSBuild()
   } catch (err) {
     console.error(err)
     process.exit(1)
