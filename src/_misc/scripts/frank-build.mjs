@@ -10,67 +10,18 @@ async function createPackageFile() {
   const packageData = JSON.parse(readFileSync(resolve(packagePath, "./package.json"), "utf8"))
   const newPackageData = {
     ...packageData,
-    type: "module",
-    main: "./dist/cjs/index.js",
-    module: "./dist/esm/index.js",
-    types: "./dist/esm/index.d.ts",
-    exports: {
-      ".": {
-        types: "./dist/esm/index.d.ts",
-        require: "./dist/cjs/index.js",
-        default: "./dist/esm/index.js",
-      },
-      "./account": {
-        types: "./dist/esm/account/index.d.ts",
-        require: "./dist/cjs/account/index.js",
-        default: "./dist/esm/account/index.js",
-      },
-      "./balance": {
-        types: "./dist/esm/balance/index.d.ts",
-        require: "./dist/cjs/balance/index.js",
-        default: "./dist/esm/balance/index.js",
-      },
-      "./blockchain": {
-        types: "./dist/esm/blockchain/index.d.ts",
-        require: "./dist/cjs/blockchain/index.js",
-        default: "./dist/esm/blockchain/index.js",
-      },
-      "./capsule": {
-        types: "./dist/esm/capsule/index.d.ts",
-        require: "./dist/cjs/capsule/index.js",
-        default: "./dist/esm/capsule/index.js",
-      },
-      "./fee": {
-        types: "./dist/esm/fee/index.d.ts",
-        require: "./dist/cjs/fee/index.js",
-        default: "./dist/esm/fee/index.js",
-      },
-      "./marketplace": {
-        types: "./dist/esm/marketplace/index.d.ts",
-        require: "./dist/cjs/marketplace/index.js",
-        default: "./dist/esm/marketplace/index.js",
-      },
-      "./nft": {
-        types: "./dist/esm/nft/index.d.ts",
-        require: "./dist/cjs/nft/index.js",
-        default: "./dist/esm/nft/index.js",
-      },
-      "./constants": {
-        types: "./dist/esm/constants.d.ts",
-        require: "./dist/cjs/constants.js",
-        default: "./dist/esm/constants.js",
-      },
-    },
+    main: "./index.js",
+    types: "./index.d.ts",
     typesVersions: {
       "*": {
-        account: ["./dist/esm/account/index.d.ts"],
-        balance: ["./dist/esm/balance/index.d.ts"],
-        blockchain: ["./dist/esm/blockchain/index.d.ts"],
-        capsule: ["./dist/esm/capsule/index.d.ts"],
-        fee: ["./dist/esm/fee/index.d.ts"],
-        marketplace: ["./dist/esm/marketplace/index.d.ts"],
-        nft: ["./dist/esm/nft/index.d.ts"],
-        constants: ["./dist/esm/constants/index.d.ts"],
+        account: ["./account/index.d.ts"],
+        balance: ["./balance/index.d.ts"],
+        blockchain: ["./blockchain/index.d.ts"],
+        capsule: ["./capsule/index.d.ts"],
+        fee: ["./fee/index.d.ts"],
+        marketplace: ["./marketplace/index.d.ts"],
+        nft: ["./nft/index.d.ts"],
+        constants: ["./constants/index.d.ts"],
       },
     },
   }
@@ -81,11 +32,7 @@ async function createPackageFile() {
   const targetPath = resolve(buildPath, "./package.json")
   writeJson(targetPath, newPackageData)
 
-  const cjsPath = join(buildPath, "./dist/cjs")
-  const targetCjsPath = resolve(cjsPath, "./package.json")
-  writeJson(targetCjsPath, { type: "commonjs" })
-
-  console.log(`Created package.json in ${targetPath} and ${targetCjsPath}`)
+  console.log(`Created package.json in ${targetPath}`)
 }
 
 async function includeFileInBuild(file) {
