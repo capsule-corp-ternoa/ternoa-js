@@ -9,7 +9,7 @@ import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
 import { types } from "./types"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
+const DEFAULT_CHAIN_ENDPOINT = "wss://dev-0.ternoa.network"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
