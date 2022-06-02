@@ -59,6 +59,7 @@ export enum chainQuery {
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",
   number = "number",
+  collections = "collections",
 }
 
 export enum chainConstants {

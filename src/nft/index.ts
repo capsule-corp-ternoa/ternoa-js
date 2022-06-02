@@ -27,14 +27,26 @@ export const checkBalanceToMintNft = async (address: string) => {
 
 /**
  * @name getNftDatas
- * @summary Gets the Nft datas if an nftid is provided otherwise, get all Nfts datas.
+ * @summary Provides the Nft datas if an nftid is provided otherwise, get all Nfts datas.
  * @param nftId The Nft id
  * @returns A JSON object with the nft datas or all nfts datas. ex:{owner, creator, offchainData, (...)}
  */
 export const getNftDatas = async (nftId?: number) => {
-  const nftDatas = await query(txPallets.nft, chainQuery.nfTs, [nftId])
-  return nftDatas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
+  const datas = await query(txPallets.nft, chainQuery.nfTs, [nftId])
+  return datas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
 }
+
+/**
+ * @name getCollectionDatas
+ * @summary Provides the datas related to a specific collection if an collection id is provided otherwise, get all collections datas. ex:{owner, creator, offchainData, limit, isClosed(...)}
+ * @param collectionId The collection id
+ * @returns A JSON object with datas of a single or all collection(s)
+ */
+export const getCollectionDatas = async (collectionId?: number) => {
+  const datas = await query(txPallets.nft, chainQuery.collections, [collectionId])
+  return datas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
+}
+
 /**
  * @name compareDatas
  * @summary Compares the current value of a extrinsic attribute to the new one to avoid running a transaction if they are equal.
@@ -172,7 +184,7 @@ export const setRoyalty = async (
   //await checkOwner ??
   //formatRoyalty ??
   const nftDatas: any = await getNftDatas(nftId) // nftDatas with : any type ?
-  if (!nftDatas) throw new Error(`Cannot retrieve the datas for Nft with id : ${nftId}`)
+  if (!nftDatas) throw new Error(`Cannot retrieve the datas for Nft with id : ${nftId}`) // try/catch ?
   await compareDatas(nftDatas, "royalty", royalty)
   const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, royalty], keyring, callback)
   return tx
@@ -193,5 +205,36 @@ export const setNftMintFee = async (
 ) => {
   const formatedFee = typeof fee === "number" ? await unFormatBalance(fee) : fee
   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
+  return tx
+}
+
+/**
+ * @name addNftToCollection
+ * @summary Add an NFT to a collection.
+ * @param nftId The Nft id
+ * @param collectionId The collection id to which the Nft will belong
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const addNftToCollection = async (
+  nftId: number,
+  collectionId: number,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const collectionDatas: any = await getCollectionDatas(collectionId) // collectionDatas with : any type ?
+  if (!collectionDatas) {
+    // Better a try/Catch ?
+    throw new Error(
+      `Cannot add Nft ${nftId} to collection ${collectionId} : Cannot find to collection ${collectionId} datas.`,
+    )
+  } else {
+    if (collectionDatas && collectionDatas.nfts.length() >= collectionDatas.limit)
+      throw new Error(`Cannot add Nft ${nftId} to collection ${collectionId} : Collection limit already reached.`)
+    if (collectionDatas && collectionDatas.isClosed)
+      throw new Error(`Cannot add Nft ${nftId} to collection ${collectionId} : Collection closed.`)
+  }
+  const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [nftId, collectionId], keyring, callback)
   return tx
 }

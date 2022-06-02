@@ -32,6 +32,13 @@ describe("Testing to mint/create a new Nft", (): void => {
   })
 })
 
+describe("Testing to get nft(s) of collection(s) datas", (): void => {
+  // datas format retruned by both functions need to be confirmed in order to know if we need to parse datas
+  // getNftDatas()
+  // getCollectionDatas()
+  // cf marketplace branch
+})
+
 describe("Testing to update/remove an Nft", (): void => {
   xit("Should throw an Error if the Nft data is already equal to the new data value", async (): Promise<void> => {
     const nftDatas: any = await getNftDatas(1)
@@ -64,4 +71,6 @@ describe("Testing to update/remove an Nft", (): void => {
     const updatedNftMintFee = setNftMintFee(20, testAccount)
     expect(isHex(updatedNftMintFee)).toBe(true)
   })
+
+  //AddNftToCollection function
 })
