@@ -16,6 +16,7 @@ export enum txActions {
   burnNft = "burnNft",
   transferNft = "transferNft",
   delegateNft = "delegateNft",
+  setRoyalty = "setRoyalty",
   create = "create",
   createNft = "createNft",
   transfer = "transfer",
@@ -52,6 +53,7 @@ export enum txEvent {
 
 export enum chainQuery {
   nftMintFee = "nftMintFee",
+  nfTs = "nfTs",
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",

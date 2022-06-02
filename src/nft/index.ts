@@ -26,6 +26,28 @@ export const checkBalanceToMintNft = async (address: string) => {
 }
 
 /**
+ * @name getNftDatas
+ * @summary Gets the Nft datas if an nftid is provided otherwise, get all Nfts datas.
+ * @param nftId The Nft id
+ * @returns A JSON object with the nft datas or all nfts datas. ex:{owner, creator, offchainData, (...)}
+ */
+export const getNftDatas = async (nftId?: number) => {
+  const nftDatas = await query(txPallets.nft, chainQuery.nfTs, [nftId])
+  return nftDatas //.toJSON() : To Be Confirmed if we retrun it with toJSON or not
+}
+/**
+ * @name compareDatas
+ * @summary Compares the current value of a extrinsic attribute to the new one to avoid running a transaction if they are equal.
+ * @param datas Current values to be compared
+ * @param attribute Attribute of the element to compare (ex: nft.royalty, marketplace.commission_fee)
+ * @param value New value to be compared to current datas
+ */
+export const compareDatas = async (datas: any, attribute: string, value: any) => {
+  if (value != (null || undefined) && datas[attribute] === value)
+    throw new Error(`The ${attribute.replace(/_/g, " ")} of the Nft is already set to : ${value}`)
+}
+
+/**
  * @name formatRoyalty
  * @summary Checks that royalty is in range 0 to 100 and format to permill.
  * @param royalty Number in range from 0 to 100 with max 4 decimals
@@ -93,6 +115,7 @@ export const burnNft = async (
  * @summary Delegate an NFT to a recipient (does not change ownership).
  * @param nftId The id of the Nft that need to be burned from the storage
  * @param recipient Address that will received the use of the Nft
+ * @param keyring Keyring pair to sign the data
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
  */
@@ -115,6 +138,7 @@ export const delegateNft = async (
  * @summary Transfer an NFT from an account to another one.
  * @param nftId The id of the Nft that need to be burned from the storage
  * @param recipient Address that will received the use of the Nft
+ * @param keyring Keyring pair to sign the data
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
  */
@@ -127,5 +151,29 @@ export const transferNft = async (
   //await checkOwner ??
   if (recipient && !isValidAddress(recipient)) throw new Error("Invalid address format")
   const tx = await runTx(txPallets.nft, txActions.transferNft, [nftId, recipient], keyring, callback)
+  return tx
+}
+
+/**
+ * @name setRoyalty
+ * @summary Set the royalty of an NFT.
+ * @param nftId The id of the Nft that need to be burned from the storage
+ * @param royalty Number in range from 0 to 100 with max 4 decimals
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const setRoyalty = async (
+  nftId: number,
+  royalty: number, // % en permill
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  //await checkOwner ??
+  //formatRoyalty ??
+  const nftDatas: any = await getNftDatas(nftId) // nftDatas with : any type ?
+  if (!nftDatas) throw new Error(`Cannot retrieve the datas for Nft with id : ${nftId}`)
+  await compareDatas(nftDatas, "royalty", royalty)
+  const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, royalty], keyring, callback)
   return tx
 }
