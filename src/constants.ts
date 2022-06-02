@@ -17,6 +17,7 @@ export enum txActions {
   transferNft = "transferNft",
   delegateNft = "delegateNft",
   setRoyalty = "setRoyalty",
+  setNftMintFee = "setNftMintFee",
   create = "create",
   createNft = "createNft",
   transfer = "transfer",

@@ -8,6 +8,7 @@ import {
   delegateNft,
   getNftDatas,
   getNftMintFee,
+  setNftMintFee,
   setRoyalty,
   transferNft,
 } from "."
@@ -57,5 +58,10 @@ describe("Testing to update/remove an Nft", (): void => {
     const { test: testAccount } = await createTestPairs()
     const updatedRoyalty = setRoyalty(1, 10, testAccount)
     expect(isHex(updatedRoyalty)).toBe(true)
+  })
+  xit("Should return a correct hash hex when the fee to mint an Nft is updated", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const updatedNftMintFee = setNftMintFee(20, testAccount)
+    expect(isHex(updatedNftMintFee)).toBe(true)
   })
 })

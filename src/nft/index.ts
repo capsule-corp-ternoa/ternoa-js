@@ -1,6 +1,6 @@
 import BN from "bn.js"
 import { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
-import { isValidAddress, query, runTx } from "../blockchain"
+import { isValidAddress, query, runTx, unFormatBalance } from "../blockchain"
 import { chainQuery, txActions, txPallets } from "../constants"
 import { getBalance } from "../balance"
 
@@ -175,5 +175,23 @@ export const setRoyalty = async (
   if (!nftDatas) throw new Error(`Cannot retrieve the datas for Nft with id : ${nftId}`)
   await compareDatas(nftDatas, "royalty", royalty)
   const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, royalty], keyring, callback)
+  return tx
+}
+
+/**
+ * @name setNftMintFee
+ * @summary Set the fee for minting an Nft.
+ * @param fee New fee to mint an Nft
+ * @param keyring Keyring pair to sign the data
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const setNftMintFee = async (
+  fee: number | BN,
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const formatedFee = typeof fee === "number" ? await unFormatBalance(fee) : fee
+  const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
   return tx
 }
