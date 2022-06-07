@@ -5,6 +5,7 @@ import {
   burnNft,
   checkBalanceToMintNft,
   compareDatas,
+  createCollection,
   createNft,
   delegateNft,
   getNftDatas,
@@ -73,7 +74,7 @@ describe("Testing to update/remove an Nft", (): void => {
     const updatedRoyalty = await setRoyalty(3, testAccount, 10)
     expect(isHex(updatedRoyalty)).toBe(true)
   })
-  //2 tests below never ran
+  //tests below never ran
   xit("Should return a correct hash hex when the fee to mint an Nft is updated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const updatedNftMintFee = await setNftMintFee(20, testAccount)
@@ -83,5 +84,13 @@ describe("Testing to update/remove an Nft", (): void => {
     const { test: testAccount } = await createTestPairs()
     const addNft = await addNftToCollection(1, testAccount, 1)
     expect(isHex(addNft)).toBe(true)
+  })
+})
+
+describe("Testing to create/update a collection", (): void => {
+  xit("Should return a correct hash hex when collection is created", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const createNewCollection = await createCollection("Offchain datas", 50, testAccount)
+    expect(isHex(createNewCollection)).toBe(true)
   })
 })

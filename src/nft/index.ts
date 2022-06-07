@@ -12,8 +12,6 @@ import { ICollectionDatas, INftDatas } from "./interfaces"
  */
 export const getNftMintFee = async () => {
   const fee: any = await query(txPallets.nft, chainQuery.nftMintFee)
-  console.log({ fee })
-
   return fee as BN
 }
 
@@ -138,7 +136,7 @@ export const createNft = async (
 ) => {
   await checkBalanceToMintNft(creator)
   await checkNftOffchainDataLimit(offchainData.length)
-  //await checkoffchainData() => query consts NFT and *4 to get 200 but need to confirm with Ghali for 150 charcaters. 200 included or not ??
+  //await checkoffchainData() => query consts NFT and *4 to get 200 but need to confirm with Ghali for 150 charcaters. 200 included or not. What about the file upload ???
   const formatedRoyalty = await formatRoyalty(royalty)
   const tx = await runTx(
     txPallets.nft,
@@ -286,5 +284,29 @@ export const addNftToCollection = async (
   if (collectionDatas && collectionDatas.isClosed)
     throw new Error(`Cannot add Nft ${nftId} to collection ${collectionId} : Collection closed.`)
   const tx = await runTx(txPallets.nft, txActions.addNftToCollection, [nftId, collectionId], keyring, callback)
+  return tx
+}
+
+/**
+ * @name createCollection
+ * @summary Create a new collection with the provided details.
+ * @param offchainData Any offchain datas to add to the collection
+ * @param limit Number max of NFTs in collection
+ * @param keyring Keyring pair to sign the data.
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const createCollection = async (
+  offchainData: string,
+  limit?: number, // u32 ?
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  // await special fee to create collection ??
+  await checkNftOffchainDataLimit(offchainData.length)
+  //await checkoffchainData() => same as create nft ??
+  //check on collection size limit ??
+  //format limit to U32 ?
+  const tx = await runTx(txPallets.nft, txActions.createCollection, [offchainData, limit], keyring, callback)
   return tx
 }
