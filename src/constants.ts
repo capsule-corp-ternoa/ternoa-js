@@ -70,4 +70,5 @@ export enum chainQuery {
 export enum chainConstants {
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",
+  collectionOffchainDataLimit = "collectionOffchainDataLimit",
 }

@@ -26,6 +26,16 @@ export const getNftOffchainDataLimit = async () => {
 }
 
 /**
+ * @name getCollectionOffchainDataLimit
+ * @summary Provides the maximum offchain data length.
+ * @returns Number.
+ */
+export const getCollectionOffchainDataLimit = async () => {
+  const limit: any = await consts(txPallets.nft, chainConstants.collectionOffchainDataLimit)
+  return limit as number
+}
+
+/**
  * @name checkNftOffchainDataLimit
  * @summary Checks if the nftOffchain data length is lower than maxium authorized length.
  * @param offchainLength Offchain data length.
@@ -33,6 +43,16 @@ export const getNftOffchainDataLimit = async () => {
 export const checkNftOffchainDataLimit = async (offchainLength: number) => {
   const limit = await getNftOffchainDataLimit()
   if (offchainLength > limit * 4) throw new Error("nftOffchainData are too long.")
+}
+
+/**
+ * @name checkCollectionOffchainDataLimit
+ * @summary Checks if the collectionOffchain data length is lower than maxium authorized length.
+ * @param offchainLength Offchain data length.
+ */
+export const checkCollectionOffchainDataLimit = async (offchainLength: number) => {
+  const limit = await getCollectionOffchainDataLimit()
+  if (offchainLength > limit * 4) throw new Error("collectionOffchainData are too long.")
 }
 
 /**
@@ -303,10 +323,49 @@ export const createCollection = async (
   callback?: (result: ISubmittableResult) => void,
 ) => {
   // await special fee to create collection ??
-  await checkNftOffchainDataLimit(offchainData.length)
   //await checkoffchainData() => same as create nft ??
   //check on collection size limit ??
   //format limit to U32 ?
+  await checkCollectionOffchainDataLimit(offchainData.length)
   const tx = await runTx(txPallets.nft, txActions.createCollection, [offchainData, limit], keyring, callback)
+  return tx
+}
+
+/**
+ * @name burnCollection
+ * @summary Remove a collection from the storage.
+ * @param collectionId The collection id to burn
+ * @param keyring Keyring pair to sign the data. Must be the owner of the collection
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const burnCollection = async (
+  collectionId: number,
+  keyring: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const { owner } = await getCollectionDatas(collectionId)
+  if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
+  const tx = await runTx(txPallets.nft, txActions.burnCollection, [collectionId], keyring, callback)
+  return tx
+}
+
+/**
+ * @name closeCollection
+ * @summary Makes the collection closed.
+ * @param collectionId The collection id to close
+ * @param keyring Keyring pair to sign the data. Must be the owner of the collection.
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const closeCollection = async (
+  collectionId: number,
+  keyring: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  const { owner, isClosed } = await getCollectionDatas(collectionId)
+  if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
+  if (isClosed) throw new Error(`Collection ${collectionId} already closed.`)
+  const tx = await runTx(txPallets.nft, txActions.closeCollection, [collectionId], keyring, callback)
   return tx
 }

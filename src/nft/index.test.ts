@@ -2,8 +2,10 @@ import { isHex } from "@polkadot/util"
 import { isBN } from "bn.js"
 import {
   addNftToCollection,
+  burnCollection,
   burnNft,
   checkBalanceToMintNft,
+  closeCollection,
   compareDatas,
   createCollection,
   createNft,
@@ -92,5 +94,15 @@ describe("Testing to create/update a collection", (): void => {
     const { test: testAccount } = await createTestPairs()
     const createNewCollection = await createCollection("Offchain datas", 50, testAccount)
     expect(isHex(createNewCollection)).toBe(true)
+  })
+  xit("Should return a correct hash hex when the collection is burned", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const burnNFTCollection = await burnCollection(1, testAccount)
+    expect(isHex(burnNFTCollection)).toBe(true)
+  })
+  xit("Should return a correct hash hex when the collection is closed", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const closeNFTCollection = await closeCollection(1, testAccount)
+    expect(isHex(closeNFTCollection)).toBe(true)
   })
 })
