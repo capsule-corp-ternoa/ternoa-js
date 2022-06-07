@@ -1,6 +1,7 @@
-import { isBN } from "bn.js"
 import { isHex } from "@polkadot/util"
+import { isBN } from "bn.js"
 import {
+  addNftToCollection,
   burnNft,
   checkBalanceToMintNft,
   compareDatas,
@@ -15,7 +16,6 @@ import {
 import { generateSeed } from "../account"
 import { createTestPairs } from "../_misc/testingPairs"
 
-// Warning : Tests never ran yet
 describe("Testing to mint/create a new Nft", (): void => {
   xit("Should retrun the fee as a BN to mint an Nft", async () => {
     const nftMintFee = await getNftMintFee()
@@ -27,7 +27,7 @@ describe("Testing to mint/create a new Nft", (): void => {
   })
   xit("Should return a correct minted Nft hash hex", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const createNewNft = await createNft(testAccount.address, "IPFSLink", 10, false, undefined, testAccount)
+    const createNewNft = await createNft(testAccount.address, "IPFSLink", 10, undefined, false, testAccount)
     expect(isHex(createNewNft)).toBe(true)
   })
 })
@@ -48,29 +48,40 @@ describe("Testing to update/remove an Nft", (): void => {
   })
   // Which NFT to do testings with ?
   xit("Should return a correct hash hex when Nft is burned/deleted", async (): Promise<void> => {
-    const remove = await burnNft(1)
+    const { test: testAccount } = await createTestPairs()
+    const remove = await burnNft(2, testAccount)
     expect(isHex(remove)).toBe(true)
   })
+
   xit("Should return a correct hash hex when Nft is transfered to another account", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const transfer = await transferNft(1, destAccount.address, testAccount)
+    const transfer = await transferNft(3, testAccount, destAccount.address)
     expect(isHex(transfer)).toBe(true)
   })
   xit("Should return a correct hash hex when Nft is delegated to another account", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const delegate = await delegateNft(1, destAccount.address, testAccount)
+    const delegate = await delegateNft(3, testAccount, destAccount.address)
     expect(isHex(delegate)).toBe(true)
+  })
+  xit("Should return a correct hash hex when Nft is undelegated", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const undelegate = await delegateNft(3, testAccount)
+    expect(isHex(undelegate)).toBe(true)
   })
   xit("Should return a correct hash hex when the royalty is updated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const updatedRoyalty = setRoyalty(1, 10, testAccount)
+    const updatedRoyalty = await setRoyalty(3, testAccount, 10)
     expect(isHex(updatedRoyalty)).toBe(true)
   })
+  //2 tests below never ran
   xit("Should return a correct hash hex when the fee to mint an Nft is updated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const updatedNftMintFee = setNftMintFee(20, testAccount)
+    const updatedNftMintFee = await setNftMintFee(20, testAccount)
     expect(isHex(updatedNftMintFee)).toBe(true)
   })
-
-  //AddNftToCollection function
+  xit("Should return a correct hash hex when an Nft is added to a collection", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const addNft = await addNftToCollection(1, testAccount, 1)
+    expect(isHex(addNft)).toBe(true)
+  })
 })

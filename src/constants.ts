@@ -18,6 +18,7 @@ export enum txActions {
   delegateNft = "delegateNft",
   setRoyalty = "setRoyalty",
   setNftMintFee = "setNftMintFee",
+  addNftToCollection = "addNftToCollection",
   create = "create",
   createNft = "createNft",
   transfer = "transfer",
@@ -64,4 +65,5 @@ export enum chainQuery {
 
 export enum chainConstants {
   existentialDeposit = "existentialDeposit",
+  nftOffchainDataLimit = "nftOffchainDataLimit",
 }
