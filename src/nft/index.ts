@@ -16,13 +16,33 @@ export const getNftMintFee = async () => {
 }
 
 /**
+ * @name getNextNftId
+ * @summary Get the next Nft Id av available.
+ * @returns Number.
+ */
+export const getNextNftId = async () => {
+  const id: any = await query(txPallets.nft, chainQuery.nextNFTId)
+  return id as BN
+}
+
+/**
+ * @name getNextCollectionId
+ * @summary Get the next collection Id available.
+ * @returns Number.
+ */
+export const getNextCollectionId = async () => {
+  const id: any = await query(txPallets.nft, chainQuery.nextCollectionId)
+  return id as BN
+}
+
+/**
  * @name getNftOffchainDataLimit
  * @summary Provides the maximum offchain data length.
  * @returns Number.
  */
 export const getNftOffchainDataLimit = async () => {
   const limit: any = await consts(txPallets.nft, chainConstants.nftOffchainDataLimit)
-  return limit as number
+  return limit as number //type of datas ?? if BN trow error line 66
 }
 
 /**
@@ -118,7 +138,7 @@ export const getCollectionDatas = async (collectionId?: number): Promise<ICollec
  */
 export const compareDatas = async (datas: any, attribute: string, value: any) => {
   if (value != (null || undefined) && datas === value)
-    throw new Error(`The ${attribute.replace(/_/g, " ")} of the Nft is already set to : ${value}`)
+    throw new Error(`The ${attribute.replace(/_/g, " ")} of the NFT is already set to : ${value}`)
 }
 
 /**
@@ -322,10 +342,10 @@ export const createCollection = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
+  // await checkoffchainData() => same as create nft function ??
   // await special fee to create collection ??
-  //await checkoffchainData() => same as create nft ??
-  //check on collection size limit ??
-  //format limit to U32 ?
+  // check on collection size limit ??
+  // format limit to U32 ?
   await checkCollectionOffchainDataLimit(offchainData.length)
   const tx = await runTx(txPallets.nft, txActions.createCollection, [offchainData, limit], keyring, callback)
   return tx
@@ -367,5 +387,29 @@ export const closeCollection = async (
   if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
   if (isClosed) throw new Error(`Collection ${collectionId} already closed.`)
   const tx = await runTx(txPallets.nft, txActions.closeCollection, [collectionId], keyring, callback)
+  return tx
+}
+
+/**
+ * @name limitCollection
+ * @summary Set the maximum number (limit) of nfts in the collection.
+ * @param collectionId The collection id to close
+ * @param setLimit Number max of NFTs in collection
+ * @param keyring Keyring pair to sign the data.
+ * @param callback Callback function to enable subscription, if not given, no subscription will be made
+ * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+ */
+export const limitCollection = async (
+  collectionId: number,
+  setLimit: number, // u32 ?
+  keyring?: IKeyringPair,
+  callback?: (result: ISubmittableResult) => void,
+) => {
+  //check on collection size limit ??
+  //format limit to U32 ?
+  const { owner, limit } = await getCollectionDatas(collectionId)
+  if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
+  await compareDatas(limit, "limit", setLimit)
+  const tx = await runTx(txPallets.nft, txActions.limitCollection, [collectionId, setLimit], keyring, callback)
   return tx
 }
