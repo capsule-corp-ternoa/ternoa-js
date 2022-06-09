@@ -4,14 +4,29 @@ import { chainQuery, txActions, txPallets } from "../constants"
 import { query, runTx, unFormatBalance } from "../blockchain"
 
 /**
- * @name getBalance
+ * @name getBalances
+ * @summary Get the balances of an account including free, reserved, miscFrozen and feeFrozen balances as well as the total.
+ * @param address Public address of the account to get balances
+ * @returns The balances of the account
+ */
+export const getBalances = async (address: string) => {
+  const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
+    (await query(txPallets.system, chainQuery.account, [address])) as any
+  ).data
+  const { free, reserved, miscFrozen, feeFrozen } = balances
+  const total = free.add(reserved).add(miscFrozen).add(feeFrozen)
+  return { ...balances, total }
+}
+
+/**
+ * @name getFreeBalance
  * @summary Get the free balance of an account
  * @param address Public address of the account to get free balance for
  * @returns The free balance of the account
  */
-export const getBalance = async (address: string) => {
-  const balance: { free: BN } = ((await query(txPallets.system, chainQuery.account, [address])) as any).data
-  return balance.free
+export const getFreeBalance = async (address: string) => {
+  const balances = await getBalances(address)
+  return balances.free
 }
 
 /**
@@ -23,9 +38,9 @@ export const getBalance = async (address: string) => {
 export const checkBalanceForTransfer = async (address: string, value: number | BN) => {
   if (value <= 0) throw new Error("Value needs to be greater than 0")
 
-  const balance = await getBalance(address)
+  const freeBalance = await getFreeBalance(address)
   const amount = typeof value === "number" ? await unFormatBalance(value) : value
-  if (balance.cmp(amount) === -1) throw new Error("Insufficient funds to transfer")
+  if (freeBalance.cmp(amount) === -1) throw new Error("Insufficient funds to transfer")
 }
 
 /**

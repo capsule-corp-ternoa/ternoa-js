@@ -1,7 +1,6 @@
 import { isHex } from "@polkadot/util"
-import type { ISubmittableResult } from "@polkadot/types/types"
 
-import { batchTxHex, batchAllTxHex, consts, createTxHex, isTransactionSuccess, query, runTx, signTx, submitTx } from "."
+import { batchTxHex, batchAllTxHex, consts, createTxHex, query, runTx, signTx, submitTx } from "."
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -68,52 +67,6 @@ describe("Testing submit transaction", (): void => {
     const submitTxHex = await submitTx(signedTxHex)
     expect(isHex(submitTxHex)).toBe(true)
   })
-
-  it("Should return a correct submited transaction hash hex with in block callback notification", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "10000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(true)
-      } else {
-        try {
-          const { success } = isTransactionSuccess(res)
-          expect(success).toBe(true)
-        } catch (err) {
-          expect(err).toEqual(Error("Transaction is not finalized or in block"))
-        }
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
-  })
-
-  it("Should reject the transaction if the free balance is lower than the amount specified", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "100000000000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(false)
-      } else {
-        try {
-          const { success } = isTransactionSuccess(res)
-          expect(success).toBe(false)
-        } catch (err) {
-          expect(err).toEqual(Error("Transaction is not finalized or in block"))
-        }
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
-  })
 })
 
 describe("Testing run transaction", (): void => {
@@ -132,25 +85,6 @@ describe("Testing run transaction", (): void => {
       testAccount,
     )
     expect(isHex(runTxHex)).toBe(true)
-  })
-})
-
-describe("Testing transaction status", (): void => {
-  it("Should throw an error if transaction is not in block or finalized", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "1000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, async (res: ISubmittableResult) => {
-      if (res.status.isReady) {
-        await expect(async () => {
-          isTransactionSuccess(res)
-        }).rejects.toThrow(Error("Transaction is not finalized or in block"))
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
   })
 })
 

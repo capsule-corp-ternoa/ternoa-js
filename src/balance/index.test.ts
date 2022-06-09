@@ -4,19 +4,19 @@ import { chainConstants, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 import { generateSeed } from "../account"
 import { consts, isTransactionSuccess } from "../blockchain"
-import { checkBalanceForTransfer, getBalance, transfer, transferAll, transferKeepAlive } from "./index"
+import { checkBalanceForTransfer, getFreeBalance, transfer, transferAll, transferKeepAlive } from "./index"
 
-describe("Testing getBalance", (): void => {
+describe("Testing getFreeBalance", (): void => {
   it("Should get an empty account balance for a new one", async (): Promise<void> => {
     const account = await generateSeed()
-    const balance = await getBalance(account.address)
-    expect(balance.isZero()).toBe(true)
+    const freeBalance = await getFreeBalance(account.address)
+    expect(freeBalance.isZero()).toBe(true)
   })
 
   it("Should get a positive account balance on the testing account", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const balance = await getBalance(testAccount.address)
-    expect(balance.cmp(new BN(0))).toBe(1)
+    const freeBalance = await getFreeBalance(testAccount.address)
+    expect(freeBalance.cmp(new BN(0))).toBe(1)
   })
 })
 
@@ -52,12 +52,12 @@ describe("Testing transfer", (): void => {
 
   it("Transfer all funds with TransferKeepAlive should throw an Error: 'Transaction is not finalized or in block'", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const testAccountBalance = await getBalance(testAccount.address)
+    const testAccountFreeBalance = await getFreeBalance(testAccount.address)
 
     await transferKeepAlive(
       testAccount.address,
       destAccount.address,
-      testAccountBalance,
+      testAccountFreeBalance,
       testAccount,
       (res: ISubmittableResult) => {
         if (!res.status.isInBlock) {
@@ -79,8 +79,8 @@ describe("Testing transfer", (): void => {
       if (res.status.isInBlock) {
         const { success } = isTransactionSuccess(res)
         expect(success).toBe(true)
-        const balance = await getBalance(testAccount.address)
-        expect(balance.toString()).toEqual(existensialDeposit.toString())
+        const freeBalance = await getFreeBalance(testAccount.address)
+        expect(freeBalance.toString()).toEqual(existensialDeposit.toString())
       }
     })
   })

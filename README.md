@@ -12,10 +12,7 @@ The easiest and fastest way to build on top of Ternoa Chain.
 npm install ternoa-js
 ```
 
-<!---
-Specify the typescript version required
-Suggest webpack/vite/react error fixing approach
--->
+> This package provides TypeScript types, but you will need TypeScript version 4.2 or higher to use them properly.
 
 ## Quick Start
 
@@ -23,7 +20,6 @@ Functions are organized by theme. In the exemple below, the import of _generateS
 
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
-
 ;(async () => {
   const account = await generateSeed()
   const keyring = await getKeyringFromSeed(account.seed)
@@ -34,12 +30,12 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 })
 ```
 
-The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://chain-dev-latest.ternoa.dev"`.
+The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
 It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function in **ternoa-js/blockchain**.
 
 ## Documentation
 
-The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js-doc.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://ternoa-doc.netlify.app/).
+The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://docs.ternoa.network/).
 
 <!---
 ### Cookbook examples
@@ -52,7 +48,7 @@ The official SDK documentation is available: [ternoa-js sdk documentation](http:
 To build a new version of the library, run:
 
 ```bash
-$ npm run build
+npm run build
 ```
 
 ### Generating Documentation
