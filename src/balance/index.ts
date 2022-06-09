@@ -4,7 +4,22 @@ import { chainQuery, txActions, txPallets } from "../constants"
 import { query, runTx, unFormatBalance } from "../blockchain"
 
 /**
- * @name getBalance
+ * @name getBalances
+ * @summary Get the balances of an account including free, reserved, miscFrozen and feeFrozen balances as well as the total.
+ * @param address Public address of the account to get balances
+ * @returns The balances of the account
+ */
+export const getBalances = async (address: string) => {
+  const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
+    (await query(txPallets.system, chainQuery.account, [address])) as any
+  ).data
+  const { free, reserved, miscFrozen, feeFrozen } = balances
+  const total = free.add(reserved).add(miscFrozen).add(feeFrozen)
+  return { ...balances, total }
+}
+
+/**
+ * @name getFreeBalance
  * @summary Get the free balance of an account
  * @param address Public address of the account to get free balance for
  * @returns The free balance of the account
