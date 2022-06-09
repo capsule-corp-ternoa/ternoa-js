@@ -6,7 +6,7 @@ import { txActions, txPallets } from "../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getCapsuleMintFee } from "../capsule"
-import { getBalance } from "../balance"
+import { getFreeBalance } from "../balance"
 
 /**
  * @name getTxGasFee
@@ -72,7 +72,7 @@ export const getTxFees = async (txHex: `0x${string}`, address: string) => {
  * @param tx Signed transaction object
  */
 export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>) => {
-  const balance = await getBalance(tx.signer.toString())
+  const freeBalance = await getFreeBalance(tx.signer.toString())
   const fees = await getTxFees(tx.toHex(), tx.signer.toString())
-  if (balance.cmp(fees) === -1) throw new Error("Insufficient funds for gas or treasury")
+  if (freeBalance.cmp(fees) === -1) throw new Error("Insufficient funds for gas or treasury")
 }
