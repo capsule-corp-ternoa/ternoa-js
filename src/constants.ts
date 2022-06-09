@@ -1,6 +1,6 @@
 export enum txPallets {
   marketplace = "marketplace",
-  nfts = "nfts",
+  nft = "nft",
   utility = "utility",
   balances = "balances",
   capsules = "capsules",
@@ -13,7 +13,18 @@ export enum txActions {
   list = "list",
   unlist = "unlist",
   burn = "burn",
+  burnNft = "burnNft",
+  transferNft = "transferNft",
+  delegateNft = "delegateNft",
+  setRoyalty = "setRoyalty",
+  setNftMintFee = "setNftMintFee",
+  addNftToCollection = "addNftToCollection",
+  createCollection = "createCollection",
+  limitCollection = "limitCollection",
+  closeCollection = "closeCollection",
+  burnCollection = "burnCollection",
   create = "create",
+  createNft = "createNft",
   transfer = "transfer",
   transferAll = "transferAll",
   transferKeepAlive = "transferKeepAlive",
@@ -48,12 +59,18 @@ export enum txEvent {
 
 export enum chainQuery {
   nftMintFee = "nftMintFee",
+  nfTs = "nfTs",
+  nextNFTId = "nextNFTId",
+  nextCollectionId = "nextCollectionId",
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",
   number = "number",
+  collections = "collections",
 }
 
 export enum chainConstants {
   existentialDeposit = "existentialDeposit",
+  nftOffchainDataLimit = "nftOffchainDataLimit",
+  collectionOffchainDataLimit = "collectionOffchainDataLimit",
 }
