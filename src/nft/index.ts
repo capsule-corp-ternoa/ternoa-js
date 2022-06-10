@@ -17,12 +17,12 @@ export const getNftMintFee = async () => {
 
 /**
  * @name getNextNftId
- * @summary Get the next Nft Id av available.
+ * @summary Get the next NFT Id available.
  * @returns Number.
  */
 export const getNextNftId = async () => {
   const id: any = await query(txPallets.nft, chainQuery.nextNFTId)
-  return id as BN
+  return id as number
 }
 
 /**
@@ -32,7 +32,7 @@ export const getNextNftId = async () => {
  */
 export const getNextCollectionId = async () => {
   const id: any = await query(txPallets.nft, chainQuery.nextCollectionId)
-  return id as BN
+  return id as number
 }
 
 /**
@@ -57,22 +57,22 @@ export const getCollectionOffchainDataLimit = async () => {
 
 /**
  * @name checkNftOffchainDataLimit
- * @summary Checks if the nftOffchain data length is lower than maxium authorized length.
+ * @summary Checks if the nftOffchain data length is lower than maximum authorized length.
  * @param offchainLength Offchain data length.
  */
 export const checkNftOffchainDataLimit = async (offchainLength: number) => {
   const limit = await getNftOffchainDataLimit()
-  if (offchainLength > limit * 4) throw new Error("nftOffchainData are too long.")
+  if (offchainLength > limit) throw new Error("nftOffchainData are too long.")
 }
 
 /**
  * @name checkCollectionOffchainDataLimit
- * @summary Checks if the collectionOffchain data length is lower than maxium authorized length.
+ * @summary Checks if the collectionOffchain data length is lower than maximum authorized length.
  * @param offchainLength Offchain data length.
  */
 export const checkCollectionOffchainDataLimit = async (offchainLength: number) => {
   const limit = await getCollectionOffchainDataLimit()
-  if (offchainLength > limit * 4) throw new Error("collectionOffchainData are too long.")
+  if (offchainLength > limit) throw new Error("collectionOffchainData are too long.")
 }
 
 /**
@@ -88,7 +88,7 @@ export const checkBalanceToMintNft = async (address: string) => {
 
 /**
  * @name getNftDatas
- * @summary Provides the NFT datas if an nftid is provided otherwise, get all NFTs datas.
+ * @summary Provides the NFT datas if an nftId is provided otherwise, get all NFTs datas.
  * @param nftId The NFT id
  * @returns A JSON object with the NFT datas or all NFTs datas. ex:{owner, creator, offchainData, (...)}
  */
@@ -113,7 +113,7 @@ export const getNftDatas = async (nftId?: number): Promise<INftDatas> => {
 
 /**
  * @name getCollectionDatas
- * @summary Provides the datas related to a specific collection if an collection id is provided otherwise, get all collections datas. ex:{owner, creator, offchainData, limit, isClosed(...)}
+ * @summary Provides the datas related to a specific collection if an collectionId is provided otherwise, get all collections datas. ex:{owner, creator, offchainData, limit, isClosed(...)}
  * @param collectionId The collection id
  * @returns A JSON object with datas of a single or all collection(s)
  */
@@ -169,7 +169,7 @@ export const createNft = async (
   creator: string,
   offchainData: string,
   royalty: number,
-  collectionId?: number, // can undefined be accepted as chain is waiting <u32> ??
+  collectionId?: number,
   isSoulbound = false,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
@@ -201,8 +201,10 @@ export const burnNft = async (
   keyring: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  const { owner } = await getNftDatas(nftId)
+  const { owner, state } = await getNftDatas(nftId)
+  const { isDelegated } = state
   if (owner !== keyring?.address) throw new Error("You are not the nft owner.")
+  if (isDelegated) throw new Error("Cannot burn a delegated Nft")
   const tx = await runTx(txPallets.nft, txActions.burnNft, [nftId], keyring, callback)
   return tx
 }
@@ -269,34 +271,36 @@ export const setRoyalty = async (
   royaltyFee: number,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  const { owner, royalty } = await getNftDatas(nftId)
+  const { owner, creator, royalty } = await getNftDatas(nftId)
   if (owner !== keyring?.address) throw new Error("You are not the nft owner.")
+  if (creator !== keyring?.address) throw new Error("Only creator of the NFT can set the royalty.")
   const formatedRoyalty = await formatRoyalty(royaltyFee)
   await compareDatas(royalty, "royalty", formatedRoyalty)
   const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, formatedRoyalty], keyring, callback)
   return tx
 }
 
-/**
- * @name setNftMintFee
- * @summary Set the fee for minting an NFT.
- * @param fee New fee to mint an NFT
- * @param keyring Keyring pair to sign the data
- * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
- */
-export const setNftMintFee = async (
-  fee: number | BN,
-  keyring?: IKeyringPair,
-  callback?: (result: ISubmittableResult) => void,
-) => {
-  //check with Blockchain team main address how to check "owner" ??// expect BN or number ? what about the initial MFT Mint Fee
-  const nftMintFee = await getNftMintFee()
-  const formatedFee = typeof fee === "number" ? await unFormatBalance(fee) : fee
-  await compareDatas(nftMintFee, "nftMintFee", formatedFee)
-  const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
-  return tx
-}
+// /**
+//  * @name setNftMintFee
+//  * @summary Set the fee for minting an NFT.
+//  * @param fee New fee to mint an NFT
+//  * @param keyring Keyring pair to sign the data
+//  * @param callback Callback function to enable subscription, if not given, no subscription will be made
+//  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
+//  */
+// export const setNftMintFee = async (
+//   fee: number | BN,
+//   keyring?: IKeyringPair,
+//   callback?: (result: ISubmittableResult) => void,
+// ) => {
+//   //check with Blockchain team main address how to check "owner" ??// expect BN or number ? what about the initial MFT Mint Fee
+//   //democracy & tech committee ???
+//   const nftMintFee = await getNftMintFee()
+//   const formatedFee = typeof fee === "number" ? await unFormatBalance(fee) : fee
+//   await compareDatas(nftMintFee, "nftMintFee", formatedFee)
+//   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
+//   return tx
+// }
 
 /**
  * @name addNftToCollection
@@ -364,8 +368,9 @@ export const burnCollection = async (
   keyring: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  const { owner } = await getCollectionDatas(collectionId)
+  const { owner, nfts } = await getCollectionDatas(collectionId)
   if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
+  if (nfts && nfts.length >= 0) throw new Error("Cannot burn collection : Collection is not empty.")
   const tx = await runTx(txPallets.nft, txActions.burnCollection, [collectionId], keyring, callback)
   return tx
 }
@@ -401,15 +406,13 @@ export const closeCollection = async (
  */
 export const limitCollection = async (
   collectionId: number,
-  setLimit: number, // u32 ?
+  setLimit: number, //format limit to U32 ?
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  //check on collection size limit ??
-  //format limit to U32 ?
   const { owner, limit } = await getCollectionDatas(collectionId)
   if (owner !== keyring?.address) throw new Error("You are not the collection owner.")
-  await compareDatas(limit, "limit", setLimit)
+  if (limit && limit > 0) throw new Error("Collection limit already set.") // limit if not set is 'null'
   const tx = await runTx(txPallets.nft, txActions.limitCollection, [collectionId, setLimit], keyring, callback)
   return tx
 }
