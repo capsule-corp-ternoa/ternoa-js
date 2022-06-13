@@ -15,9 +15,9 @@ import {
   getNftDatas,
   getNftMintFee,
   limitCollection,
-  setNftMintFee,
   setRoyalty,
   transferNft,
+  // setNftMintFee,
 } from "."
 import { generateSeed } from "../account"
 import { isValidAddress } from "../blockchain"
@@ -84,11 +84,11 @@ describe("Testing to update/remove an Nft", (): void => {
     expect(isHex(remove)).toBe(true) // should be deleted with dest ??
   })
   //tests below never ran yet
-  xit("Should return a correct hash hex when the fee to mint an Nft is updated", async (): Promise<void> => {
-    const { test: testAccount } = await createTestPairs()
-    const updatedNftMintFee = await setNftMintFee(20, testAccount)
-    expect(isHex(updatedNftMintFee)).toBe(true)
-  })
+  // xit("Should return a correct hash hex when the fee to mint an Nft is updated", async (): Promise<void> => {
+  //   const { test: testAccount } = await createTestPairs()
+  //   const updatedNftMintFee = await setNftMintFee(20, testAccount)
+  //   expect(isHex(updatedNftMintFee)).toBe(true)
+  // })
 })
 //tests below never ran yet
 describe("Testing to create/update a collection", (): void => {

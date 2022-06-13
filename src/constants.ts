@@ -62,6 +62,7 @@ export enum chainQuery {
   nfTs = "nfTs",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
+  collectionSizeLimit = "collectionSizeLimit",
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",
