@@ -2,7 +2,7 @@ import { cryptoWaitReady } from "@polkadot/util-crypto"
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
+import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
 
 import { txActions, txEvent, txPallets } from "../constants"
@@ -309,6 +309,23 @@ export const isValidAddress = (address: string) => {
   } catch (error) {
     return false
   }
+}
+
+/**
+ * @name formatBalance
+ * @summary Format balance from BN to number.
+ * @param input BN input.
+ * @param withSi Format with SI, i.e. m/M/etc.
+ * @param withSiFull Format with full SI, i.e. mili/Mega/etc.
+ * @param withUnit Add the unit (useful in Balance formats).
+ * @param unit Token Unit.
+ * @returns Formatted balance with SI and unit notation.
+ */
+export const formatBalance = async (input: BN, withSi = true, withSiFull = false, withUnit = true, unit = "CAPS") => {
+  const api = await getApi()
+  const decimals = api.registry.chainDecimals[0]
+  formatBalancePolkadotUtil.setDefaults({ decimals, unit })
+  return formatBalancePolkadotUtil(input, { withSi, withSiFull, withUnit })
 }
 
 /**
