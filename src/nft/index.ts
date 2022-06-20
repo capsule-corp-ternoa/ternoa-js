@@ -114,7 +114,7 @@ export const checkCollectionSizeLimit = async (limit: number) => {
  * @returns A JSON object with the NFT datas. ex:{owner, creator, offchainData, (...)}
  */
 export const getNftDatas = async (nftId: number): Promise<INftDatas> => {
-  const datas = await query(txPallets.nft, chainQuery.nfTs, [nftId])
+  const datas = await query(txPallets.nft, chainQuery.nfts, [nftId])
   if (!datas.toJSON()) throw new Error(`No data retrieved for the nftId : ${nftId}`)
   return datas.toJSON() as {
     owner: string
@@ -158,7 +158,7 @@ export const getCollectionDatas = async (collectionId: number): Promise<ICollect
  * @param value New value to be compared to current datas.
  */
 export const compareDatas = async <T>(datas: T, attribute: string, value: T) => {
-  if (value != (null || undefined) && datas === value)
+  if (value !== (null || undefined) && datas === value)
     throw new Error(`The ${attribute.replace(/_/g, " ")} is already set to : ${value}`)
 }
 
@@ -190,7 +190,7 @@ export const createNft = async (
   creator: string,
   nftOffchainData: string,
   nftRoyalty: number,
-  nftCollectionId?: number,
+  nftCollectionId: number | null = null,
   nftIsSoulbound = false,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
@@ -254,7 +254,7 @@ export const burnNft = async (
 export const delegateNft = async (
   nftId: number,
   nftOwner: string,
-  nftRecipient?: string,
+  nftRecipient: string | null = null,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
@@ -375,7 +375,7 @@ export const addNftToCollection = async (
  */
 export const createCollection = async (
   collectionOffchainData: string,
-  collectionLimit?: number,
+  collectionLimit: number | null = null,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {

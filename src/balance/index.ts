@@ -13,9 +13,7 @@ export const getBalances = async (address: string) => {
   const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
     (await query(txPallets.system, chainQuery.account, [address])) as any
   ).data
-  const { free, reserved, miscFrozen, feeFrozen } = balances
-  const total = free.add(reserved).add(miscFrozen).add(feeFrozen)
-  return { ...balances, total }
+  return balances
 }
 
 /**
