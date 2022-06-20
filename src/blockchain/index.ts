@@ -7,7 +7,6 @@ import BN from "bn.js"
 
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
-import { types } from "./types"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://dev-0.ternoa.network"
 
@@ -26,7 +25,6 @@ export const initializeApi = async (chain = chainEndpoint) => {
   const wsProvider = new WsProvider(chain)
   api = await ApiPromise.create({
     provider: wsProvider,
-    types,
   })
   chainEndpoint = chain
 }
