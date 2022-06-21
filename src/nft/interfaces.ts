@@ -1,4 +1,4 @@
-interface IState {
+export interface INftState {
   isCapsule: boolean
   listedForSale: boolean
   isSecret: boolean
@@ -12,7 +12,7 @@ export interface INftDatas {
   offchainData: string
   collectionId: number | null
   royalty: number
-  state: IState
+  state: INftState
 }
 
 export interface ICollectionDatas {

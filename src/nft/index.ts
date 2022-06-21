@@ -496,3 +496,5 @@ export const limitCollection = async (
 //   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
 //   return tx
 // }
+
+export * from "./interfaces"
