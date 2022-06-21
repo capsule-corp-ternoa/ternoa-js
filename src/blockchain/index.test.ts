@@ -1,6 +1,19 @@
 import { isHex } from "@polkadot/util"
+import { BN } from "bn.js"
 
-import { batchTxHex, batchAllTxHex, consts, createTxHex, query, runTx, signTx, submitTx } from "."
+import {
+  batchTxHex,
+  batchAllTxHex,
+  consts,
+  createTxHex,
+  query,
+  runTx,
+  signTx,
+  submitTx,
+  formatBalance,
+  unFormatBalance,
+  isValidSignature,
+} from "."
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -115,5 +128,38 @@ describe("Testing transactions batch and batchAll", (): void => {
     ])
     const batchAllTx = await batchAllTxHex([txHex1, txHex2])
     expect(isHex(batchAllTx)).toBe(true)
+  })
+})
+
+describe("Testing balance format/unformat", (): void => {
+  it("Should format a BN into a number", async () => {
+    const res = await formatBalance(new BN("123432100000000000000000000"))
+    expect(res).toBe("123.4321 MCAPS")
+  })
+  it("Should unformat a number into a BN", async () => {
+    const res = await unFormatBalance(123.4321)
+    expect(res).toEqual(new BN("123432100000000000000"))
+  })
+})
+
+describe("Testing isValidSignature", (): void => {
+  it("Should return true if a message passed as parameter has been signed by the passed address", async () => {
+    expect(
+      isValidSignature(
+        "This is a text message",
+        "0x2aeaa98e26062cf65161c68c5cb7aa31ca050cb5bdd07abc80a475d2a2eebc7b7a9c9546fbdff971b29419ddd9982bf4148c81a49df550154e1674a6b58bac84",
+        "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+      ),
+    ).toBe(true)
+  })
+  it("Should return false if a message passed as parameter has not been signed by the passed address", async () => {
+    const { test: testAccount } = await createTestPairs()
+    expect(
+      isValidSignature(
+        "This is a text message",
+        "0x2aeaa98e26062cf65161c68c5cb7aa31ca050cb5bdd07abc80a475d2a2eebc7b7a9c9546fbdff971b29419ddd9982bf4148c81a49df550154e1674a6b58bac84",
+        testAccount.address,
+      ),
+    ).toBe(false)
   })
 })
