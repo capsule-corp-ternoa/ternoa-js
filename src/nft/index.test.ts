@@ -6,13 +6,13 @@ import {
   burnNft,
   checkBalanceToMintNft,
   closeCollection,
-  compareDatas,
+  compareData,
   createCollection,
   createNft,
   delegateNft,
   formatRoyalty,
-  getCollectionDatas,
-  getNftDatas,
+  getCollectionData,
+  getNftData,
   getNftMintFee,
   limitCollection,
   setRoyalty,
@@ -38,22 +38,22 @@ describe("Testing to mint/create a new NFT", (): void => {
   })
 })
 
-describe("Testing to get nft(s) or collection(s) datas", (): void => {
-  xit("Should return the datas of a specific nft", async (): Promise<void> => {
-    const datas = await getNftDatas(0)
-    expect(isValidAddress(datas.owner)).toBe(true)
+describe("Testing to get nft(s) or collection(s) data", (): void => {
+  xit("Should return the data of a specific nft", async (): Promise<void> => {
+    const data = await getNftData(0)
+    expect(isValidAddress(data.owner)).toBe(true)
   })
-  xit("Should return the datas of a specific collection", async (): Promise<void> => {
-    const datas = await getCollectionDatas(0)
-    expect(isValidAddress(datas.owner)).toBe(true)
+  xit("Should return the data of a specific collection", async (): Promise<void> => {
+    const data = await getCollectionData(0)
+    expect(isValidAddress(data.owner)).toBe(true)
   })
 })
 
 describe("Testing to update/remove an NFT", (): void => {
   xit("Should throw an Error if the NFT data is already equal to the new data value", async (): Promise<void> => {
-    const { royalty } = await getNftDatas(56)
+    const { royalty } = await getNftData(56)
     const formatedRoyalty = await formatRoyalty(10)
-    await expect(compareDatas(royalty, "royalty", formatedRoyalty)).rejects.toThrow(
+    await expect(compareData(royalty, "royalty", formatedRoyalty)).rejects.toThrow(
       Error(`The royalty is already set to : ${formatedRoyalty}`),
     )
   })
@@ -86,7 +86,7 @@ describe("Testing to update/remove an NFT", (): void => {
 describe("Testing to create/update a collection", (): void => {
   xit("Should return a correct hash hex when collection is created", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const createNewCollection = await createCollection("Offchain datas", null, testAccount)
+    const createNewCollection = await createCollection("Offchain data", null, testAccount)
     expect(isHex(createNewCollection)).toBe(true)
   })
   xit("Should return a correct hash hex when an NFT is added to a collection", async (): Promise<void> => {

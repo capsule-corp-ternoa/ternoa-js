@@ -3,7 +3,7 @@ import { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
 import { consts, isValidAddress, query, runTx } from "../blockchain"
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { getFreeBalance } from "../balance"
-import { ICollectionDatas, INftDatas } from "./interfaces"
+import { ICollectionData, INftData } from "./interfaces"
 
 /**
  * @name getNftMintFee
@@ -108,15 +108,15 @@ export const checkCollectionSizeLimit = async (limit: number) => {
 }
 
 /**
- * @name getNftDatas
- * @summary Provides the datas related to one NFT.
+ * @name getNftData
+ * @summary Provides the data related to one NFT.
  * @param nftId The NFT id.
- * @returns A JSON object with the NFT datas. ex:{owner, creator, offchainData, (...)}
+ * @returns A JSON object with the NFT data. ex:{owner, creator, offchainData, (...)}
  */
-export const getNftDatas = async (nftId: number): Promise<INftDatas> => {
-  const datas = await query(txPallets.nft, chainQuery.nfts, [nftId])
-  if (!datas.toJSON()) throw new Error(`No data retrieved for the nftId : ${nftId}`)
-  return datas.toJSON() as {
+export const getNftData = async (nftId: number): Promise<INftData> => {
+  const data = await query(txPallets.nft, chainQuery.nfts, [nftId])
+  if (!data.toJSON()) throw new Error(`No data retrieved for the nftId : ${nftId}`)
+  return data.toJSON() as {
     owner: string
     creator: string
     offchainData: string
@@ -133,15 +133,15 @@ export const getNftDatas = async (nftId: number): Promise<INftDatas> => {
 }
 
 /**
- * @name getCollectionDatas
- * @summary Provides the datas related to one NFT collection. ex:{owner, creator, offchainData, limit, isClosed(...)}
+ * @name getCollectionData
+ * @summary Provides the data related to one NFT collection. ex:{owner, creator, offchainData, limit, isClosed(...)}
  * @param collectionId The collection id.
- * @returns A JSON object with datas of a single NFT collection.
+ * @returns A JSON object with data of a single NFT collection.
  */
-export const getCollectionDatas = async (collectionId: number): Promise<ICollectionDatas> => {
-  const datas = await query(txPallets.nft, chainQuery.collections, [collectionId])
-  if (!datas.toJSON()) throw new Error(`No data retrieved for the collectionId : ${collectionId}`)
-  return datas.toJSON() as {
+export const getCollectionData = async (collectionId: number): Promise<ICollectionData> => {
+  const data = await query(txPallets.nft, chainQuery.collections, [collectionId])
+  if (!data.toJSON()) throw new Error(`No data retrieved for the collectionId : ${collectionId}`)
+  return data.toJSON() as {
     owner: string
     offchainData: string
     nfts: number[]
@@ -151,14 +151,14 @@ export const getCollectionDatas = async (collectionId: number): Promise<ICollect
 }
 
 /**
- * @name compareDatas
+ * @name compareData
  * @summary Compares the current value of a extrinsic attribute to the new one to avoid running a transaction if they are equal.
- * @param datas Current values to be compared.
+ * @param data Current values to be compared.
  * @param attribute Attribute of the element to compare. (ex: nft.royalty, marketplace.commission_fee)
- * @param value New value to be compared to current datas.
+ * @param value New value to be compared to current data.
  */
-export const compareDatas = async <T>(datas: T, attribute: string, value: T) => {
-  if (value !== (null || undefined) && datas === value)
+export const compareData = async <T>(data: T, attribute: string, value: T) => {
+  if (value !== (null || undefined) && data === value)
     throw new Error(`The ${attribute.replace(/_/g, " ")} is already set to : ${value}`)
 }
 
@@ -178,7 +178,7 @@ export const formatRoyalty = async (royalty: number) => {
  * @name createNft
  * @summary Create a new NFT on blockchain with the provided details.
  * @param creator Public address of the account to check balance to mint NFT.
- * @param nftOffchainData Any offchain datas to add to the NFT. (ex: a link, ipfs datas, a text)
+ * @param nftOffchainData Any offchain data to add to the NFT. (ex: a link, ipfs data, a text)
  * @param nftRoyalty Royalty can be set from 0% to 100%.
  * @param nftCollectionId The collection id to which the NFT will belong.
  * @param nftIsSoulbound Boolean that lock transfert after creation.
@@ -199,7 +199,7 @@ export const createNft = async (
   await checkBalanceToMintNft(creator)
   await checkNftOffchainDataLimit(nftOffchainData.length)
   if (nftCollectionId) {
-    const { owner, isClosed, limit, nfts } = await getCollectionDatas(nftCollectionId)
+    const { owner, isClosed, limit, nfts } = await getCollectionData(nftCollectionId)
     if (owner !== creator) throw new Error("You are not the collection owner.")
     if (isClosed) throw new Error("Collection is closed.")
     if (nfts.length == limit) throw new Error(`Collection limit already reached.`)
@@ -233,7 +233,7 @@ export const burnNft = async (
 ) => {
   if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
-  const { owner, state } = await getNftDatas(nftId)
+  const { owner, state } = await getNftData(nftId)
   const { isDelegated } = state
   if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated) throw new Error("Cannot burn a delegated NFT")
@@ -261,7 +261,7 @@ export const delegateNft = async (
   if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (nftRecipient && !isValidAddress(nftRecipient)) throw new Error("Invalid recipient address format")
   if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
-  const { owner, state } = await getNftDatas(nftId)
+  const { owner, state } = await getNftData(nftId)
   const { isDelegated } = state
   if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated && nftRecipient) throw new Error("NFT already delegated.")
@@ -289,7 +289,7 @@ export const transferNft = async (
   if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (!isValidAddress(nftRecipient)) throw new Error("Invalid recipient address format")
   if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
-  const { owner, state } = await getNftDatas(nftId)
+  const { owner, state } = await getNftData(nftId)
   const { isDelegated, isSoulbound } = state
   if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated) throw new Error("Cannot transfer a delegated NFT")
@@ -317,11 +317,11 @@ export const setRoyalty = async (
 ) => {
   if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
-  const { owner, creator, royalty } = await getNftDatas(nftId)
+  const { owner, creator, royalty } = await getNftData(nftId)
   if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (creator !== nftOwner) throw new Error("Only creator of the NFT can set the royalty.")
   const formatedRoyalty = await formatRoyalty(nftRoyaltyFee)
-  await compareDatas<number>(royalty, "royalty", formatedRoyalty)
+  await compareData<number>(royalty, "royalty", formatedRoyalty)
   const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, formatedRoyalty], keyring, callback)
   return tx
 }
@@ -345,20 +345,20 @@ export const addNftToCollection = async (
 ) => {
   if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
   if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
-  const { owner, collectionId } = await getNftDatas(nftId)
+  const { owner, collectionId } = await getNftData(nftId)
   if (collectionId === nftCollectionId) throw new Error(`Nft ${nftId} is already in the collection ${nftCollectionId}.`)
   if (collectionId !== null) throw new Error(`Nft ${nftId} is already in the collection ${collectionId}.`)
   if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
 
-  const collectionDatas = await getCollectionDatas(nftCollectionId)
-  if (collectionDatas.owner !== nftOwner) throw new Error("You are not the collection owner.")
+  const collectionData = await getCollectionData(nftCollectionId)
+  if (collectionData.owner !== nftOwner) throw new Error("You are not the collection owner.")
   const collectionMaxLimit = await getCollectionSizeLimit()
   if (
-    (collectionDatas.limit === null && collectionDatas.nfts.length === collectionMaxLimit) ||
-    collectionDatas.nfts.length === collectionDatas.limit
+    (collectionData.limit === null && collectionData.nfts.length === collectionMaxLimit) ||
+    collectionData.nfts.length === collectionData.limit
   )
     throw new Error(`Cannot add Nft ${nftId} to collection ${nftCollectionId} : Collection limit already reached.`)
-  if (collectionDatas.isClosed)
+  if (collectionData.isClosed)
     throw new Error(`Cannot add Nft ${nftId} to collection ${nftCollectionId} : Collection closed.`)
   const tx = await runTx(txPallets.nft, txActions.addNftToCollection, [nftId, nftCollectionId], keyring, callback)
   return tx
@@ -367,7 +367,7 @@ export const addNftToCollection = async (
 /**
  * @name createCollection
  * @summary Create a new collection with the provided details.
- * @param collectionOffchainData Any offchain datas to add to the collection.
+ * @param collectionOffchainData Any offchain data to add to the collection.
  * @param collectionLimit Number max of NFTs in collection.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
@@ -409,7 +409,7 @@ export const burnCollection = async (
   if (keyring && keyring.address !== collectionOwner)
     throw new Error("Collection owner and keyring address must be the same.")
   if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
-  const { owner, nfts } = await getCollectionDatas(collectionId)
+  const { owner, nfts } = await getCollectionData(collectionId)
   if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
   if (nfts && nfts.length > 0) throw new Error("Cannot burn collection : Collection is not empty.")
   const tx = await runTx(txPallets.nft, txActions.burnCollection, [collectionId], keyring, callback)
@@ -434,7 +434,7 @@ export const closeCollection = async (
   if (keyring && keyring.address !== collectionOwner)
     throw new Error("Collection owner and keyring address must be the same.")
   if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
-  const { owner, isClosed } = await getCollectionDatas(collectionId)
+  const { owner, isClosed } = await getCollectionData(collectionId)
   if (isClosed) throw new Error(`Collection ${collectionId} already closed.`)
   if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
   const tx = await runTx(txPallets.nft, txActions.closeCollection, [collectionId], keyring, callback)
@@ -461,7 +461,7 @@ export const limitCollection = async (
   if (keyring && keyring.address !== collectionOwner)
     throw new Error("Collection owner and keyring address must be the same.")
   if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
-  const { owner, limit, isClosed } = await getCollectionDatas(collectionId)
+  const { owner, limit, isClosed } = await getCollectionData(collectionId)
   if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
   if (limit && limit >= 1) throw new Error("Collection limit already set.")
   if (isClosed) throw new Error("Collection closed.")
@@ -492,7 +492,7 @@ export const limitCollection = async (
 //   //who can set fee ?? democracy & tech committee
 //   const nftMintFee = await getNftMintFee()
 //   const formatedFee = typeof fee === "number" ? await unFormatBalance(fee) : fee
-//   await compareDatas(nftMintFee, "nftMintFee", formatedFee)
+//   await compareData(nftMintFee, "nftMintFee", formatedFee)
 //   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
 //   return tx
 // }
