@@ -1,7 +1,19 @@
 import { isHex } from "@polkadot/util"
-import type { ISubmittableResult } from "@polkadot/types/types"
+import { BN } from "bn.js"
 
-import { batchTxHex, batchAllTxHex, consts, createTxHex, isTransactionSuccess, query, runTx, signTx, submitTx } from "."
+import {
+  batchTxHex,
+  batchAllTxHex,
+  consts,
+  createTxHex,
+  query,
+  runTx,
+  signTx,
+  submitTx,
+  formatBalance,
+  unFormatBalance,
+  isValidSignature,
+} from "."
 import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 
@@ -68,52 +80,6 @@ describe("Testing submit transaction", (): void => {
     const submitTxHex = await submitTx(signedTxHex)
     expect(isHex(submitTxHex)).toBe(true)
   })
-
-  it("Should return a correct submited transaction hash hex with in block callback notification", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "10000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(true)
-      } else {
-        try {
-          const { success } = isTransactionSuccess(res)
-          expect(success).toBe(true)
-        } catch (err) {
-          expect(err).toEqual(Error("Transaction is not finalized or in block"))
-        }
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
-  })
-
-  it("Should reject the transaction if the free balance is lower than the amount specified", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "100000000000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(false)
-      } else {
-        try {
-          const { success } = isTransactionSuccess(res)
-          expect(success).toBe(false)
-        } catch (err) {
-          expect(err).toEqual(Error("Transaction is not finalized or in block"))
-        }
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
-  })
 })
 
 describe("Testing run transaction", (): void => {
@@ -132,25 +98,6 @@ describe("Testing run transaction", (): void => {
       testAccount,
     )
     expect(isHex(runTxHex)).toBe(true)
-  })
-})
-
-describe("Testing transaction status", (): void => {
-  it("Should throw an error if transaction is not in block or finalized", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const txHex = await createTxHex(txPallets.balances, txActions.transfer, [
-      destAccount.address,
-      "1000000000000000000",
-    ])
-    const signedTxHex = await signTx(testAccount, txHex)
-    const submitTxHex = await submitTx(signedTxHex, async (res: ISubmittableResult) => {
-      if (res.status.isReady) {
-        await expect(async () => {
-          isTransactionSuccess(res)
-        }).rejects.toThrow(Error("Transaction is not finalized or in block"))
-      }
-    })
-    expect(isHex(submitTxHex)).toBe(true)
   })
 })
 
@@ -181,5 +128,38 @@ describe("Testing transactions batch and batchAll", (): void => {
     ])
     const batchAllTx = await batchAllTxHex([txHex1, txHex2])
     expect(isHex(batchAllTx)).toBe(true)
+  })
+})
+
+describe("Testing balance format/unformat", (): void => {
+  it("Should format a BN into a number", async () => {
+    const res = await formatBalance(new BN("123432100000000000000000000"))
+    expect(res).toBe("123.4321 MCAPS")
+  })
+  it("Should unformat a number into a BN", async () => {
+    const res = await unFormatBalance(123.4321)
+    expect(res).toEqual(new BN("123432100000000000000"))
+  })
+})
+
+describe("Testing isValidSignature", (): void => {
+  it("Should return true if a message passed as parameter has been signed by the passed address", async () => {
+    expect(
+      isValidSignature(
+        "This is a text message",
+        "0x2aeaa98e26062cf65161c68c5cb7aa31ca050cb5bdd07abc80a475d2a2eebc7b7a9c9546fbdff971b29419ddd9982bf4148c81a49df550154e1674a6b58bac84",
+        "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+      ),
+    ).toBe(true)
+  })
+  it("Should return false if a message passed as parameter has not been signed by the passed address", async () => {
+    const { test: testAccount } = await createTestPairs()
+    expect(
+      isValidSignature(
+        "This is a text message",
+        "0x2aeaa98e26062cf65161c68c5cb7aa31ca050cb5bdd07abc80a475d2a2eebc7b7a9c9546fbdff971b29419ddd9982bf4148c81a49df550154e1674a6b58bac84",
+        testAccount.address,
+      ),
+    ).toBe(false)
   })
 })

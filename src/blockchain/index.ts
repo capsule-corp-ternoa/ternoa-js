@@ -1,15 +1,14 @@
-import { cryptoWaitReady } from "@polkadot/util-crypto"
+import { cryptoWaitReady, signatureVerify } from "@polkadot/util-crypto"
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
-import { hexToU8a, isHex, BN_TEN } from "@polkadot/util"
+import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
 
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
-import { types } from "./types"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
+const DEFAULT_CHAIN_ENDPOINT = "wss://dev-0.ternoa.network"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
@@ -26,7 +25,6 @@ export const initializeApi = async (chain = chainEndpoint) => {
   const wsProvider = new WsProvider(chain)
   api = await ApiPromise.create({
     provider: wsProvider,
-    types,
   })
   chainEndpoint = chain
 }
@@ -311,6 +309,38 @@ export const isValidAddress = (address: string) => {
   } catch (error) {
     return false
   }
+}
+
+/**
+ * @name isValidSignature
+ * @summary Check if a message has been signed by the passed address.
+ * @param signedMessage Message to check.
+ * @param signature
+ * @param address Address to verify the signer.
+ * @returns Boolean, true if the address signed the message, false otherwise
+ */
+export const isValidSignature = (signedMessage: string, signature: `0x${string}`, address: string) => {
+  const publicKey = decodeAddress(address)
+  const hexPublicKey = u8aToHex(publicKey)
+
+  return signatureVerify(signedMessage, signature, hexPublicKey).isValid
+}
+
+/**
+ * @name formatBalance
+ * @summary Format balance from BN to number.
+ * @param input BN input.
+ * @param withSi Format with SI, i.e. m/M/etc.
+ * @param withSiFull Format with full SI, i.e. mili/Mega/etc.
+ * @param withUnit Add the unit (useful in Balance formats).
+ * @param unit Token Unit.
+ * @returns Formatted balance with SI and unit notation.
+ */
+export const formatBalance = async (input: BN, withSi = true, withSiFull = false, withUnit = true, unit = "CAPS") => {
+  const api = await getApi()
+  const decimals = api.registry.chainDecimals[0]
+  formatBalancePolkadotUtil.setDefaults({ decimals, unit })
+  return formatBalancePolkadotUtil(input, { withSi, withSiFull, withUnit })
 }
 
 /**
