@@ -26,7 +26,7 @@ module.exports = async () => {
   if (freeBalance.cmp(new BN("100000000000000000000")) === 1) {
     const share = freeBalance.sub(new BN("100000000000000000000")).div(new BN(pairs.length))
     for (const pair of pairs) {
-      await transferKeepAlive(keyring.address, pair.publicKey, share, keyring)
+      await transferKeepAlive(pair.publicKey, share, keyring)
     }
   }
   await timer(5000)

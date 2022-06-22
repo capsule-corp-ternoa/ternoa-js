@@ -177,7 +177,6 @@ export const formatRoyalty = async (royalty: number) => {
 /**
  * @name createNft
  * @summary Create a new NFT on blockchain with the provided details.
- * @param creator Public address of the account to check balance to mint NFT.
  * @param nftOffchainData Any offchain data to add to the NFT. (ex: a link, ipfs data, a text)
  * @param nftRoyalty Royalty can be set from 0% to 100%.
  * @param nftCollectionId The collection id to which the NFT will belong.
@@ -187,7 +186,6 @@ export const formatRoyalty = async (royalty: number) => {
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const createNft = async (
-  creator: string,
   nftOffchainData: string,
   nftRoyalty: number,
   nftCollectionId: number | null = null,
@@ -195,16 +193,16 @@ export const createNft = async (
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (!isValidAddress(creator)) throw new Error("Invalid creator address format")
-  await checkBalanceToMintNft(creator)
+  if (keyring) {
+    await checkBalanceToMintNft(keyring.address)
+  }
   await checkNftOffchainDataLimit(nftOffchainData.length)
   if (nftCollectionId) {
     const { owner, isClosed, limit, nfts } = await getCollectionData(nftCollectionId)
-    if (owner !== creator) throw new Error("You are not the collection owner.")
     if (isClosed) throw new Error("Collection is closed.")
     if (nfts.length == limit) throw new Error(`Collection limit already reached.`)
+    if (keyring && keyring.address !== owner) throw new Error("You are not the collection owner.")
   }
-  if (keyring && keyring.address !== creator) throw new Error("Creator and keyring address must be the same.")
   const formatedRoyalty = await formatRoyalty(nftRoyalty)
   const tx = await runTx(
     txPallets.nft,
@@ -220,22 +218,18 @@ export const createNft = async (
  * @name burnNft
  * @summary Remove an NFT from the storage.
  * @param nftId The id of the NFT that need to be burned from the storage.
- * @param nftOwner The NFT owner address.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const burnNft = async (
   nftId: number,
-  nftOwner: string,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
-  if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
   const { owner, state } = await getNftData(nftId)
+  if (keyring && keyring.address !== owner) throw new Error("You are not the NFT owner.")
   const { isDelegated } = state
-  if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated) throw new Error("Cannot burn a delegated NFT")
   const tx = await runTx(txPallets.nft, txActions.burnNft, [nftId], keyring, callback)
   return tx
@@ -244,8 +238,6 @@ export const burnNft = async (
 /**
  * @name delegateNft
  * @summary Delegate an NFT to a recipient (does not change ownership).
- * @param nftId The id of the NFT that need to be delegated.
- * @param nftOwner The NFT owner address.
  * @param nftRecipient Address to which the NFT will be delegated. If not specified NFT will be undelegated.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
@@ -253,17 +245,14 @@ export const burnNft = async (
  */
 export const delegateNft = async (
   nftId: number,
-  nftOwner: string,
   nftRecipient: string | null = null,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (nftRecipient && !isValidAddress(nftRecipient)) throw new Error("Invalid recipient address format")
-  if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
   const { owner, state } = await getNftData(nftId)
+  if (keyring && keyring.address !== owner) throw new Error("You are not the NFT owner.")
   const { isDelegated } = state
-  if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated && nftRecipient) throw new Error("NFT already delegated.")
   const tx = await runTx(txPallets.nft, txActions.delegateNft, [nftId, nftRecipient], keyring, callback)
   return tx
@@ -273,7 +262,6 @@ export const delegateNft = async (
  * @name transferNft
  * @summary Transfer an NFT from an account to another one.
  * @param nftId The id of the NFT that need to be burned from the storage.
- * @param nftOwner The NFT owner address.
  * @param nftRecipient Address that will received the ownership of the NFT.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
@@ -281,17 +269,14 @@ export const delegateNft = async (
  */
 export const transferNft = async (
   nftId: number,
-  nftOwner: string,
   nftRecipient: string,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   if (!isValidAddress(nftRecipient)) throw new Error("Invalid recipient address format")
-  if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
   const { owner, state } = await getNftData(nftId)
+  if (keyring && keyring.address !== owner) throw new Error("You are not the NFT owner.")
   const { isDelegated, isSoulbound } = state
-  if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
   if (isDelegated) throw new Error("Cannot transfer a delegated NFT")
   if (isSoulbound) throw new Error("Cannot transfer a soulbond NFT")
   const tx = await runTx(txPallets.nft, txActions.transferNft, [nftId, nftRecipient], keyring, callback)
@@ -302,7 +287,6 @@ export const transferNft = async (
  * @name setRoyalty
  * @summary Set the royalty of an NFT.
  * @param nftId The id of the NFT that need to be burned from the storage.
- * @param nftOwner The NFT owner address.
  * @param nftRoyaltyFee Number in range from 0 to 100 with max 4 decimals.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
@@ -310,16 +294,13 @@ export const transferNft = async (
  */
 export const setRoyalty = async (
   nftId: number,
-  nftOwner: string,
   nftRoyaltyFee: number,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
-  if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
   const { owner, creator, royalty } = await getNftData(nftId)
-  if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
-  if (creator !== nftOwner) throw new Error("Only creator of the NFT can set the royalty.")
+  if (creator !== owner) throw new Error("Only creator of the NFT can set the royalty.")
+  if (keyring && keyring.address !== owner) throw new Error("You are not the NFT owner.")
   const formatedRoyalty = await formatRoyalty(nftRoyaltyFee)
   await compareData<number>(royalty, "royalty", formatedRoyalty)
   const tx = await runTx(txPallets.nft, txActions.setRoyalty, [nftId, formatedRoyalty], keyring, callback)
@@ -330,7 +311,6 @@ export const setRoyalty = async (
  * @name addNftToCollection
  * @summary Add an NFT to a collection.
  * @param nftId The NFT id.
- * @param nftOwner The NFT owner address.
  * @param nftCollectionId The collection id to which the NFT will belong.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
@@ -338,20 +318,17 @@ export const setRoyalty = async (
  */
 export const addNftToCollection = async (
   nftId: number,
-  nftOwner: string,
   nftCollectionId: number,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (keyring && keyring.address !== nftOwner) throw new Error("NFT owner and keyring address must be the same.")
-  if (!isValidAddress(nftOwner)) throw new Error("Invalid owner address format")
   const { owner, collectionId } = await getNftData(nftId)
   if (collectionId === nftCollectionId) throw new Error(`Nft ${nftId} is already in the collection ${nftCollectionId}.`)
   if (collectionId !== null) throw new Error(`Nft ${nftId} is already in the collection ${collectionId}.`)
-  if (owner !== nftOwner) throw new Error("You are not the NFT owner.")
+  if (keyring && keyring.address !== owner) throw new Error("You are not the NFT owner.")
 
   const collectionData = await getCollectionData(nftCollectionId)
-  if (collectionData.owner !== nftOwner) throw new Error("You are not the collection owner.")
+  if (keyring && keyring.address !== collectionData.owner) throw new Error("You are not the collection owner.")
   const collectionMaxLimit = await getCollectionSizeLimit()
   if (
     (collectionData.limit === null && collectionData.nfts.length === collectionMaxLimit) ||
@@ -395,22 +372,17 @@ export const createCollection = async (
  * @name burnCollection
  * @summary Remove a collection from the storage.
  * @param collectionId The collection id to burn.
- * @param collectionOwner The NFT owner address.
  * @param keyring Keyring pair to sign the data. Must be the owner of the collection.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const burnCollection = async (
   collectionId: number,
-  collectionOwner: string,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (keyring && keyring.address !== collectionOwner)
-    throw new Error("Collection owner and keyring address must be the same.")
-  if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
   const { owner, nfts } = await getCollectionData(collectionId)
-  if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
+  if (keyring && keyring.address !== owner) throw new Error("You are not the collection owner.")
   if (nfts && nfts.length > 0) throw new Error("Cannot burn collection : Collection is not empty.")
   const tx = await runTx(txPallets.nft, txActions.burnCollection, [collectionId], keyring, callback)
   return tx
@@ -420,23 +392,18 @@ export const burnCollection = async (
  * @name closeCollection
  * @summary Makes the collection closed.
  * @param collectionId The collection id to close.
- * @param collectionOwner The NFT owner address.
  * @param keyring Keyring pair to sign the data. Must be the owner of the collection.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const closeCollection = async (
   collectionId: number,
-  collectionOwner: string,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (keyring && keyring.address !== collectionOwner)
-    throw new Error("Collection owner and keyring address must be the same.")
-  if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
   const { owner, isClosed } = await getCollectionData(collectionId)
   if (isClosed) throw new Error(`Collection ${collectionId} already closed.`)
-  if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
+  if (keyring && keyring.address !== owner) throw new Error("You are not the collection owner.")
   const tx = await runTx(txPallets.nft, txActions.closeCollection, [collectionId], keyring, callback)
   return tx
 }
@@ -446,23 +413,18 @@ export const closeCollection = async (
  * @summary Set the maximum number (limit) of nfts in the collection.
  * @param collectionId The collection id to close.
  * @param setCollectionLimit Number max of NFTs in collection.
- * @param collectionOwner The NFT owner address.
  * @param keyring Keyring pair to sign the data.
  * @param callback Callback function to enable subscription, if not given, no subscription will be made.
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const limitCollection = async (
   collectionId: number,
-  collectionOwner: string,
   setCollectionLimit: number,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
-  if (keyring && keyring.address !== collectionOwner)
-    throw new Error("Collection owner and keyring address must be the same.")
-  if (!isValidAddress(collectionOwner)) throw new Error("Invalid collection owner address format")
   const { owner, limit, isClosed } = await getCollectionData(collectionId)
-  if (owner !== collectionOwner) throw new Error("You are not the collection owner.")
+  if (keyring && keyring.address !== owner) throw new Error("You are not the collection owner.")
   if (limit && limit >= 1) throw new Error("Collection limit already set.")
   if (isClosed) throw new Error("Collection closed.")
   await checkCollectionSizeLimit(setCollectionLimit)

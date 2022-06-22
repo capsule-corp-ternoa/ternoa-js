@@ -44,7 +44,6 @@ export const checkBalanceForTransfer = async (address: string, value: number | B
 /**
  * @name transfer
  * @summary Transfer some liquid free balance to another account
- * @param from Public address of the account to get balance for
  * @param to Public address of the account to transfer amount to
  * @param value Token amount to transfer
  * @param keyring Keyring pair to sign the data
@@ -52,14 +51,13 @@ export const checkBalanceForTransfer = async (address: string, value: number | B
  * @returns Hash of the transaction or the hex value of the signable tx
  */
 export const transfer = async (
-  from: string,
   to: string,
   value: number | BN,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
   const amount = typeof value === "number" ? await unFormatBalance(value) : value
-  await checkBalanceForTransfer(from, amount)
+  if (keyring) await checkBalanceForTransfer(keyring.address, amount)
   const hash = await runTx(txPallets.balances, txActions.transfer, [to, amount], keyring, callback)
   return hash
 }
@@ -86,7 +84,6 @@ export const transferAll = async (
 /**
  * @name transferKeepAlive
  * @summary Transfer some liquid free balance to another account with a check that the transfer will not kill the origin account
- * @param from Public address of the account to get balance for
  * @param to Public address of the account to transfer amount to
  * @param value Token amount to transfer
  * @param keyring Keyring pair to sign the data
@@ -94,14 +91,13 @@ export const transferAll = async (
  * @returns Hash of the transaction or the hex value of the signable tx
  */
 export const transferKeepAlive = async (
-  from: string,
   to: string,
   value: number | BN,
   keyring?: IKeyringPair,
   callback?: (result: ISubmittableResult) => void,
 ) => {
   const amount = typeof value === "number" ? await unFormatBalance(value) : value
-  await checkBalanceForTransfer(from, value)
+  if (keyring) await checkBalanceForTransfer(keyring.address, amount)
   const hash = await runTx(txPallets.balances, txActions.transferKeepAlive, [to, amount], keyring, callback)
   return hash
 }

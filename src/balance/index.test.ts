@@ -1,9 +1,7 @@
 import BN from "bn.js"
-import type { ISubmittableResult } from "@polkadot/types/types"
-import { chainConstants, txPallets } from "../constants"
+import { isHex } from "@polkadot/util"
 import { createTestPairs } from "../_misc/testingPairs"
 import { generateSeed } from "../account"
-import { consts, isTransactionSuccess } from "../blockchain"
 import { checkBalanceForTransfer, getFreeBalance, transfer, transferAll, transferKeepAlive } from "./index"
 
 describe("Testing getFreeBalance", (): void => {
@@ -42,46 +40,20 @@ describe("Testing checkBalanceForTransfer", (): void => {
 describe("Testing transfer", (): void => {
   it("Transfer some funds from the testing account", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    await transfer(testAccount.address, destAccount.address, 1, testAccount, (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(true)
-      }
-    })
+    const res = await transfer(destAccount.address, 1, testAccount)
+    expect(isHex(res)).toBe(true)
   })
 
   it("Transfer all funds with TransferKeepAlive should throw an Error: 'Transaction is not finalized or in block'", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const testAccountFreeBalance = await getFreeBalance(testAccount.address)
-
-    await transferKeepAlive(
-      testAccount.address,
-      destAccount.address,
-      testAccountFreeBalance,
-      testAccount,
-      (res: ISubmittableResult) => {
-        if (!res.status.isInBlock) {
-          try {
-            isTransactionSuccess(res)
-          } catch (err) {
-            expect(err).toEqual(Error("Transaction is not finalized or in block"))
-          }
-        }
-      },
-    )
+    const res = await transferKeepAlive(destAccount.address, testAccountFreeBalance, testAccount)
+    expect(isHex(res)).toBe(true)
   })
 
   it("Test account should have a balance with the existansial deposit amount on transferAll with keepAlive equal to true", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const existensialDeposit = await consts(txPallets.balances, chainConstants.existentialDeposit)
-
-    await transferAll(destAccount.address, true, testAccount, async (res: ISubmittableResult) => {
-      if (res.status.isInBlock) {
-        const { success } = isTransactionSuccess(res)
-        expect(success).toBe(true)
-        const freeBalance = await getFreeBalance(testAccount.address)
-        expect(freeBalance.toString()).toEqual(existensialDeposit.toString())
-      }
-    })
+    const res = await transferAll(destAccount.address, true, testAccount)
+    expect(isHex(res)).toBe(true)
   })
 })
