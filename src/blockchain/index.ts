@@ -8,34 +8,44 @@ import BN from "bn.js"
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
 
-const DEFAULT_CHAIN_ENDPOINT = "wss://dev-0.ternoa.network"
+const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
+let endpointChanged = false
 
 /**
  * @name initializeApi
  * @summary Initialize substrate api with selected or default wss endpoint.
  * @description The default chainEndpoint is "wss://alphanet.ternoa.com"
- * @param chain Chain endpoint
  */
-export const initializeApi = async (chain = chainEndpoint) => {
+const initializeApi = async () => {
   await cryptoWaitReady()
   safeDisconnect()
-  const wsProvider = new WsProvider(chain)
+  const wsProvider = new WsProvider(chainEndpoint)
   api = await ApiPromise.create({
     provider: wsProvider,
   })
-  chainEndpoint = chain
+  endpointChanged = false
 }
 
 /**
- * @name getApi
+ * @name changeEndpoint
+ * @summary Set the chainEndpoint to specified parameter.
+ * @param chain Chain endpoint
+ */
+export const changeEndpoint = (chain: string) => {
+  chainEndpoint = chain
+  endpointChanged = true
+}
+
+/**
+ * @name getRawApi
  * @summary Get initialized substrate Api instance.
  * @returns Promise containing the actual Api instance, a wrapper around the RPC and interfaces of the chain.
  */
-export const getApi = async () => {
-  if (!isApiConnected()) await initializeApi()
+export const getRawApi = async () => {
+  if (!isApiConnected() || endpointChanged) await initializeApi()
   return api
 }
 
@@ -50,11 +60,10 @@ export const isApiConnected = () => {
 
 /**
  * @name getApiEndpoint
- * @summary Provides the wss api endpoint
+ * @summary Returns the wss api endpoint
  * @returns String, the api endpoint connected with.
  */
-export const getApiEndpoint = async () => {
-  await getApi()
+export const getApiEndpoint = () => {
   return chainEndpoint
 }
 
@@ -87,7 +96,7 @@ export const safeDisconnect = async () => {
  * @returns Result of the query storage call
  */
 export const query = async (module: string, call: string, args: any[] = [], callback?: (result: any) => void) => {
-  const api = await getApi()
+  const api = await getRawApi()
   if (!callback) {
     return await api.query[module][call](...args)
   } else {
@@ -112,7 +121,7 @@ export const query = async (module: string, call: string, args: any[] = [], call
  * @returns The constant value
  */
 export const consts = async (section: string, constantName: string) => {
-  const api = await getApi()
+  const api = await getRawApi()
   return api.consts[section][constantName]
 }
 
@@ -149,7 +158,7 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
  * @returns Boolean, true if the pallet module and the subsequent extrinsic method exist, throw an Error otherwise
  */
 export const checkTxAvailable = async (txPallet: string, txExtrinsic: string) => {
-  const api = await getApi()
+  const api = await getRawApi()
   try {
     api.tx[txPallet][txExtrinsic]
     return true
@@ -167,7 +176,7 @@ export const checkTxAvailable = async (txPallet: string, txExtrinsic: string) =>
  * @returns Transaction object unsigned
  */
 const createTx = async (txPallet: string, txExtrinsic: string, txArgs: any[] = []) => {
-  const api = await getApi()
+  const api = await getRawApi()
   await checkTxAvailable(txPallet, txExtrinsic)
   return api.tx[txPallet][txExtrinsic](...txArgs)
 }
@@ -193,7 +202,7 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
  * @returns Hex value of the signed transaction
  */
 export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const txSigned = await api.tx(txHex).signAsync(keyring, { nonce: -1, blockHash: api.genesisHash, era: 0 })
   return txSigned.toHex()
 }
@@ -206,7 +215,7 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
  * @returns Hash of the transaction
  */
 export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const tx = api.tx(txHex)
   await checkFundsForTxFees(tx)
   if (callback === undefined) {
@@ -257,7 +266,7 @@ export const runTx = async (
  * @returns Submittable extrinsic unsigned
  */
 export const batchTx = async (txHexes: `0x${string}`[]) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const tx = createTx(txPallets.utility, txActions.batch, [txHexes.map((x) => api.tx(x))])
   return tx
 }
@@ -280,7 +289,7 @@ export const batchTxHex = async (txHexes: `0x${string}`[]) => {
  * @returns Submittable extrinsic unsigned
  */
 export const batchAllTx = async (txHexes: `0x${string}`[]) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const tx = createTx(txPallets.utility, txActions.batchAll, [txHexes.map((x) => api.tx(x))])
   return tx
 }
@@ -337,7 +346,7 @@ export const isValidSignature = (signedMessage: string, signature: `0x${string}`
  * @returns Formatted balance with SI and unit notation.
  */
 export const formatBalance = async (input: BN, withSi = true, withSiFull = false, withUnit = true, unit = "CAPS") => {
-  const api = await getApi()
+  const api = await getRawApi()
   const decimals = api.registry.chainDecimals[0]
   formatBalancePolkadotUtil.setDefaults({ decimals, unit })
   return formatBalancePolkadotUtil(input, { withSi, withSiFull, withUnit })
@@ -351,7 +360,7 @@ export const formatBalance = async (input: BN, withSi = true, withSiFull = false
  */
 export const unFormatBalance = async (_input: number) => {
   const input = String(_input)
-  const api = await getApi()
+  const api = await getRawApi()
   const siPower = new BN(api.registry.chainDecimals[0])
   const basePower = api.registry.chainDecimals[0]
   const siUnitPower = 0

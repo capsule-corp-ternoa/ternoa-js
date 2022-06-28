@@ -1,7 +1,7 @@
 import { SubmittableExtrinsic } from "@polkadot/api/types"
 import BN from "bn.js"
 import type { ISubmittableResult } from "@polkadot/types/types"
-import { getApi } from "../blockchain"
+import { getRawApi } from "../blockchain"
 import { txActions, txPallets } from "../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"
@@ -16,7 +16,7 @@ import { getFreeBalance } from "../balance"
  * @returns Transaction fee estimation
  */
 export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const tx = api.tx(txHex)
   const info = await tx.paymentInfo(address)
   return info.partialFee
@@ -30,7 +30,7 @@ export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
  * @returns Fee estimation
  */
 export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
-  const api = await getApi()
+  const api = await getRawApi()
   const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
     case `${txPallets.nft}_${txActions.create}`: {
