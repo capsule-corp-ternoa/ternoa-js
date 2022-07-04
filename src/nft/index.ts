@@ -1,7 +1,7 @@
 import BN from "bn.js"
 import { IKeyringPair, ISubmittableResult } from "@polkadot/types/types"
-import { consts, isValidAddress, query, runTx } from "../blockchain"
-import { chainConstants, chainQuery, txActions, txPallets } from "../constants"
+import { consts, createTxHex, isValidAddress, query, runTx, signTx, submitTx } from "../blockchain"
+import { chainConstants, chainQuery, txActions, txPallets, CreateCollectionEvent, BlockchainEvent, EventType, ConVar, CreateNFTEvent, WaitUntil } from "../constants"
 import { getFreeBalance } from "../balance"
 import { ICollectionData, INftData } from "./interfaces"
 
@@ -175,46 +175,6 @@ export const formatRoyalty = async (royalty: number) => {
 }
 
 /**
- * @name createNft
- * @summary Create a new NFT on blockchain with the provided details.
- * @param nftOffchainData Any offchain data to add to the NFT. (ex: a link, ipfs data, a text)
- * @param nftRoyalty Royalty can be set from 0% to 100%.
- * @param nftCollectionId The collection id to which the NFT will belong.
- * @param nftIsSoulbound Boolean that lock transfert after creation.
- * @param keyring Keyring pair to sign the data.
- * @param callback Callback function to enable subscription, if not given, no subscription will be made.
- * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
- */
-export const createNft = async (
-  nftOffchainData: string,
-  nftRoyalty: number,
-  nftCollectionId: number | null = null,
-  nftIsSoulbound = false,
-  keyring?: IKeyringPair,
-  callback?: (result: ISubmittableResult) => void,
-) => {
-  if (keyring) {
-    await checkBalanceToMintNft(keyring.address)
-  }
-  await checkNftOffchainDataLimit(nftOffchainData.length)
-  if (nftCollectionId) {
-    const { owner, isClosed, limit, nfts } = await getCollectionData(nftCollectionId)
-    if (isClosed) throw new Error("Collection is closed.")
-    if (nfts.length == limit) throw new Error(`Collection limit already reached.`)
-    if (keyring && keyring.address !== owner) throw new Error("You are not the collection owner.")
-  }
-  const formatedRoyalty = await formatRoyalty(nftRoyalty)
-  const tx = await runTx(
-    txPallets.nft,
-    txActions.createNft,
-    [nftOffchainData, formatedRoyalty, nftCollectionId, nftIsSoulbound],
-    keyring,
-    callback,
-  )
-  return tx
-}
-
-/**
  * @name burnNft
  * @summary Remove an NFT from the storage.
  * @param nftId The id of the NFT that need to be burned from the storage.
@@ -342,33 +302,6 @@ export const addNftToCollection = async (
 }
 
 /**
- * @name createCollection
- * @summary Create a new collection with the provided details.
- * @param collectionOffchainData Any offchain data to add to the collection.
- * @param collectionLimit Number max of NFTs in collection.
- * @param keyring Keyring pair to sign the data.
- * @param callback Callback function to enable subscription, if not given, no subscription will be made.
- * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
- */
-export const createCollection = async (
-  collectionOffchainData: string,
-  collectionLimit: number | null = null,
-  keyring?: IKeyringPair,
-  callback?: (result: ISubmittableResult) => void,
-) => {
-  await checkCollectionOffchainDataLimit(collectionOffchainData.length)
-  if (collectionLimit) await checkCollectionSizeLimit(collectionLimit)
-  const tx = await runTx(
-    txPallets.nft,
-    txActions.createCollection,
-    [collectionOffchainData, collectionLimit],
-    keyring,
-    callback,
-  )
-  return tx
-}
-
-/**
  * @name burnCollection
  * @summary Remove a collection from the storage.
  * @param collectionId The collection id to burn.
@@ -458,5 +391,103 @@ export const limitCollection = async (
 //   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
 //   return tx
 // }
+
+
+// Flexible Interfaces
+export const createCollectionTx = async (
+  collectionOffchainData: string,
+  collectionLimit: number | null = null,
+) => {
+  return await createTxHex(txPallets.nft, txActions.createCollection, [collectionOffchainData, collectionLimit]);
+}
+
+export const createNftTx = async (
+  nftOffchainData: string,
+  nftRoyalty: number,
+  nftCollectionId: number | null = null,
+  nftIsSoulbound = false,
+) => {
+  const formatedRoyalty = await formatRoyalty(nftRoyalty)
+  return await createTxHex(txPallets.nft, txActions.createNft, [nftOffchainData, formatedRoyalty, nftCollectionId, nftIsSoulbound]);
+}
+
+
+// Newbies Interfaces
+export const createCollection = async (
+  collectionOffchainData: string,
+  collectionLimit: number | null = null,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CreateCollectionEvent> => {
+  const signableTx = await createCollectionTx(collectionOffchainData, collectionLimit);
+  const signedTx = await signTx(keyring, signableTx)
+
+  const events = await submitTxBlocking(signedTx, waitUntil);
+
+  let event = events.find(event => event.type == EventType.CreateCollection);
+  if (event == undefined) {
+    throw new Error("Nice Error");
+  }
+
+  return event as CreateCollectionEvent;
+}
+
+export const createNft = async (
+  nftOffchainData: string,
+  nftRoyalty: number,
+  nftCollectionId: number | null = null,
+  nftIsSoulbound = false,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CreateNFTEvent> => {
+  const signableTx = await createNftTx(nftOffchainData, nftRoyalty, nftCollectionId, nftIsSoulbound);
+  const signedTx = await signTx(keyring, signableTx)
+
+  const events = await submitTxBlocking(signedTx, waitUntil);
+
+  let event = events.find(event => event.type == EventType.CreateNFT);
+  if (event == undefined) {
+    throw new Error("Nice Error");
+  }
+
+  return event as CreateNFTEvent;
+}
+
+export async function submitTxBlocking(signedTx: `0x${string}`, waitUntil: WaitUntil): Promise<BlockchainEvent[]> {
+  let [conVar, events] = await submitTxNonBlocking(signedTx, waitUntil);
+  await conVar.wait();
+
+  return events;
+}
+
+export async function submitTxNonBlocking(signedTx: `0x${string}`, waitUntil: WaitUntil): Promise<[ConVar, BlockchainEvent[]]> {
+  let conVar = new ConVar(100);
+  let events: BlockchainEvent[] = [];
+  let callback = (result: ISubmittableResult) => {
+    if ((result.status.isFinalized && waitUntil == WaitUntil.BlockFinalization)
+      || (result.status.isInBlock && waitUntil == WaitUntil.BlockInclusion)
+    ) {
+      if (result.dispatchInfo) {
+        for (let element of result.events) {
+          let event = BlockchainEvent.fromEvent(element.event);
+          if (event) {
+            events.push(event);
+          }
+        }
+      }
+
+      conVar.notify();
+    }
+
+    if (result.dispatchError) {
+      console.log(result.dispatchError);
+      conVar.notify();
+    }
+  };
+
+  await submitTx(signedTx, callback);
+
+  return [conVar, events];
+}
 
 export * from "./interfaces"

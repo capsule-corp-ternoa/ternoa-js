@@ -5,5 +5,6 @@ export * from "./capsule"
 export * from "./fee"
 export * from "./marketplace"
 export * from "./nft"
+export * from "./constants"
 
 export { hexToString, hexToU8a, stringToHex, u8aToHex } from "@polkadot/util"
