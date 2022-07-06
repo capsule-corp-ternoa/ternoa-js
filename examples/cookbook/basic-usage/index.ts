@@ -4,55 +4,130 @@ import { NFTCreatedEvent } from '../../../src/events';
 
 import { getKeyringFromSeed } from '../../../src/account/index';
 import { createCollection, createNftTx } from '../../../src/nft/index';
-import { batchAllTxHex, submitTxBlocking } from '../../../src/blockchain/index';
+import { batchAllTxHex, initializeApi, submitTxBlocking } from '../../../src/blockchain/index';
 import { createMarketplace, setMarketplaceKind, setMarketplaceOwner } from '../../../src/marketplace';
 
 
 async function main() {
-    // Create Collection :)
-    // If needed, you can replace //TernoaTestAccount with your own account seed
-    let keyring = await getKeyringFromSeed("//TernoaTestAccount");
+    // This will initialize the internal SDK API.
+    //
+    // It's not strictly necessary but it's good practice to initialize the API as soon as possible.
+    // This call can be omitted but then in the first SDK call the API will be forcefully initialized.
+    // You can also specify the endpoint by passing the endpoint address as the first argument.
+    await initializeApi();
 
-    /*     let a = await createMarketplace(MarketplaceKind.Public, keyring, WaitUntil.BlockInclusion); */
-    //let x = await setMarketplaceOwner(10, "5H6CufD1EAFqLv5idoecZDXuvjZXqmQ399n3SuGFS8R5sD22", keyring, WaitUntil.BlockInclusion);
-    /*     let x = await setMarketplaceKind(a.marketplaceId, MarketplaceKind.Private, keyring, WaitUntil.BlockInclusion); */
+    // This will create a keyring from the provided account seed.
+    //
+    // Activities and communication on the blockchain is achieved through executing extrinsics (also called transactions). In 
+    // order to execute them someone needs to sign them and pay the execution fee. That someone is in this case you and you
+    // are represented through a concept called Keyring.
+    // Here we provide a default account that you can use to do this exercise. In case you want to use your own account you
+    // need to change //TernoaTestAccount with your account seed.
+    const keyring = await getKeyringFromSeed("//TernoaTestAccount");
 
-    //console.log(x);
-    // In reality, this would be a link or a IPFS reference
-    let collectionOffchainData = "Bored Dog Yacht Club (BDYC)";
+    // Here we define the metadata about our collection.
+    //
+    // Collection metadata is additional data that is stored off-chain (which means it's not stored on the chain) and it's
+    // used to better describe the collection itself. In most cases this will be an IPFS hash that points to a JSON file
+    // which contains fields as "name", "description" or "image". In other cases this can be a link to a either a static
+    // or a dynamic file, plain text or a small JSON string.
+    //
+    // In this exercise we will not use IPFS and instead we will just use this metadata to store our collection name.
+    // It's called offchainData since it usually point to collection data that is stored off-chain.
+    const collectionOffchainData = "Bored Dog Yacht Club (BDYC)";
 
-    // This can be set to undefined if we want to have a open ended collection.
+    // Here we define how much NFTs will be stored inside our collection.
+    //
+    // Our goal is to make an exclusive collection just for a few VIP members so we will limit it to max 10 NFTs. This
+    // can of course be set to undefined instead of 10 and in this case the collection will be open ended. In case
+    // that you start with an open ended collection you can at any point limit it later.
     let limit = 10;
 
-    // In production code you would wait for the transaction to be inside a finalized block.
+    // Here we define at which point we want to get the results of the transaction execution.
+    //
+    // There are two points for now. Either we get the results when the transaction is included in the block (BlockInclusion)
+    // or when the transaction is included in the block and that block is also finalized (BlockFinalization).
+    // In general BlockInclusion is faster (done under 6 seconds) while BlockFinalization usually takes around 18 seconds.
+    // In case that those two modes are not clear enough, there is a chapter that explains the differences in more details
+    // but the general rule of thumb is to use BlockInclusion until the code needs to be used in the production where you
+    // would usually switch to BlockFinalization.
     let executionTrigger = WaitUntil.BlockInclusion;
 
-    // This call can take up to 6 seconds to finish. The return value is the Collection Event or in case of an 
-    // error an exception will be thrown.
+    // Here we use our predefined data in order to create our collection.
+    //
+    // This is one of the many convenient function that are available in our SDK. This function will create a
+    // "createCollection" extrinsic, it will sign it with our keyring and it will execute it. It was also wait
+    // until the execution has been finished and as a result it will return the CollectionCreatedEvent event which
+    // was generated by the chain. 
+    //
+    // Contrary to using the raw Polkadot JS API, here you don't need to do any of those steps manually. Everything
+    // is automatically handled which substantially decreases the amount of code that you need write. As a 
+    // reference, it would take more than 30 lines of code to do this by just using the raw Polkadot JS API.
     let collectionEvent = await createCollection(collectionOffchainData, limit, keyring, executionTrigger);
 
-    // Printout collection
+    // Here we print out the event that we got from creating a collection. This is just for debug purposes.
     console.log(collectionEvent);
 
-    // Create Doggos :)
-    // Define doggo names
+    //
+    // That's it. The first step is done and we got our own collection locked and loaded. Now we need to 
+    // to add some NFTs to it so that it becomes more useful.
+    //
+
+    // Here we define the name of the dogs that we will use.
+    //
+    // The first step in creating our Dog NFTs we to define how they will be called. To make sure that no bias
+    // is being shown, this list contains the names of the most popular dog names in the USA. Feel free to 
+    // replace the names with something that you are more conformable with :) 
     let dogNames = ["Charlie", "Bella", "Max", "Luna", "Buddy", "Coco", "Milo", "Ruby", "Archie", "Molly"];
 
-    // We want to get a cut of every doggo sale :)
+    // Here we define the royalty of our NFTs.
+    //
+    // The plan is to created our dog NFTs and to list them for sale. Selling them is just one way to get 
+    // value of them. By setting the royalty to a value over 0 means that we will get a cut of every next sale
+    // that will be done with our NFTs. The range is [0, 100] and decimal numbers can be used.
+    // Example: setting it to 10 means that after the initial sale we will receive 10% of all secondary sales.
     let royalty = 10;
 
-    // For each doggo we will create it's own transaction and sign it.
+    // Here we create one createNftTx for each dog name.
+    //
+    // This process is a bit different that the one before. We could have done the same and create all the NFTs one by one
+    // but it's recommended that in cases where more than one operation is needs to be done to group them all and  to executed them
+    // as one transaction. This allows us to save on transaction fees and most importantly to save on time. In the best case
+    // scenario doing one by one would take us 1 minute to do for 10 dogs but with this it will take us less than 6 seconds.
     let signableTxs = await Promise.all(dogNames.map(name => createNftTx(name, royalty, collectionEvent.collectionId, false)));
 
-    // Batching transactions allow us to execute just one transaction instead 10 of them separately. 
+    // Here we batch (group) all those created transaction into one transaction
+    //
+    // There are two transactions that do the same, one is called batch and the second one is called batchAll.
+    // The difference is that with just "batch" that our transactions will be executed until one fails and at
+    // that point it will not continue to the next batched transaction. With "batchAll" it will try to first
+    // do them all and if any one fails it will revered the successful ones and the state of the chain will not
+    // change.
+    // The general rule of thumb is to always use the batchAll transaction.
     let signableBatch = await batchAllTxHex(signableTxs);
 
-    // This allows us to submit a transaction in a blocking way. The return value is a array of Events or in case of an 
-    // error an exception will be thrown.
+    // Here we submit (and sign) our batch transaction.
+    //
+    // You probably have noticed that instead of creating NFTs we are actually creating NFT transactions. 
+    // We do this so that we could group them all together. The downside is that we need to manually sign them
+    // and submit them (submitting means executing). To make the whole process super convenient and flexible, 
+    // we provide three different submitting functions. Here, we use the most convenient one but it's the least
+    // flexible. This function will sign the transaction for us if we pass a keyring (one less thing to worry about)
+    // and it's blocking the execution flow until the transaction is either in a block or in a finalized block.
+    // Since submitting needs to work will all kinds of transactions, the result is an object that contains all
+    // the events that have happen (instead of only specific ones). 
     let events = await submitTxBlocking(signableBatch, WaitUntil.BlockInclusion, keyring);
 
-    // Now we just need to filter the right dog events and viola, our dogs are created :) 
+    // Here we get only the events that we are interested in.
+    //
+    // Since submitTxBlocking returned all the events that have happen we want to get only the ones that are
+    // important to us. In this case, we are looking for NFTCreatedEvents and here is another nice example
+    // how our API is quite convenient. Instead of manually searching our events of interest we can just
+    // call the findEvents call and pass the type of the event that we are looking for. The result of this
+    // function will be a list of those events and they will have the same type that we are expecting.
     let dogs = events.findEvents(NFTCreatedEvent);
+
+    // Here we print out the events that we got from creating our dog NFTs. This is just for debug purposes.
     dogs.forEach(dog => console.log(dog));
 
     process.exit();
