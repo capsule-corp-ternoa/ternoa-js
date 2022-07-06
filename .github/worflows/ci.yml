@@ -1,5 +1,8 @@
 name: SDK CI integration
-on: [push]
+on:
+  push:
+    branches:
+      - "*"
 
 jobs:
   build-doc:
