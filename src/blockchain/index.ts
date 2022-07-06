@@ -5,7 +5,7 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
 
-import { txActions, txEvent, txPallets, WaitUntil } from "../constants"
+import { TransactionHash, txActions, txEvent, txPallets, WaitUntil } from "../constants"
 import { checkFundsForTxFees } from "../fee"
 import { BlockchainEvent, BlockchainEvents } from "../events"
 import { ConditionalVariable } from "../misc"
@@ -207,7 +207,7 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
  * @param validity Number of blocks during which transaction can be submitted, default to immortal
  * @returns Hex value of the signed transaction
  */
-export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`, nonce = -1, validity = 0) => {
+export const signTx = async (keyring: IKeyringPair, txHex: TransactionHash, nonce = -1, validity = 0) => {
   const api = await getRawApi()
   const txSigned = await api.tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
@@ -220,7 +220,7 @@ export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`, nonce 
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
  * @returns Hash of the transaction
  */
-export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmittableResult) => void) => {
+export const submitTx = async (txHex: TransactionHash, callback?: (result: ISubmittableResult) => void) => {
   const api = await getRawApi()
   const tx = api.tx(txHex)
   await checkFundsForTxFees(tx)
@@ -248,7 +248,7 @@ export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmit
  * @param txHexes Transactions to execute in the batch call
  * @returns Submittable extrinsic unsigned
  */
-export const batchTx = async (txHexes: `0x${string}`[]) => {
+export const batchTx = async (txHexes: TransactionHash[]) => {
   const api = await getRawApi()
   const tx = createTx(txPallets.utility, txActions.batch, [txHexes.map((x) => api.tx(x))])
   return tx
@@ -260,7 +260,7 @@ export const batchTx = async (txHexes: `0x${string}`[]) => {
  * @param txHexes Transactions to execute in the batch call
  * @returns Hex of the submittable extrinsic unsigned
  */
-export const batchTxHex = async (txHexes: `0x${string}`[]) => {
+export const batchTxHex = async (txHexes: TransactionHash[]) => {
   const tx = await batchTx(txHexes)
   return tx.toHex()
 }
@@ -271,7 +271,7 @@ export const batchTxHex = async (txHexes: `0x${string}`[]) => {
  * @param txHexes Transactions to execute in the batch call
  * @returns Submittable extrinsic unsigned
  */
-export const batchAllTx = async (txHexes: `0x${string}`[]) => {
+export const batchAllTx = async (txHexes: TransactionHash[]) => {
   const api = await getRawApi()
   const tx = createTx(txPallets.utility, txActions.batchAll, [txHexes.map((x) => api.tx(x))])
   return tx
@@ -283,7 +283,7 @@ export const batchAllTx = async (txHexes: `0x${string}`[]) => {
  * @param txHexes Transactions to execute in the batch call
  * @returns Hex of the submittable extrinsic unsigned
  */
-export const batchAllTxHex = async (txHexes: `0x${string}`[]) => {
+export const batchAllTxHex = async (txHexes: TransactionHash[]) => {
   const tx = await batchAllTx(txHexes)
   return tx.toHex()
 }
@@ -311,7 +311,7 @@ export const isValidAddress = (address: string) => {
  * @param address Address to verify the signer.
  * @returns Boolean, true if the address signed the message, false otherwise
  */
-export const isValidSignature = (signedMessage: string, signature: `0x${string}`, address: string) => {
+export const isValidSignature = (signedMessage: string, signature: TransactionHash, address: string) => {
   const publicKey = decodeAddress(address)
   const hexPublicKey = u8aToHex(publicKey)
 
@@ -360,7 +360,7 @@ export const unFormatBalance = async (_input: number) => {
 }
 
 /// TODO DOC!
-export const submitTxBlocking = async (tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<BlockchainEvents> => {
+export const submitTxBlocking = async (tx: TransactionHash, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<BlockchainEvents> => {
   let [conVar, events] = await submitTxNonBlocking(tx, waitUntil, keyring);
   await conVar.wait();
 
@@ -368,7 +368,7 @@ export const submitTxBlocking = async (tx: `0x${string}`, waitUntil: WaitUntil, 
 }
 
 /// TODO DOC!
-export const submitTxNonBlocking = async (tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<[ConditionalVariable, BlockchainEvents]> => {
+export const submitTxNonBlocking = async (tx: TransactionHash, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<[ConditionalVariable, BlockchainEvents]> => {
   let conVar = new ConditionalVariable(500);
   let events: BlockchainEvents = new BlockchainEvents([]);
 

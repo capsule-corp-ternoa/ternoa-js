@@ -2,7 +2,7 @@ import { SubmittableExtrinsic } from "@polkadot/api/types"
 import BN from "bn.js"
 import type { ISubmittableResult } from "@polkadot/types/types"
 import { getRawApi } from "../blockchain"
-import { txActions, txPallets } from "../constants"
+import { TransactionHash, txActions, txPallets } from "../constants"
 import { getNftMintFee } from "../nft"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getCapsuleMintFee } from "../capsule"
@@ -15,7 +15,7 @@ import { getFreeBalance } from "../balance"
  * @param address Public address of the sender
  * @returns Transaction fee estimation
  */
-export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
+export const getTxGasFee = async (txHex: TransactionHash, address: string) => {
   const api = await getRawApi()
   const tx = api.tx(txHex)
   const info = await tx.paymentInfo(address)
@@ -29,7 +29,7 @@ export const getTxGasFee = async (txHex: `0x${string}`, address: string) => {
  * @param txHex Transaction hex
  * @returns Fee estimation
  */
-export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
+export const getTxTreasuryFee = async (txHex: TransactionHash) => {
   const api = await getRawApi()
   const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
@@ -60,7 +60,7 @@ export const getTxTreasuryFee = async (txHex: `0x${string}`) => {
  * @param address Public address of the sender
  * @returns Total estimated fee which is the sum of the chain gas fee and the treasury fee
  */
-export const getTxFees = async (txHex: `0x${string}`, address: string) => {
+export const getTxFees = async (txHex: TransactionHash, address: string) => {
   const extrinsicFee = await getTxGasFee(txHex, address)
   const treasuryFee = await getTxTreasuryFee(txHex)
   return extrinsicFee.add(treasuryFee)

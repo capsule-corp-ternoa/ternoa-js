@@ -99,3 +99,5 @@ export enum MarketplaceKind {
   Public = "Public",
   Private = "Private"
 }
+
+export type TransactionHash = `0x${string}`;
