@@ -2,7 +2,8 @@ name: SDK CI integration
 on:
   push:
     branches:
-      - "*"
+      - master
+      - dev
 
 jobs:
   build-doc:
