@@ -5,7 +5,7 @@ import { NFTCreatedEvent, NFTListedEvent } from '../../../src/events';
 import { getKeyringFromSeed } from '../../../src/account/index';
 import { createCollection, createNftTx } from '../../../src/nft/index';
 import { batchAllTxHex, initializeApi, signTx, submitTxBlocking } from '../../../src/blockchain/index';
-import { buyNft, createMarketplace, listNftTx, setMarketplaceKind, setMarketplaceOwner } from '../../../src/marketplace';
+import { buyNft, createMarketplace, listNftTx } from '../../../src/marketplace';
 
 
 async function main() {
@@ -69,7 +69,7 @@ async function main() {
     console.log(collectionEvent);
 
     //
-    // That's it for Collection. The first step is done and we got our own collection locked and loaded. Now we need to 
+    // That's it for Collection. The first step is done and we got our own collection locked and loaded. Now we need
     // to add some NFTs to it so that it becomes more useful.
     //
 
@@ -223,8 +223,8 @@ async function main() {
 
     // Here we buy one of our NFTs with the second account.
     //
-    // The second account provided in the previous is going to be used to buy the first
-    // NFT that was listed. 
+    // The second account provided in the previous step is going to be used to buy the first
+    // NFT that was listed with our original account. 
     let buyNftEvent = await buyNft(listedDogs[0].nftId, keyring2, WaitUntil.BlockInclusion);
 
     // Here we print out the event that we got from buying our own dog NFT. This is just for debug purposes.
