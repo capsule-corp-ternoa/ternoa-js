@@ -360,7 +360,7 @@ export const unFormatBalance = async (_input: number) => {
 }
 
 /// TODO DOC!
-export async function submitTxBlocking(tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<BlockchainEvents> {
+export const submitTxBlocking = async (tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<BlockchainEvents> => {
   let [conVar, events] = await submitTxNonBlocking(tx, waitUntil, keyring);
   await conVar.wait();
 
@@ -368,7 +368,7 @@ export async function submitTxBlocking(tx: `0x${string}`, waitUntil: WaitUntil, 
 }
 
 /// TODO DOC!
-export async function submitTxNonBlocking(tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<[ConditionalVariable, BlockchainEvents]> {
+export const submitTxNonBlocking = async (tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<[ConditionalVariable, BlockchainEvents]> => {
   let conVar = new ConditionalVariable(500);
   let events: BlockchainEvents = new BlockchainEvents([]);
 
