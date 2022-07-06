@@ -201,11 +201,13 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
  * @summary Sign a transaction.
  * @param keyring Keyring pair to sign the data
  * @param txHex Tx hex of the unsigned transaction to be signed
+ * @param nonce Nonce to be used in the transaction, default to next available
+ * @param validity Number of blocks during which transaction can be submitted, default to immortal
  * @returns Hex value of the signed transaction
  */
-export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
+export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`, nonce = -1, validity = 0) => {
   const api = await getRawApi()
-  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce: -1, blockHash: api.genesisHash, era: 0 })
+  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
 }
 
