@@ -28,7 +28,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -m "CI: Automated doc push" --no-verify -a | exit 0
       - name: Push changes
-        if: github.ref == 'refs/heads/master'
         uses: ad-m/github-push-action@master
         with:
+          branch: ${{ github.ref_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
