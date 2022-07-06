@@ -1,11 +1,14 @@
 import { cryptoWaitReady, signatureVerify } from "@polkadot/util-crypto"
 import { ApiPromise, WsProvider } from "@polkadot/api"
 import type { ISubmittableResult, IKeyringPair } from "@polkadot/types/types"
+import { EventRecord } from "@polkadot/types/interfaces/system/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, BN_TEN } from "@polkadot/util"
 import BN from "bn.js"
 
-import { txActions, txEvent, txPallets } from "../constants"
+import { txActions, txEvent, txPallets, WaitUntil } from "../constants"
+import { BlockchainEvent, BlockchainEvents } from "../events"
+import { ConditionalVariable } from "../misc"
 import { checkFundsForTxFees } from "../fee"
 
 import { IFormatBalanceOptions } from "./interfaces"
@@ -239,29 +242,6 @@ export const submitTx = async (txHex: `0x${string}`, callback?: (result: ISubmit
 }
 
 /**
- * @name runTx
- * @summary Create, sign and submit a transaction on blockchain.
- * @param txPallet Pallet module of the transaction
- * @param txExtrinsic Subsequent extrinsic method of the transaction
- * @param txArgs Arguments of the transaction
- * @param keyring Keyring pair to sign the data, if not given, an unsigned transaction to be signed will be returned
- * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
- */
-export const runTx = async (
-  txPallet: string,
-  txExtrinsic: string,
-  txArgs: any[],
-  keyring?: IKeyringPair,
-  callback?: (result: ISubmittableResult) => void,
-) => {
-  const signableTx = await createTxHex(txPallet, txExtrinsic, txArgs)
-  if (!keyring) return signableTx
-  const signedTx = await signTx(keyring, signableTx)
-  return await submitTx(signedTx, callback)
-}
-
-/**
  * @name batchTx
  * @summary Create a batch transaction of dispatch calls.
  * @param txHexes Transactions to execute in the batch call
@@ -383,4 +363,37 @@ export const unFormatBalance = async (_input: number) => {
   return result
 }
 
+/// TODO DOC!
+export async function submitTxBlocking(tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<BlockchainEvents> {
+  let [conVar, events] = await submitTxNonBlocking(tx, waitUntil, keyring);
+  await conVar.wait();
+
+  return events;
+}
+
+/// TODO DOC!
+export async function submitTxNonBlocking(tx: `0x${string}`, waitUntil: WaitUntil, keyring?: IKeyringPair): Promise<[ConditionalVariable, BlockchainEvents]> {
+  let conVar = new ConditionalVariable(500);
+  let events: BlockchainEvents = new BlockchainEvents([]);
+
+  if (keyring) {
+    tx = await signTx(keyring, tx);
+  }
+
+  let callback = (result: ISubmittableResult) => {
+    if ((result.status.isFinalized && waitUntil == WaitUntil.BlockFinalization)
+      || (result.status.isInBlock && waitUntil == WaitUntil.BlockInclusion)
+    ) {
+      events.inner = result.events.map(eventRecord => BlockchainEvent.fromEvent(eventRecord.event));
+      conVar.notify();
+    }
+  };
+
+  await submitTx(tx, callback);
+
+  return [conVar, events];
+}
+
 export * from "./interfaces"
+
+

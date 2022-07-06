@@ -13,18 +13,8 @@ export enum txActions {
   list = "list",
   unlist = "unlist",
   burn = "burn",
-  burnNft = "burnNft",
-  transferNft = "transferNft",
-  delegateNft = "delegateNft",
-  setRoyalty = "setRoyalty",
-  setNftMintFee = "setNftMintFee",
-  addNftToCollection = "addNftToCollection",
-  createCollection = "createCollection",
-  limitCollection = "limitCollection",
-  closeCollection = "closeCollection",
-  burnCollection = "burnCollection",
+
   create = "create",
-  createNft = "createNft",
   transfer = "transfer",
   transferAll = "transferAll",
   transferKeepAlive = "transferKeepAlive",
@@ -41,6 +31,30 @@ export enum txActions {
   setName = "setName",
   setUri = "setUri",
   setLogoUri = "setLogoUri",
+
+  // nft
+  createNft = "createNft",
+  burnNft = "burnNft",
+  transferNft = "transferNft",
+  delegateNft = "delegateNft",
+  setRoyalty = "setRoyalty",
+  addNftToCollection = "addNftToCollection",
+  createCollection = "createCollection",
+  limitCollection = "limitCollection",
+  closeCollection = "closeCollection",
+  burnCollection = "burnCollection",
+  setNftMintFee = "setNftMintFee",
+
+
+  // marketplace
+  buyNft = "buyNft",
+  createMarketplace = "createMarketplace",
+  listNft = "listNft",
+  unlistNft = "unlistNft",
+  setMarketplaceConfiguration = "setMarketplaceConfiguration",
+  setMarketplaceKind = "setMarketplaceKind",
+  setMarketplaceOwner = "setMarketplaceOwner",
+  setMarketplaceMintFee = "setMarketplaceMintFee"
 }
 
 export enum txEvent {
@@ -74,4 +88,14 @@ export enum chainConstants {
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
+}
+
+export enum WaitUntil {
+  BlockInclusion,
+  BlockFinalization
+}
+
+export enum MarketplaceKind {
+  Public = "Public",
+  Private = "Private"
 }

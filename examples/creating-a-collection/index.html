@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+    <link href="res/prism.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <script>
+        function show(shown) {
+            let list = ["Page0", "Page1", "Page2"]
+            for (page of list) {
+                document.getElementById(page).style.display = page == shown ? 'block' : 'none';
+            }
+            return false;
+        }
+    </script>
+    <script src="res/prism.js"></script>
+
+    <div id="Page0">
+        Hello! My name is Timmy :)
+
+        <br><br>I will show you how to create your own Bored <s>Ape</s> Dog Yacht Club or BDYC for short, yay!.
+
+        <br>First things first, we need to lay down some ground rules. Our <i>Club</i> is nothing more than a collection
+        of
+        dogs.
+        <br>This means that we need to do the following tasks in order to create our club:
+        <br>- 1. Create a collection
+        <br>- 2. Add 10 prestigious dogs to our collection
+        <br>- 3. Put one dog for sale
+
+        <br><br>Seems easy, right? So let's start!
+        <br><button onclick="return show('Page1');">Click me to continue!</button>
+    </div>
+
+    <div id="Page1" style="display:none">
+        <br><b>- 1. Create a collection</b>
+        <br>- 2. Add 10 prestigious dogs to our collection
+        <br>- 3. Put one dog for sale
+
+        <br><br> In order to create a collection we need the following steps:
+        <br> - I. Create an account
+        <br> - II. Define the metadata for collection
+        <br> - III. Execution Trigger
+
+        <h3>I. Account</h3>
+        To create an collection we need an entity which is going to sign and submit the transactions that will create
+        that collection. You either can create a new account and use the faucet to get some funds or you can use the
+        standard Ternoa Example account for that.
+
+        <pre><code class="language-js">
+            // If needed, you can replace //TernoaTestAccount with your own account seed
+            let keyring = await getKeyringFromSeed("//TernoaTestAccount");
+        </code></pre>
+
+        <h3>II. Metadata</h3>
+        The collection metadata consists of two entities: collection off-chain-data and collection limit.
+
+        <br><b>Collection off-chain-data</b> can be anything, it can be the name of the collection, it can be a link to
+        a file that contains a detailed description of our collection or it can a IPFS reference. In this example we
+        will use the name of our collection as the off-chain-data.
+
+        <br><br><b>Collection limit</b> allows us to either define an open ended collection if not specific or a limited
+        collection.
+        In order to make our club a exclusive society, we will limit the collection size to 10.
+
+        <pre><code class="language-js">
+            // In practice, this would be a link or a IPFS reference
+            let collectionOffchainData = "Bored Dog Yacht Club (BDYC)";
+
+            // This can be set to undefined if we want to have a open ended collection.
+            let limit = 10;
+        </code></pre>
+
+        <h3>III. Execution Trigger</h3>
+        There is a separate page which discusses this topic in more details but the gist is that we provide two
+        different execution triggers. On one trigger we wait for the transaction to be included in the not-finalized
+        block and on the other trigger we wait for the transaction to be included inside a finalized block.
+
+        <br> In this example and when you do your testing you can saftly always just the BlockInclusion trigger but in
+        production you would use the BlockFinalization trigger.
+        <pre><code class="language-js">
+            // In production code you would wait for the transaction to be inside a finalized block.
+            let executionTrigger = WaitUntil.BlockInclusion;
+        </code></pre>
+
+        <h3>Time to shine</h3>
+        With all the preparation done, we can finally create a collection. We just need to call the right function and
+        pass all our already defined data.
+
+        <pre><code class="language-js">
+            // This call can take up to 6 seconds to finish. The return value is the Collection Event or in case of an 
+            // error a exception will be thrown.
+            let collectionEvent = await createCollection(collectionOffchainData, limit, keyring, executionTrigger);
+
+            // Printout collection
+            console.log(collectionEvent);
+        </code></pre>
+
+        <br><button onclick="return show('Page0');">Go back</button>
+        <button onclick="return show('Page2');">Next Page</button>
+    </div>
+
+    <div id="Page2" style="display:none">
+        <br>- 1. Create a collection
+        <br><b>- 2. Add 10 prestigious dogs to our collection</b>
+        <br>- 3. Put one dog for sale
+
+        <br><br> In order to create a collection we need the following steps:
+        <br> - I. Create an account
+        <br> - II. Define the metadata for collection
+        <br> - III. Execution Trigger
+
+        <h3>I. Account</h3>
+        To create an collection we need an entity which is going to sign and submit the transactions that will create
+        that collection. You either can create a new account and use the faucet to get some funds or you can use the
+        standard Ternoa Example account for that.
+
+        <pre><code class="language-js">
+            // If needed, you can replace //TernoaTestAccount with your own account seed
+            let keyring = await getKeyringFromSeed("//TernoaTestAccount");
+        </code></pre>
+
+        <h3>II. Metadata</h3>
+        The collection metadata consists of two entities: collection off-chain-data and collection limit.
+
+        <br><b>Collection off-chain-data</b> can be anything, it can be the name of the collection, it can be a link to
+        a file that contains a detailed description of our collection or it can a IPFS reference. In this example we
+        will use the name of our collection as the off-chain-data.
+
+        <br><br><b>Collection limit</b> allows us to either define an open ended collection if not specific or a limited
+        collection.
+        In order to make our club a exclusive society, we will limit the collection size to 10.
+
+        <pre><code class="language-js">
+            // In practice, this would be a link or a IPFS reference
+            let collectionOffchainData = "Bored Dog Yacht Club (BDYC)";
+
+            // This can be set to undefined if we want to have a open ended collection.
+            let limit = 10;
+        </code></pre>
+
+        <h3>III. Execution Trigger</h3>
+        There is a separate page which discusses this topic in more details but the gist is that we provide two
+        different execution triggers. On one trigger we wait for the transaction to be included in the not-finalized
+        block and on the other trigger we wait for the transaction to be included inside a finalized block.
+
+        <br> In this example and when you do your testing you can saftly always just the BlockInclusion trigger but in
+        production you would use the BlockFinalization trigger.
+        <pre><code class="language-js">
+            // In production code you would wait for the transaction to be inside a finalized block.
+            let executionTrigger = WaitUntil.BlockInclusion;
+        </code></pre>
+
+        <h3>Time to shine</h3>
+        With all the preparation done, we can finally create a collection. We just need to call the right function and
+        pass all our already defined data.
+
+        <pre><code class="language-js">
+            // This call can take up to 6 seconds to finish. The return value is the Collection Event or in case of an 
+            // error a exception will be thrown.
+            let collectionEvent = await createCollection(collectionOffchainData, limit, keyring, executionTrigger);
+
+            // Printout collection
+            console.log(collectionEvent);
+        </code></pre>
+
+        <br><button onclick="return show('Page1');">Go back</button>
+        <button onclick="return show('Page3');">Next Page</button>
+    </div>
+</body>
+
+</html>
