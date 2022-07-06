@@ -201,11 +201,13 @@ export const createTxHex = async (txPallet: string, txExtrinsic: string, txArgs:
  * @summary Sign a transaction.
  * @param keyring Keyring pair to sign the data
  * @param txHex Tx hex of the unsigned transaction to be signed
+ * @param nonce Nonce to be used in the transaction, default to next available
+ * @param validity Number of blocks during which transaction can be submitted, default to immortal
  * @returns Hex value of the signed transaction
  */
-export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`) => {
+export const signTx = async (keyring: IKeyringPair, txHex: `0x${string}`, nonce = -1, validity = 0) => {
   const api = await getRawApi()
-  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce: -1, blockHash: api.genesisHash, era: 0 })
+  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
 }
 
@@ -341,16 +343,11 @@ export const isValidSignature = (signedMessage: string, signature: `0x${string}`
  * @name formatBalance
  * @summary Format balance from BN to number.
  * @param input BN input.
- * @param withSi Format with SI, i.e. m/M/etc.
- * @param withSiFull Format with full SI, i.e. mili/Mega/etc.
- * @param withUnit Add the unit (useful in Balance formats).
- * @param unit Token Unit.
+ * @param options Formatting options from IFormatBalanceOptions.
  * @returns Formatted balance with SI and unit notation.
  */
-export const formatBalance = async (input: BN, options?: IFormatBalanceOptions) => {
-  const api = await getRawApi()
-  const decimals = api.registry.chainDecimals[0]
-  formatBalancePolkadotUtil.setDefaults({ decimals, unit: options?.unit ?? "CAPS" })
+export const formatBalance = (input: BN, options?: IFormatBalanceOptions) => {
+  formatBalancePolkadotUtil.setDefaults({ decimals: 18, unit: options?.unit ?? "CAPS" })
   return formatBalancePolkadotUtil(input, options)
 }
 
