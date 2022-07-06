@@ -269,7 +269,7 @@ export const createTxHex = async (
   txPallet: string,
   txExtrinsic: string,
   txArgs: any[] = [],
-): Promise<`0x${string}`> => {
+): Promise<TransactionHash> => {
   const tx = await createTx(txPallet, txExtrinsic, txArgs)
   return tx.toHex()
 }
@@ -288,7 +288,7 @@ export const signTx = async (
   txHex: TransactionHash,
   nonce = -1,
   validity = 0,
-): Promise<`0x${string}`> => {
+): Promise<TransactionHash> => {
   const api = getRawApi()
   const txSigned = await api.tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
@@ -304,7 +304,7 @@ export const signTx = async (
 export const submitTx = async (
   txHex: TransactionHash,
   callback?: (result: ISubmittableResult) => void,
-): Promise<`0x${string}`> => {
+): Promise<TransactionHash> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
   await checkFundsForTxFees(tx)
@@ -346,7 +346,7 @@ export const batchTx = async (
  * @param txHexes Transactions to execute in the batch call
  * @returns Hex of the submittable extrinsic unsigned
  */
-export const batchTxHex = async (txHexes: TransactionHash[]): Promise<`0x${string}`> => {
+export const batchTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
   const tx = await batchTx(txHexes)
   return tx.toHex()
 }
@@ -371,7 +371,7 @@ export const batchAllTx = async (
  * @param txHexes Transactions to execute in the batch call
  * @returns Hex of the submittable extrinsic unsigned
  */
-export const batchAllTxHex = async (txHexes: TransactionHash[]): Promise<`0x${string}`> => {
+export const batchAllTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
   const tx = await batchAllTx(txHexes)
   return tx.toHex()
 }

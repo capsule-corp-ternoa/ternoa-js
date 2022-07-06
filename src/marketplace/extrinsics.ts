@@ -9,11 +9,11 @@ import {
   NFTUnlistedEvent,
 } from "../events"
 import { createTxHex, submitTxBlocking, numberToBalance } from "../blockchain"
-import { MarketplaceKind, txActions, txPallets, WaitUntil } from "../constants"
+import { MarketplaceKind, TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
 import BN from "bn.js"
 
 /// TODO DOC!
-export const createMarketplaceTx = async (kind: MarketplaceKind): Promise<`0x${string}`> => {
+export const createMarketplaceTx = async (kind: MarketplaceKind): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.createMarketplace, [kind])
 }
 
@@ -29,7 +29,7 @@ export const createMarketplace = async (
 }
 
 /// TODO DOC!
-export const setMarketplaceOwnerTx = async (id: number, recipient: string): Promise<`0x${string}`> => {
+export const setMarketplaceOwnerTx = async (id: number, recipient: string): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceOwner, [id, recipient])
 }
 
@@ -46,7 +46,7 @@ export const setMarketplaceOwner = async (
 }
 
 /// TODO DOC!
-export const setMarketplaceKindTx = async (id: number, kind: MarketplaceKind): Promise<`0x${string}`> => {
+export const setMarketplaceKindTx = async (id: number, kind: MarketplaceKind): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceKind, [id, kind])
 }
 
@@ -63,7 +63,7 @@ export const setMarketplaceKind = async (
 }
 
 /// TODO DOC!
-export const listNftTx = async (nft_id: number, marketplace_id: number, price: number | BN): Promise<`0x${string}`> => {
+export const listNftTx = async (nft_id: number, marketplace_id: number, price: number | BN): Promise<TransactionHash> => {
   const formatted_price = typeof price === "number" ? await numberToBalance(price) : price
   return await createTxHex(txPallets.marketplace, txActions.listNft, [nft_id, marketplace_id, formatted_price])
 }
@@ -82,7 +82,7 @@ export const listNft = async (
 }
 
 /// TODO DOC!
-export const unlistNftTx = async (nft_id: number): Promise<`0x${string}`> => {
+export const unlistNftTx = async (nft_id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.unlist, [nft_id])
 }
 
@@ -98,7 +98,7 @@ export const unlistNft = async (
 }
 
 /// TODO DOC!
-export const buyNftTx = async (nft_id: number): Promise<`0x${string}`> => {
+export const buyNftTx = async (nft_id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.buyNft, [nft_id])
 }
 
@@ -110,7 +110,7 @@ export const buyNft = async (nft_id: number, keyring: IKeyringPair, waitUntil: W
 }
 
 /// TODO DOC!
-export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<`0x${string}`> => {
+export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<TransactionHash> => {
   const formatted_price = typeof fee === "number" ? await numberToBalance(fee) : fee
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceMintFee, [formatted_price])
 }

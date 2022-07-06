@@ -12,7 +12,7 @@ import {
   NFTTransferredEvent,
 } from "../events"
 import { createTxHex, submitTxBlocking } from "../blockchain"
-import { txActions, txPallets, WaitUntil } from "../constants"
+import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
 import { formatRoyalty } from "./storage"
 
 // NFTs
@@ -23,7 +23,7 @@ export const createNftTx = async (
   royalty = 0,
   collectionId: number | undefined = undefined,
   isSoulbound = false,
-): Promise<`0x${string}`> => {
+): Promise<TransactionHash> => {
   const formatedRoyalty = await formatRoyalty(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
@@ -48,7 +48,7 @@ export const createNft = async (
 }
 
 /// TODO DOC!
-export const burnNftTx = async (id: number): Promise<`0x${string}`> => {
+export const burnNftTx = async (id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.burnNft, [id])
 }
 
@@ -60,7 +60,7 @@ export const burnNft = async (id: number, keyring: IKeyringPair, waitUntil: Wait
 }
 
 /// TODO DOC!
-export const delegateNftTx = async (id: number, recipient: string | undefined = undefined): Promise<`0x${string}`> => {
+export const delegateNftTx = async (id: number, recipient: string | undefined = undefined): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.delegateNft, [id, recipient])
 }
 
@@ -77,7 +77,7 @@ export const delegateNft = async (
 }
 
 /// TODO DOC!
-export const setRoyaltyTx = async (id: number, amount: number): Promise<`0x${string}`> => {
+export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHash> => {
   const formatedRoyalty = await formatRoyalty(amount)
   return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
 }
@@ -95,7 +95,7 @@ export const setRoyalty = async (
 }
 
 /// TODO DOC!
-export const transferNftTx = async (id: number, recipient: string): Promise<`0x${string}`> => {
+export const transferNftTx = async (id: number, recipient: string): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.transferNft, [id, recipient])
 }
 
@@ -112,7 +112,7 @@ export const transferNft = async (
 }
 
 /// TODO DOC!
-export const addNftToCollectionTx = async (nft_id: number, collection_id: number): Promise<`0x${string}`> => {
+export const addNftToCollectionTx = async (nft_id: number, collection_id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.addNftToCollection, [nft_id, collection_id])
 }
 
@@ -134,7 +134,7 @@ export const addNftToCollection = async (
 export const createCollectionTx = async (
   offchainData: string,
   limit: number | undefined = undefined,
-): Promise<`0x${string}`> => {
+): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.createCollection, [offchainData, limit])
 }
 
@@ -151,7 +151,7 @@ export const createCollection = async (
 }
 
 /// TODO DOC!
-export const limitCollectionTx = async (id: number, limit: number): Promise<`0x${string}`> => {
+export const limitCollectionTx = async (id: number, limit: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.limitCollection, [id, limit])
 }
 
@@ -168,7 +168,7 @@ export const limitCollection = async (
 }
 
 /// TODO DOC!
-export const closeCollectionTx = async (id: number): Promise<`0x${string}`> => {
+export const closeCollectionTx = async (id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.closeCollection, [id])
 }
 
@@ -184,7 +184,7 @@ export const closeCollection = async (
 }
 
 /// TODO DOC!
-export const burnCollectionTx = async (id: number): Promise<`0x${string}`> => {
+export const burnCollectionTx = async (id: number): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.burnCollection, [id])
 }
 

@@ -1,11 +1,11 @@
 import BN from "bn.js"
 import type { IKeyringPair } from "@polkadot/types/types"
-import { txActions, txPallets, WaitUntil } from "../constants"
+import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
 import { createTxHex, submitTxBlocking, numberToBalance } from "../blockchain"
 import { BalancesTransferEvent } from "../events"
 
 /// TODO DOC!
-export const balancesTransferTx = async (to: string, value: number | BN): Promise<`0x${string}`> => {
+export const balancesTransferTx = async (to: string, value: number | BN): Promise<TransactionHash> => {
   const amount = typeof value === "number" ? await numberToBalance(value) : value
   return await createTxHex(txPallets.balances, txActions.transfer, [to, amount])
 }
@@ -23,7 +23,7 @@ export const balancesTransfer = async (
 }
 
 /// TODO DOC!
-export const balancesTransferAllTx = async (to: string, keepAlive = true): Promise<`0x${string}`> => {
+export const balancesTransferAllTx = async (to: string, keepAlive = true): Promise<TransactionHash> => {
   return await createTxHex(txPallets.balances, txActions.transferAll, [to, keepAlive])
 }
 
@@ -40,7 +40,7 @@ export const balancesTransferAll = async (
 }
 
 /// TODO DOC!
-export const balancesTransferKeepAliveTx = async (to: string, value: number | BN): Promise<`0x${string}`> => {
+export const balancesTransferKeepAliveTx = async (to: string, value: number | BN): Promise<TransactionHash> => {
   const amount = typeof value === "number" ? await numberToBalance(value) : value
   return await createTxHex(txPallets.balances, txActions.transferKeepAlive, [to, amount])
 }
