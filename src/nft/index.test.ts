@@ -33,7 +33,7 @@ describe("Testing to mint/create a new NFT", (): void => {
   })
   xit("Should return a correct minted NFT hash hex", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const createNewNft = await createNft("My First NFT", 10, null, false, testAccount)
+    const createNewNft = await createNft("My First NFT", 10, undefined, false, testAccount)
     expect(isHex(createNewNft)).toBe(true)
   })
 })
@@ -64,7 +64,7 @@ describe("Testing to update/remove an NFT", (): void => {
   })
   xit("Should return a correct hash hex when NFT is undelegated", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const undelegate = await delegateNft(56, null, testAccount)
+    const undelegate = await delegateNft(56, undefined, testAccount)
     expect(isHex(undelegate)).toBe(true)
   })
   xit("Should return a correct hash hex when the royalty is updated", async (): Promise<void> => {
@@ -86,7 +86,7 @@ describe("Testing to update/remove an NFT", (): void => {
 describe("Testing to create/update a collection", (): void => {
   xit("Should return a correct hash hex when collection is created", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const createNewCollection = await createCollection("Offchain data", null, testAccount)
+    const createNewCollection = await createCollection("Offchain data", undefined, testAccount)
     expect(isHex(createNewCollection)).toBe(true)
   })
   xit("Should return a correct hash hex when an NFT is added to a collection", async (): Promise<void> => {

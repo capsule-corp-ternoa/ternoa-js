@@ -1,6 +1,6 @@
 import BN from "bn.js"
-import { chainQuery, txPallets } from "../constants"
-import { query, unFormatBalance } from "../blockchain"
+import { chainQuery, Errors, txPallets } from "../constants"
+import { query, numberToBalance } from "../blockchain"
 
 /**
  * @name getBalances
@@ -8,11 +8,18 @@ import { query, unFormatBalance } from "../blockchain"
  * @param address Public address of the account to get balances
  * @returns The balances of the account
  */
-export const getBalances = async (address: string) => {
-    const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
-        (await query(txPallets.system, chainQuery.account, [address])) as any
-    ).data
-    return balances
+export const getBalances = async (
+  address: string,
+): Promise<{
+  free: BN
+  reserved: BN
+  miscFrozen: BN
+  feeFrozen: BN
+}> => {
+  const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
+    (await query(txPallets.system, chainQuery.account, [address])) as any
+  ).data
+  return balances
 }
 
 /**
@@ -21,9 +28,9 @@ export const getBalances = async (address: string) => {
  * @param address Public address of the account to get free balance for
  * @returns The free balance of the account
  */
-export const getFreeBalance = async (address: string) => {
-    const balances = await getBalances(address)
-    return balances.free
+export const getFreeBalance = async (address: string): Promise<BN> => {
+  const balances = await getBalances(address)
+  return balances.free
 }
 
 /**
@@ -32,10 +39,10 @@ export const getFreeBalance = async (address: string) => {
  * @param address Public address of the account to check balance for transfer
  * @param value Token amount to transfer
  */
-export const checkBalanceForTransfer = async (address: string, value: number | BN) => {
-    if (value <= 0) throw new Error("Value needs to be greater than 0")
+export const checkBalanceForTransfer = async (address: string, value: number | BN): Promise<void> => {
+  if (value <= 0) throw new Error(Errors.VALUE_LOWER_THAN_0)
 
-    const freeBalance = await getFreeBalance(address)
-    const amount = typeof value === "number" ? await unFormatBalance(value) : value
-    if (freeBalance.cmp(amount) === -1) throw new Error("Insufficient funds to transfer")
+  const freeBalance = await getFreeBalance(address)
+  const amount = typeof value === "number" ? await numberToBalance(value) : value
+  if (freeBalance.cmp(amount) === -1) throw new Error(Errors.INSUFFICIENT_FUNDS)
 }

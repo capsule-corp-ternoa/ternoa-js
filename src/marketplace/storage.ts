@@ -7,7 +7,7 @@ import { query } from "../blockchain"
  * @summary Get the amount of caps needed to mint a marketplace.
  * @returns Marketplace mint fee
  */
-export const getMarketplaceMintFee = async () => {
-    const fee: any = await query(txPallets.marketplace, chainQuery.marketplaceMintFee)
-    return fee as BN
+export const getMarketplaceMintFee = async (): Promise<BN> => {
+  const fee: any = await query(txPallets.marketplace, chainQuery.marketplaceMintFee)
+  return fee as BN
 }
