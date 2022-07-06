@@ -2,7 +2,7 @@ name: SDK CI integration
 on:
   push:
     branches:
-      - master
+      - main
       - dev
 
 jobs:
@@ -21,8 +21,12 @@ jobs:
       - name: Generating doc
         run: npm run docs
       - name: Commit doc files
+        env:
+          SEED_TEST_FUNDS: ${{ secrets.SEED_TEST_FUNDS }}
+          SEED_TEST_FUNDS_PUBLIC: ${{ secrets.SEED_TEST_FUNDS_PUBLIC }}
         run: |
           echo ${{ github.ref }}
+          echo $SEED_TEST_FUNDS_PUBLIC
           git add .
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
