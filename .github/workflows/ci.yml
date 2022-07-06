@@ -1,14 +1,15 @@
 name: SDK CI integration
 on:
-  push:
+  pull_request:
     branches:
-      - main
       - dev
+    types:
+      - closed
 
 jobs:
   build-doc:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    environment: production
     strategy:
       matrix:
         node-version: [14.x]
@@ -20,16 +21,17 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - name: Generating doc
-        run: npm run docs
+        run: |
+          npm run docs
       - name: Commit doc files
         run: |
-          echo ${{ github.ref }}
           git add .
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "CI: Automated doc push" -a | exit 0
-      - name: Push changes
-        if: github.ref == 'refs/heads/master'
+          git commit -m "CI: Automated doc push" --no-verify -a
+      - name: Push changes on dev
+        if: github.ref == 'dev'
         uses: ad-m/github-push-action@master
         with:
+          branch: ${{ github.ref }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
