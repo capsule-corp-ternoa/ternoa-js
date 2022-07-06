@@ -343,16 +343,11 @@ export const isValidSignature = (signedMessage: string, signature: `0x${string}`
  * @name formatBalance
  * @summary Format balance from BN to number.
  * @param input BN input.
- * @param withSi Format with SI, i.e. m/M/etc.
- * @param withSiFull Format with full SI, i.e. mili/Mega/etc.
- * @param withUnit Add the unit (useful in Balance formats).
- * @param unit Token Unit.
+ * @param options Formatting options from IFormatBalanceOptions.
  * @returns Formatted balance with SI and unit notation.
  */
-export const formatBalance = async (input: BN, options?: IFormatBalanceOptions) => {
-  const api = await getRawApi()
-  const decimals = api.registry.chainDecimals[0]
-  formatBalancePolkadotUtil.setDefaults({ decimals, unit: options?.unit ?? "CAPS" })
+export const formatBalance = (input: BN, options?: IFormatBalanceOptions) => {
+  formatBalancePolkadotUtil.setDefaults({ decimals: 18, unit: options?.unit ?? "CAPS" })
   return formatBalancePolkadotUtil(input, options)
 }
 
