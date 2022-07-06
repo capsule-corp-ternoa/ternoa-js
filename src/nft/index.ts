@@ -176,18 +176,18 @@ export const formatRoyalty = async (royalty: number) => {
 
 /**
  * @name createNft
- * @summary Create a new NFT on blockchain with the provided details.
- * @param nftOffchainData Any offchain data to add to the NFT. (ex: a link, ipfs data, a text)
- * @param nftRoyalty Royalty can be set from 0% to 100%.
- * @param nftCollectionId The collection id to which the NFT will belong.
- * @param nftIsSoulbound Boolean that lock transfert after creation.
+ * @summary Create a new NFT on the blockchain with the provided details.
+ * @param nftOffchainData Any offchain data to add to the NFT. (ex: an ipfs id, a text)
+ * @param nftRoyalty Royalty can be set from 0% to 100%. Default: 0
+ * @param nftCollectionId The collection id to which the NFT will belong. Default: null
+ * @param nftIsSoulbound Boolean that lock transfert after creation. Default: false
  * @param keyring Keyring pair to sign the data.
- * @param callback Callback function to enable subscription, if not given, no subscription will be made.
+ * @param callback Callback function to enable subscription. If not specified, no subscription will be made.
  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed.
  */
 export const createNft = async (
   nftOffchainData: string,
-  nftRoyalty: number,
+  nftRoyalty = 0,
   nftCollectionId: number | null = null,
   nftIsSoulbound = false,
   keyring?: IKeyringPair,

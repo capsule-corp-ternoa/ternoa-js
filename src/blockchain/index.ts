@@ -8,6 +8,8 @@ import BN from "bn.js"
 import { txActions, txEvent, txPallets } from "../constants"
 import { checkFundsForTxFees } from "../fee"
 
+import { IFormatBalanceOptions } from "./interfaces"
+
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
 let api: ApiPromise
@@ -347,11 +349,11 @@ export const isValidSignature = (signedMessage: string, signature: `0x${string}`
  * @param unit Token Unit.
  * @returns Formatted balance with SI and unit notation.
  */
-export const formatBalance = async (input: BN, withSi = true, withSiFull = false, withUnit = true, unit = "CAPS") => {
+export const formatBalance = async (input: BN, options?: IFormatBalanceOptions) => {
   const api = await getRawApi()
   const decimals = api.registry.chainDecimals[0]
-  formatBalancePolkadotUtil.setDefaults({ decimals, unit })
-  return formatBalancePolkadotUtil(input, { withSi, withSiFull, withUnit })
+  formatBalancePolkadotUtil.setDefaults({ decimals, unit: options?.unit ?? "CAPS" })
+  return formatBalancePolkadotUtil(input, options)
 }
 
 /**
@@ -382,3 +384,5 @@ export const unFormatBalance = async (_input: number) => {
   }
   return result
 }
+
+export * from "./interfaces"
