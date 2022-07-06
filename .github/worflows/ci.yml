@@ -1,16 +1,12 @@
 name: SDK CI integration
-on:
-  pull_request:
-    types:
-      - closed
+on: [push]
+
 jobs:
   build-doc:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x]
-
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
