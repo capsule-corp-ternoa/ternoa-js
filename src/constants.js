@@ -1,0 +1,101 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MarketplaceKind = exports.WaitUntil = exports.chainConstants = exports.chainQuery = exports.txEvent = exports.txActions = exports.txPallets = void 0;
+var txPallets;
+(function (txPallets) {
+    txPallets["marketplace"] = "marketplace";
+    txPallets["nft"] = "nft";
+    txPallets["utility"] = "utility";
+    txPallets["balances"] = "balances";
+    txPallets["capsules"] = "capsules";
+    txPallets["associatedAccounts"] = "associatedAccounts";
+    txPallets["system"] = "system";
+})(txPallets = exports.txPallets || (exports.txPallets = {}));
+var txActions;
+(function (txActions) {
+    txActions["buy"] = "buy";
+    txActions["list"] = "list";
+    txActions["unlist"] = "unlist";
+    txActions["burn"] = "burn";
+    txActions["create"] = "create";
+    txActions["transfer"] = "transfer";
+    txActions["transferAll"] = "transferAll";
+    txActions["transferKeepAlive"] = "transferKeepAlive";
+    txActions["finishSeries"] = "finishSeries";
+    txActions["batch"] = "batch";
+    txActions["batchAll"] = "batchAll";
+    txActions["createFromNft"] = "createFromNft";
+    txActions["remove"] = "remove";
+    txActions["setIpfsReference"] = "setIpfsReference";
+    txActions["setAltvrUsername"] = "setAltvrUsername";
+    txActions["setCommissionFee"] = "setCommissionFee";
+    txActions["setOwner"] = "setOwner";
+    txActions["setKind"] = "setMarketType";
+    txActions["setName"] = "setName";
+    txActions["setUri"] = "setUri";
+    txActions["setLogoUri"] = "setLogoUri";
+    // nft
+    txActions["createNft"] = "createNft";
+    txActions["burnNft"] = "burnNft";
+    txActions["transferNft"] = "transferNft";
+    txActions["delegateNft"] = "delegateNft";
+    txActions["setRoyalty"] = "setRoyalty";
+    txActions["addNftToCollection"] = "addNftToCollection";
+    txActions["createCollection"] = "createCollection";
+    txActions["limitCollection"] = "limitCollection";
+    txActions["closeCollection"] = "closeCollection";
+    txActions["burnCollection"] = "burnCollection";
+    txActions["setNftMintFee"] = "setNftMintFee";
+    // marketplace
+    txActions["buyNft"] = "buyNft";
+    txActions["createMarketplace"] = "createMarketplace";
+    txActions["listNft"] = "listNft";
+    txActions["unlistNft"] = "unlistNft";
+    txActions["setMarketplaceConfiguration"] = "setMarketplaceConfiguration";
+    txActions["setMarketplaceKind"] = "setMarketplaceKind";
+    txActions["setMarketplaceOwner"] = "setMarketplaceOwner";
+    txActions["setMarketplaceMintFee"] = "setMarketplaceMintFee";
+})(txActions = exports.txActions || (exports.txActions = {}));
+var txEvent;
+(function (txEvent) {
+    txEvent["nftsCreated"] = "Created";
+    txEvent["nftsBurned"] = "Burned";
+    txEvent["nftsTransfered"] = "Transfered";
+    txEvent["CapsuleIpfsReferenceChanged"] = "CapsuleIpfsReferenceChanged";
+    txEvent["CapsuleCreated"] = "CapsuleCreated";
+    txEvent["CapsuleRemoved"] = "CapsuleRemoved";
+    txEvent["MarketplaceCreated"] = "MarketplaceCreated";
+    txEvent["ExtrinsicSuccess"] = "ExtrinsicSuccess";
+    txEvent["ExtrinsicFailed"] = "ExtrinsicFailed";
+    txEvent["BatchCompleted"] = "BatchCompleted";
+    txEvent["BatchInterrupted"] = "BatchInterrupted";
+})(txEvent = exports.txEvent || (exports.txEvent = {}));
+var chainQuery;
+(function (chainQuery) {
+    chainQuery["nftMintFee"] = "nftMintFee";
+    chainQuery["nfts"] = "nfts";
+    chainQuery["nextNFTId"] = "nextNFTId";
+    chainQuery["nextCollectionId"] = "nextCollectionId";
+    chainQuery["collectionSizeLimit"] = "collectionSizeLimit";
+    chainQuery["capsuleMintFee"] = "capsuleMintFee";
+    chainQuery["marketplaceMintFee"] = "marketplaceMintFee";
+    chainQuery["account"] = "account";
+    chainQuery["number"] = "number";
+    chainQuery["collections"] = "collections";
+})(chainQuery = exports.chainQuery || (exports.chainQuery = {}));
+var chainConstants;
+(function (chainConstants) {
+    chainConstants["existentialDeposit"] = "existentialDeposit";
+    chainConstants["nftOffchainDataLimit"] = "nftOffchainDataLimit";
+    chainConstants["collectionOffchainDataLimit"] = "collectionOffchainDataLimit";
+})(chainConstants = exports.chainConstants || (exports.chainConstants = {}));
+var WaitUntil;
+(function (WaitUntil) {
+    WaitUntil[WaitUntil["BlockInclusion"] = 0] = "BlockInclusion";
+    WaitUntil[WaitUntil["BlockFinalization"] = 1] = "BlockFinalization";
+})(WaitUntil = exports.WaitUntil || (exports.WaitUntil = {}));
+var MarketplaceKind;
+(function (MarketplaceKind) {
+    MarketplaceKind["Public"] = "Public";
+    MarketplaceKind["Private"] = "Private";
+})(MarketplaceKind = exports.MarketplaceKind || (exports.MarketplaceKind = {}));

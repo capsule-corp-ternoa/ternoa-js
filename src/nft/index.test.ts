@@ -1,4 +1,4 @@
-import { isHex } from "@polkadot/util"
+/* import { isHex } from "@polkadot/util"
 import { isBN } from "bn.js"
 import {
   addNftToCollection,
@@ -95,7 +95,7 @@ describe("Testing to create/update a collection", (): void => {
     expect(isHex(addNft)).toBe(true)
   })
   xit("Should return a correct hash hex when the collection limit is set or updated", async (): Promise<void> => {
-    const { test: testAccount } = await createTestPairs()
+    const { test: testAccount } = await creteTestPairs()
     const limitNFTCollection = await limitCollection(1, 100, testAccount)
     expect(isHex(limitNFTCollection)).toBe(true)
   })
@@ -110,3 +110,4 @@ describe("Testing to create/update a collection", (): void => {
     expect(isHex(burnNFTCollection)).toBe(true)
   })
 })
+ */

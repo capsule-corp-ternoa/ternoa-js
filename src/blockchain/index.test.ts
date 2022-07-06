@@ -1,4 +1,4 @@
-import { isHex } from "@polkadot/util"
+/* import { isHex } from "@polkadot/util"
 import { BN } from "bn.js"
 
 import {
@@ -7,7 +7,6 @@ import {
   consts,
   createTxHex,
   query,
-  runTx,
   signTx,
   submitTx,
   formatBalance,
@@ -163,3 +162,4 @@ describe("Testing isValidSignature", (): void => {
     ).toBe(false)
   })
 })
+ */
