@@ -1,7 +1,7 @@
 name: SDK CI integration
 on:
   pull_request:
-    branches: [main, dev]
+    branches: ["main", "dev"]
     types:
       - closed
 jobs:
