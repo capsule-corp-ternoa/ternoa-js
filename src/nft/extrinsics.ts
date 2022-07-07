@@ -93,7 +93,7 @@ export const burnNft = async (id: number, keyring: IKeyringPair, waitUntil: Wait
  * @name delegateNftTx
  * @summary           Creates an unsigned unsubmitted Delegate-NFT Transaction Hash.
  * @param id          The ID of the NFT.
- * @param recipient   Destination account.
+ * @param recipient   Destination account. If set to undefined this functions acts as a way to undelegate a delegated NFT.
  * @returns           Unsigned unsubmitted Delegate-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const delegateNftTx = async (id: number, recipient: string | undefined = undefined): Promise<TransactionHash> => {
@@ -104,7 +104,7 @@ export const delegateNftTx = async (id: number, recipient: string | undefined = 
  * @name delegateNft
  * @summary           Delegates an NFT to someone.
  * @param id          The ID of the NFT.
- * @param recipient   Destination account.
+ * @param recipient   Destination account. If set to undefined this functions acts as a way to undelegate a delegated NFT.
  * @param keyring     Account that will sign the transaction.
  * @param waitUntil   Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns           NFTDelegatedEvent Blockchain event.
