@@ -124,9 +124,8 @@ export const query = async (
  * @param constantName The constantName depending on the section (eg. "existentialDeposit")
  * @returns The constant value
  */
-export const consts = async (section: string, constantName: string): Promise<Codec> => {
-  const api = getRawApi()
-  return api.consts[section][constantName]
+export const consts = (section: string, constantName: string): Codec => {
+  return getRawApi().consts[section][constantName]
 }
 
 /**
@@ -223,23 +222,6 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
 }
 
 /**
- * @name checkTxAvailable
- * @summary Check if the pallet module and the subsequent extrinsic method exist in the Api instance.
- * @param txPallet Pallet module of the transaction
- * @param txExtrinsic Subsequent extrinsic method of the transaction
- * @returns Boolean, true if the pallet module and the subsequent extrinsic method exist, throw an Error otherwise
- */
-export const checkTxAvailable = async (txPallet: string, txExtrinsic: string): Promise<boolean> => {
-  const api = getRawApi()
-  try {
-    api.tx[txPallet][txExtrinsic]
-    return true
-  } catch (err) {
-    throw new Error(`${txPallet.toUpperCase()}_${txExtrinsic.toUpperCase()}_${Errors.EXTRINSIC_NOT_FOUND}`)
-  }
-}
-
-/**
  * @name createTx
  * @summary Create a transaction.
  * @param txPallet Pallet module of the transaction
@@ -252,9 +234,7 @@ const createTx = async (
   txExtrinsic: string,
   txArgs: any[] = [],
 ): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => {
-  const api = getRawApi()
-  await checkTxAvailable(txPallet, txExtrinsic)
-  return api.tx[txPallet][txExtrinsic](...txArgs)
+  return getRawApi().tx[txPallet][txExtrinsic](...txArgs)
 }
 
 /**
@@ -307,7 +287,6 @@ export const submitTx = async (
 ): Promise<TransactionHash> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
-  await checkFundsForTxFees(tx)
   if (callback === undefined) {
     await tx.send()
   } else {

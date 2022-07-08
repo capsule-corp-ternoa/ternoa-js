@@ -67,3 +67,15 @@ export const checkCollectionSizeLimit = async (limit: number): Promise<boolean> 
 
   return dataLimit >= limit
 }
+
+/**
+ * @name compareData
+ * @summary Compares the current value of a extrinsic attribute to the new one to avoid running a transaction if they are equal.
+ * @param data Current values to be compared.
+ * @param attribute Attribute of the element to compare. (ex: nft.royalty, marketplace.commission_fee)
+ * @param value New value to be compared to current data.
+ */
+export const compareData = async <T>(data: T, attribute: string, value: T): Promise<void> => {
+  if (value !== (null || undefined) && data === value)
+    throw new Error(`The ${attribute.replace(/_/g, " ")} is already set to : ${value}`)
+}

@@ -39,10 +39,9 @@ export const getFreeBalance = async (address: string): Promise<BN> => {
  * @param address Public address of the account to check balance for transfer
  * @param value Token amount to transfer
  */
-export const checkBalanceForTransfer = async (address: string, value: number | BN): Promise<void> => {
-  if (value <= 0) throw new Error(Errors.VALUE_LOWER_THAN_0)
+export const checkBalanceForTransfer = async (address: string, value: number | BN): Promise<boolean> => {
+  const amount = typeof value === "number" ? await numberToBalance(value) : value;
+  const freeBalance = await getFreeBalance(address);
 
-  const freeBalance = await getFreeBalance(address)
-  const amount = typeof value === "number" ? await numberToBalance(value) : value
-  if (freeBalance.cmp(amount) === -1) throw new Error(Errors.INSUFFICIENT_FUNDS)
+  return freeBalance.gt(amount);
 }

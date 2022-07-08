@@ -10,6 +10,11 @@ interface PairDef {
   type: KeypairType
 }
 
+export const TEST_DATA = {
+  collectionId: 0,
+  nftId: 0
+}
+
 export interface TestKeyringMap {
   [index: string]: IKeyringPair
 }
