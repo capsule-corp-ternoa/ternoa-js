@@ -1,3 +1,5 @@
+import BN from "bn.js"
+
 export enum txPallets {
   marketplace = "marketplace",
   nft = "nft",
@@ -75,7 +77,6 @@ export enum chainQuery {
   nfts = "nfts",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
-  collectionSizeLimit = "collectionSizeLimit",
   capsuleMintFee = "capsuleMintFee",
   marketplaceMintFee = "marketplaceMintFee",
   account = "account",
@@ -84,6 +85,8 @@ export enum chainQuery {
 }
 
 export enum chainConstants {
+  initialMintFee = "initialMintFee",
+  collectionSizeLimit = "collectionSizeLimit",
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
@@ -116,6 +119,9 @@ export enum Errors {
   NFT_NOT_FOUND = "NFT_NOT_FOUND",
   COLLECTION_NOT_FOUND = "COLLECTION_NOT_FOUND",
   ROYALTY_MUST_BE_PERCENTAGE = "ROYALTY_MUST_BE_PERCENTAGE",
+  NFT_CONVERSION_ERROR = "NFT_CONVERSION_ERROR",
+  COLLECTION_CONVERSION_ERROR = "COLLECTION_CONVERSION_ERROR",
 }
 
 export type TransactionHash = `0x${string}`
+export type Balance = BN;

@@ -12,8 +12,7 @@ import {
   NFTTransferredEvent,
 } from "../events"
 import { createTxHex, submitTxBlocking } from "../blockchain"
-import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
-import { formatRoyalty } from "./storage"
+import { Errors, TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
 
 // NFTs
 
@@ -337,23 +336,17 @@ export const burnCollection = async (
   return events.findEventOrThrow(CollectionBurnedEvent)
 }
 
-// /**
-//  * @name setNftMintFee
-//  * @summary Set the fee for minting an NFT.
-//  * @param fee New fee to mint an NFT
-//  * @param keyring Keyring pair to sign the data
-//  * @param callback Callback function to enable subscription, if not given, no subscription will be made
-//  * @returns Hash of the transaction, or an unsigned transaction to be signed if no keyring pair is passed
-//  */
-// export const setNftMintFee = async (
-//   fee: number | BN,
-//   keyring?: IKeyringPair,
-//   callback?: (result: ISubmittableResult) => void,
-// ) => {
-//   //who can set fee ?? democracy & tech committee
-//   const nftMintFee = await getNftMintFee()
-//   const formatedFee = typeof fee === "number" ? await numberToBalance(fee) : fee
-//   await compareData(nftMintFee, "nftMintFee", formatedFee)
-//   const tx = await runTx(txPallets.nft, txActions.setNftMintFee, [formatedFee], keyring, callback)
-//   return tx
-// }
+// misc
+/**
+ * @name formatRoyalty
+ * @summary Checks that royalty is in range 0 to 100 and format to permill.
+ * @param royalty Number in range from 0 to 100 with max 4 decimals.
+ * @returns The royalty in permill format.
+ */
+export const formatRoyalty = async (royalty: number): Promise<number> => {
+  if (royalty > 100 || royalty < 0) {
+    throw new Error(Errors.ROYALTY_MUST_BE_PERCENTAGE);
+  }
+
+  return parseFloat(royalty.toFixed(4)) * 10000;
+}
