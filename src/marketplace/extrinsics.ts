@@ -63,7 +63,11 @@ export const setMarketplaceKind = async (
 }
 
 /// TODO DOC!
-export const listNftTx = async (nft_id: number, marketplace_id: number, price: number | BN): Promise<TransactionHash> => {
+export const listNftTx = async (
+  nft_id: number,
+  marketplace_id: number,
+  price: number | BN,
+): Promise<TransactionHash> => {
   const formatted_price = typeof price === "number" ? await numberToBalance(price) : price
   return await createTxHex(txPallets.marketplace, txActions.listNft, [nft_id, marketplace_id, formatted_price])
 }

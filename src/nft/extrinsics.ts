@@ -12,7 +12,8 @@ import {
   NFTTransferredEvent,
 } from "../events"
 import { createTxHex, submitTxBlocking } from "../blockchain"
-import { Errors, TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
+import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
+import { formatRoyalty } from "./misc"
 
 // NFTs
 
@@ -95,7 +96,10 @@ export const burnNft = async (id: number, keyring: IKeyringPair, waitUntil: Wait
  * @param recipient   Destination account. If set to undefined this functions acts as a way to undelegate a delegated NFT.
  * @returns           Unsigned unsubmitted Delegate-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const delegateNftTx = async (id: number, recipient: string | undefined = undefined): Promise<TransactionHash> => {
+export const delegateNftTx = async (
+  id: number,
+  recipient: string | undefined = undefined,
+): Promise<TransactionHash> => {
   return await createTxHex(txPallets.nft, txActions.delegateNft, [id, recipient])
 }
 
@@ -334,19 +338,4 @@ export const burnCollection = async (
   const tx = await burnCollectionTx(id)
   const events = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionBurnedEvent)
-}
-
-// misc
-/**
- * @name formatRoyalty
- * @summary Checks that royalty is in range 0 to 100 and format to permill.
- * @param royalty Number in range from 0 to 100 with max 4 decimals.
- * @returns The royalty in permill format.
- */
-export const formatRoyalty = async (royalty: number): Promise<number> => {
-  if (royalty > 100 || royalty < 0) {
-    throw new Error(Errors.ROYALTY_MUST_BE_PERCENTAGE);
-  }
-
-  return parseFloat(royalty.toFixed(4)) * 10000;
 }

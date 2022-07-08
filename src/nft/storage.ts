@@ -9,8 +9,8 @@ import { ICollectionData, INftData } from "./interfaces"
  * @returns NFT mint fee.
  */
 export const getNftMintFee = async (): Promise<Balance> => {
-  const fee = await query(txPallets.nft, chainQuery.nftMintFee);
-  return fee as any as Balance;
+  const fee = await query(txPallets.nft, chainQuery.nftMintFee)
+  return fee as any as Balance
 }
 
 /**
@@ -19,8 +19,8 @@ export const getNftMintFee = async (): Promise<Balance> => {
  * @returns Number.
  */
 export const getNextNftId = async (): Promise<number> => {
-  const id = await query(txPallets.nft, chainQuery.nextNFTId);
-  return (id as any as BN).toNumber();
+  const id = await query(txPallets.nft, chainQuery.nextNFTId)
+  return (id as any as BN).toNumber()
 }
 
 /**
@@ -29,8 +29,8 @@ export const getNextNftId = async (): Promise<number> => {
  * @returns Number.
  */
 export const getNextCollectionId = async (): Promise<number> => {
-  const id = await query(txPallets.nft, chainQuery.nextCollectionId);
-  return (id as any as BN).toNumber();
+  const id = await query(txPallets.nft, chainQuery.nextCollectionId)
+  return (id as any as BN).toNumber()
 }
 
 /**
@@ -40,15 +40,15 @@ export const getNextCollectionId = async (): Promise<number> => {
  * @returns A JSON object with the NFT data. ex:{owner, creator, offchainData, (...)}
  */
 export const getNftData = async (nftId: number): Promise<INftData | null> => {
-  const data = await query(txPallets.nft, chainQuery.nfts, [nftId]);
+  const data = await query(txPallets.nft, chainQuery.nfts, [nftId])
   if (data.isEmpty == true) {
-    return null;
+    return null
   }
 
   try {
-    return data.toJSON() as any as INftData;
+    return data.toJSON() as any as INftData
   } catch (error) {
-    throw new Error(`${Errors.NFT_CONVERSION_ERROR}`);
+    throw new Error(`${Errors.NFT_CONVERSION_ERROR}`)
   }
 }
 
@@ -59,14 +59,14 @@ export const getNftData = async (nftId: number): Promise<INftData | null> => {
  * @returns A JSON object with data of a single NFT collection.
  */
 export const getCollectionData = async (collectionId: number): Promise<ICollectionData | null> => {
-  const data = await query(txPallets.nft, chainQuery.collections, [collectionId]);
+  const data = await query(txPallets.nft, chainQuery.collections, [collectionId])
   if (data.isEmpty == true) {
-    return null;
+    return null
   }
 
   try {
-    return data.toJSON() as any as ICollectionData;
+    return data.toJSON() as any as ICollectionData
   } catch (error) {
-    throw new Error(`${Errors.COLLECTION_CONVERSION_ERROR}`);
+    throw new Error(`${Errors.COLLECTION_CONVERSION_ERROR}`)
   }
 }

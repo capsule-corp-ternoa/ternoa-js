@@ -124,4 +124,4 @@ export enum Errors {
 }
 
 export type TransactionHash = `0x${string}`
-export type Balance = BN;
+export type Balance = BN
