@@ -4,32 +4,17 @@
 // Author: Charmander
 
 import { initializeApi } from '../../../src/blockchain/index';
-import { getNextNftId, getNftData } from '../../../src/nft';
+import { getNextNftId, getNftData, INftData } from '../../../src/nft';
+import { Cache } from './cache';
 import epxress from 'express'
 import cors from 'cors'
 import fetch from 'node-fetch';
 
-interface NFT {
+export interface NFT {
     nftId: number;
     imageUrl: string;
     title: string;
     description: string;
-}
-
-class Cache {
-    nfts: Map<number, NFT>;
-
-    constructor() {
-        this.nfts = new Map();
-    }
-
-    addRecord(nftId: number, imageUrl: string, title: string, description: string) {
-        this.nfts.set(nftId, { nftId, imageUrl, title, description });
-    }
-
-    getRecord(nftId: number): NFT | undefined {
-        return this.nfts.get(nftId);
-    }
 }
 
 let CACHE = new Cache();
@@ -38,7 +23,6 @@ async function main() {
     // Initializing Blockchain API
     await initializeApi("wss://mainnet.ternoa.network");
     console.log("Api Init");
-
 
     // Create the API server
     const app = epxress();
@@ -58,6 +42,8 @@ async function main() {
         res.send(a)
     })
 
+    CACHE.loadRecords();
+
     console.log("Starting to listen...");
     app.listen(3000);
 }
@@ -69,6 +55,43 @@ function getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+async function getNFTMetadata(nft: INftData): Promise<any> {
+    try {
+        const url = "https://ipfs.ternoa.dev/ipfs/" + nft.offchainData;
+        console.log("Getting metadata: " + url);
+
+        let response = await fetch(url);
+        let json = await response.text();
+        return JSON.parse(json);
+    } catch (error: any) {
+        return undefined;
+    }
+}
+
+async function getImageUrl(metadata: any): Promise<string | undefined> {
+    if (metadata.properties == undefined || metadata.properties.media == undefined) {
+        return undefined;
+    }
+
+    let url = "https://ipfs.ternoa.dev/ipfs/";
+    if (metadata.properties.media.url != undefined) {
+        url += metadata.properties.media.url;
+    } else if (metadata.properties.media.hash != undefined) {
+        url += metadata.properties.media.hash;
+    } else {
+        return undefined;
+    }
+
+    try {
+        console.log("Getting image: " + url);
+        await fetch(url);
+    } catch (error: any) {
+        return undefined;
+    }
+
+    return url
 }
 
 async function fetchNewNftImage(): Promise<string> {
@@ -91,46 +114,27 @@ async function fetchNewNftImage(): Promise<string> {
         console.log("Cache MISS!");
 
 
-        let data = await getNftData(nftId);
-        if (data == undefined) {
+        let nft = await getNftData(nftId);
+        if (nft == undefined) {
             continue;
         };
 
-        const url = "https://ipfs.ternoa.dev/ipfs/" + data.offchainData;
-        let metadata: any = "";
-        try {
-            console.log("Getting metadata: " + url);
-            let response = await fetch(url);
-            let json = await response.text();
-            metadata = JSON.parse(json);
-        } catch (error: any) {
-            console.log("Not an IPFS Valid Image Link ");
+        const metadata = await getNFTMetadata(nft);
+        if (metadata == undefined) {
+            console.log("Failed to get NFT metadata");
             continue;
         }
 
-        if (metadata.properties == undefined || metadata.properties.media == undefined) {
-            console.log("Found broken NFT1");
+        const imageUrl = await getImageUrl(metadata);
+        if (imageUrl == undefined) {
+            console.log("Failed to get image from Metadata");
             continue;
         }
 
-        let url2 = "https://ipfs.ternoa.dev/ipfs/";
-        if (metadata.properties.media.url != undefined) {
-            url2 += metadata.properties.media.url;
-        } else if (metadata.properties.media.hash != undefined) {
-            url2 += metadata.properties.media.hash;
-        } else {
-            console.log("Found broken NFT2");
-            continue;
-        }
-        try {
-            console.log("Getting image: " + url);
-            await fetch(url2);
-        } catch (error: any) {
-            console.log("Not an IPFS Valid Image Link ");
-        }
+        const nftRecord: NFT = { nftId, imageUrl, title: metadata.title, description: metadata.description };
+        CACHE.addRecord(nftRecord);
+        CACHE.saveRecords();
 
-        CACHE.addRecord(nftId, url2, metadata.title, metadata.description);
-
-        return JSON.stringify(CACHE.getRecord(nftId));
+        return JSON.stringify(nftRecord);
     }
 }
