@@ -98,24 +98,24 @@ async function fetchNewNftImage(): Promise<string> {
     let maxNftId = await getNextNftId();
     let nftId = 0;
 
-
     while (true) {
-        nftId = getRandomInt(0, maxNftId);
+        nftId = getRandomInt(0, maxNftId - 1);
         console.log("New nft: " + nftId);
         console.log("Checking cache...");
 
-        const maybe_record = CACHE.getRecord(nftId);
-        if (maybe_record != undefined) {
+        const record = CACHE.getRecord(nftId);
+        if (record != undefined) {
             console.log("Cache HIT!");
-            console.log(maybe_record);
+            console.log(record);
 
-            return JSON.stringify(maybe_record);
+            return JSON.stringify(record);
         }
         console.log("Cache MISS!");
 
 
         let nft = await getNftData(nftId);
         if (nft == undefined) {
+            console.log("Failed to get NFT data from blockchain");
             continue;
         };
 
@@ -135,6 +135,7 @@ async function fetchNewNftImage(): Promise<string> {
         CACHE.addRecord(nftRecord);
         CACHE.saveRecords();
 
+        console.log("Done!");
         return JSON.stringify(nftRecord);
     }
 }
