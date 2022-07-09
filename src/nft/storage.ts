@@ -2,6 +2,7 @@ import BN from "bn.js"
 import { query } from "../blockchain"
 import { Balance, chainQuery, Errors, txPallets } from "../constants"
 import { ICollectionData, INftData } from "./interfaces"
+import { hex2a } from "../misc"
 
 /**
  * @name nftMintFee
@@ -46,7 +47,11 @@ export const getNftData = async (nftId: number): Promise<INftData | null> => {
   }
 
   try {
-    return data.toJSON() as any as INftData
+    const result = data.toJSON() as any as INftData;
+    // The offchainData instead of being a string int's going tob a HEX.
+    // To fix this, we need to convert it to a normal string.
+    result.offchainData = hex2a(result.offchainData);
+    return result;
   } catch (error) {
     throw new Error(`${Errors.NFT_CONVERSION_ERROR}`)
   }

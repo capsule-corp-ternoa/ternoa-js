@@ -96,7 +96,7 @@ async function fetchNewNftImage(): Promise<string> {
             continue;
         };
 
-        const url = "https://ipfs.ternoa.dev/ipfs/" + hex2a(data.offchainData);
+        const url = "https://ipfs.ternoa.dev/ipfs/" + data.offchainData;
         let metadata: any = "";
         try {
             console.log("Getting metadata: " + url);
@@ -134,36 +134,3 @@ async function fetchNewNftImage(): Promise<string> {
         return JSON.stringify(CACHE.getRecord(nftId));
     }
 }
-
-
-function hex2a(hex: any) {
-    var str = '';
-    for (var i = 0; i < hex.length; i += 2) {
-        var v = parseInt(hex.substr(i, 2), 16);
-        if (v) str += String.fromCharCode(v);
-    }
-    return str;
-}
-/* function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
-}
-
-async function fetchNewNftImage() {
-    let maxNftId = await getNextNftId();
-}
-
-
-async function main() {
-    await initializeApi("wss://mainnet.ternoa.network");
-}
-
-main();
-
-console.log(getRandomInt(0, 100));
-console.log(getRandomInt(0, 100));
-console.log(getRandomInt(0, 100));
-console.log(getRandomInt(0, 100));
-console.log(getRandomInt(0, 100));
- */
