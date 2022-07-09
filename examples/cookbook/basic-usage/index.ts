@@ -1,3 +1,8 @@
+// Exercise Name: Basic SDK Usage
+// Date : 2022-07-06
+// Keywords: Create-Collection Create-NFT Create-Marketplace Batch-All List-NFT Buy-NFT Dummy-Data
+// Author: Charmander
+
 import '@polkadot/api-augment';
 import { MarketplaceKind, WaitUntil } from '../../../src/constants';
 import { NFTCreatedEvent, NFTListedEvent } from '../../../src/events';
@@ -6,7 +11,6 @@ import { getKeyringFromSeed } from '../../../src/account/index';
 import { createCollection, createNftTx } from '../../../src/nft/index';
 import { batchAllTxHex, initializeApi, signTx, submitTxBlocking } from '../../../src/blockchain/index';
 import { buyNft, createMarketplace, listNftTx } from '../../../src/marketplace';
-
 
 async function main() {
     // This will initialize the internal SDK API.
