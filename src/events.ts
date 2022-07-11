@@ -1,5 +1,5 @@
 import { Event } from "@polkadot/types/interfaces/system"
-import { Errors, MarketplaceKind } from "./constants"
+import { Errors } from "./constants"
 
 export enum EventType {
   // Balances
@@ -24,16 +24,6 @@ export enum EventType {
   CollectionLimited = "nft.CollectionLimited",
   CollectionClosed = "nft.CollectionClosed",
   CollectionBurned = "nft.CollectionBurned",
-
-  // Marketplace
-  MarketplaceCreated = "marketplace.MarketplaceCreated",
-  MarketplaceOwnerSet = "marketplace.MarketplaceOwnerSet",
-  MarketplaceKindSet = "marketplace.MarketplaceKindSet",
-  MarketplaceConfigSet = "marketplace.MarketplaceConfigSet",
-  MarketplaceMintFeeSet = "marketplace.MarketplaceMintFeeSet",
-  NFTListed = "marketplace.NFTListed",
-  NFTUnlisted = "marketplace.NFTUnlisted",
-  NFTSold = "marketplace.NFTSold",
 
   // Utility
   ItemCompleted = "utility.ItemCompleted",
@@ -98,23 +88,6 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
-      // Marketplace
-      case EventType.MarketplaceCreated:
-        return new MarketplaceCreatedEvent(event)
-      case EventType.MarketplaceOwnerSet:
-        return new MarketplaceOwnerSetEvent(event)
-      case EventType.MarketplaceKindSet:
-        return new MarketplaceKindSetEvent(event)
-      case EventType.MarketplaceConfigSet:
-        return new MarketplaceConfigSetEvent(event)
-      case EventType.MarketplaceMintFeeSet:
-        return new MarketplaceMintFeeSetEvent(event)
-      case EventType.NFTListed:
-        return new NFTListedEvent(event)
-      case EventType.NFTUnlisted:
-        return new NFTUnlistedEvent(event)
-      case EventType.NFTSold:
-        return new NFTSoldEvent(event)
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
@@ -432,180 +405,7 @@ export class CollectionBurnedEvent extends BlockchainEvent {
   }
 }
 
-/**
- * This class represents the on-chain MarketplaceCreatedEvent event.
- */
-export class MarketplaceCreatedEvent extends BlockchainEvent {
-  marketplaceId: number
-  owner: string
-  kind: MarketplaceKind
-
-  /**
-   * Construct the data object from MarketplaceCreatedEvent event
-   * @param event The MarketplaceCreatedEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceCreated)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-    this.kind = event.data[2].toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
-  }
-}
-
-/**
- * This class represents the on-chain MarketplaceConfigSetEvent event.
- */
-export class MarketplaceConfigSetEvent extends BlockchainEvent {
-  // This is not production ready - WIP for it since we focus on basic NFT for now.
-  marketplaceId: number
-  commissionFee: string | number // u128 or permil or enum
-  listingFee: string | number // u128 or permil or enum
-  accountList: string[] | string //can pass the {set : ["", "", ""] }
-  offchainData: string
-
-  /**
-   * Construct the data object from MarketplaceConfigSetEvent event
-   * @param event The MarketplaceConfigSetEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceConfigSet)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.commissionFee = event.data[1].toString()
-    this.listingFee = event.data[2].toString()
-    this.accountList = event.data[3].toString()
-    const offchainData = event.data[4].toHuman()
-    this.offchainData = offchainData ? offchainData.toString() : ""
-  }
-}
-
-/**
- * This class represents the on-chain MarketplaceOwnerSetEvent event.
- */
-export class MarketplaceOwnerSetEvent extends BlockchainEvent {
-  marketplaceId: number
-  owner: string
-
-  /**
-   * Construct the data object from MarketplaceOwnerSetEvent event
-   * @param event The MarketplaceOwnerSetEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceOwnerSet)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-  }
-}
-
-/**
- * This class represents the on-chain MarketplaceKindSetEvent event.
- */
-export class MarketplaceKindSetEvent extends BlockchainEvent {
-  marketplaceId: number
-  kind: MarketplaceKind
-
-  /**
-   * Construct the data object from MarketplaceKindSetEvent event
-   * @param event The MarketplaceKindSetEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceKindSet)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.kind = event.data[1].toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
-  }
-}
-
-/**
- * This class represents the on-chain MarketplaceMintFeeSetEvent event.
- */
-export class MarketplaceMintFeeSetEvent extends BlockchainEvent {
-  fee: string
-
-  /**
-   * Construct the data object from MarketplaceMintFeeSetEvent event
-   * @param event The MarketplaceMintFeeSetEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceMintFeeSet)
-
-    this.fee = event.data[0].toString()
-  }
-}
-
-/**
- * This class represents the on-chain NFTListedEvent event.
- */
-export class NFTListedEvent extends BlockchainEvent {
-  nftId: number
-  marketplaceId: number
-  price: string
-  commissionFee?: string
-
-  /**
-   * Construct the data object from NFTListedEvent event
-   * @param event The NFTListedEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.NFTListed)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.marketplaceId = Number.parseInt(event.data[1].toString())
-    this.price = event.data[2].toString()
-    this.commissionFee = event.data[3].isEmpty ? undefined : event.data[3].toString()
-  }
-}
-
-/**
- * This class represents the on-chain NFTUnlistedEvent event.
- */
-export class NFTUnlistedEvent extends BlockchainEvent {
-  nftId: number
-
-  /**
-   * Construct the data object from NFTUnlistedEvent event
-   * @param event The NFTUnlistedEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.NFTUnlisted)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-  }
-}
-
-/**
- * This class represents the on-chain NFTSoldEvent event.
- */
-export class NFTSoldEvent extends BlockchainEvent {
-  nftId: number
-  marketplaceId: number
-  buyer: string
-  listedPrice: string
-  marketplaceCut: string
-  royaltyCut: string
-
-  /**
-   * Construct the data object from NFTSoldEvent event
-   * @param event The NFTSoldEvent event
-   */
-  constructor(event: Event) {
-    super(event, EventType.NFTSold)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.marketplaceId = Number.parseInt(event.data[1].toString())
-    this.buyer = event.data[2].toString()
-    this.listedPrice = event.data[3].toString()
-    this.marketplaceCut = event.data[4].toString()
-    this.royaltyCut = event.data[5].toString()
-  }
-}
-
-/**
- * This class represents the on-chain CollectionBurnedEvent event,
- * when a single item within a Batch of dispatches has completed with no error.
- */
+// TODO
 export class ItemCompletedEvent extends BlockchainEvent {
   /**
    * Construct the data object from the ItemCompletedEvent event
