@@ -1,5 +1,5 @@
 import { Event } from "@polkadot/types/interfaces/system"
-import { Errors, MarketplaceKind } from "./constants"
+import { Errors } from "./constants"
 
 export enum EventType {
   // Balances
@@ -24,16 +24,6 @@ export enum EventType {
   CollectionLimited = "nft.CollectionLimited",
   CollectionClosed = "nft.CollectionClosed",
   CollectionBurned = "nft.CollectionBurned",
-
-  // Marketplace
-  MarketplaceCreated = "marketplace.MarketplaceCreated",
-  MarketplaceOwnerSet = "marketplace.MarketplaceOwnerSet",
-  MarketplaceKindSet = "marketplace.MarketplaceKindSet",
-  MarketplaceConfigSet = "marketplace.MarketplaceConfigSet",
-  MarketplaceMintFeeSet = "marketplace.MarketplaceMintFeeSet",
-  NFTListed = "marketplace.NFTListed",
-  NFTUnlisted = "marketplace.NFTUnlisted",
-  NFTSold = "marketplace.NFTSold",
 
   // Utility
   ItemCompleted = "utility.ItemCompleted",
@@ -98,23 +88,6 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
-      // Marketplace
-      case EventType.MarketplaceCreated:
-        return new MarketplaceCreatedEvent(event)
-      case EventType.MarketplaceOwnerSet:
-        return new MarketplaceOwnerSetEvent(event)
-      case EventType.MarketplaceKindSet:
-        return new MarketplaceKindSetEvent(event)
-      case EventType.MarketplaceConfigSet:
-        return new MarketplaceConfigSetEvent(event)
-      case EventType.MarketplaceMintFeeSet:
-        return new MarketplaceMintFeeSetEvent(event)
-      case EventType.NFTListed:
-        return new NFTListedEvent(event)
-      case EventType.NFTUnlisted:
-        return new NFTUnlistedEvent(event)
-      case EventType.NFTSold:
-        return new NFTSoldEvent(event)
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
@@ -339,114 +312,6 @@ export class CollectionBurnedEvent extends BlockchainEvent {
     super(event, EventType.CollectionBurned)
 
     this.collectionId = Number.parseInt(event.data[0].toString())
-  }
-}
-
-// TODO
-export class MarketplaceCreatedEvent extends BlockchainEvent {
-  marketplaceId: number
-  owner: string
-  kind: MarketplaceKind
-
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceCreated)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-    this.kind = event.data[2].toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
-  }
-}
-
-// TODO
-export class MarketplaceOwnerSetEvent extends BlockchainEvent {
-  marketplaceId: number
-  owner: string
-
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceOwnerSet)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-  }
-}
-
-// TODO
-export class MarketplaceKindSetEvent extends BlockchainEvent {
-  marketplaceId: number
-  kind: MarketplaceKind
-
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceKindSet)
-
-    this.marketplaceId = Number.parseInt(event.data[0].toString())
-    this.kind = event.data[1].toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
-  }
-}
-
-// TODO
-export class MarketplaceConfigSetEvent extends BlockchainEvent {
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceConfigSet)
-  }
-}
-
-// TODO
-export class MarketplaceMintFeeSetEvent extends BlockchainEvent {
-  fee: string
-
-  constructor(event: Event) {
-    super(event, EventType.MarketplaceMintFeeSet)
-
-    this.fee = event.data[0].toString()
-  }
-}
-
-// TODO
-export class NFTListedEvent extends BlockchainEvent {
-  nftId: number
-  marketplaceId: number
-  price: string
-  commissionFee?: string
-
-  constructor(event: Event) {
-    super(event, EventType.NFTListed)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.marketplaceId = Number.parseInt(event.data[1].toString())
-    this.price = event.data[2].toString()
-    this.commissionFee = event.data[3].isEmpty ? undefined : event.data[3].toString()
-  }
-}
-
-// TODO
-export class NFTUnlistedEvent extends BlockchainEvent {
-  nftId: number
-
-  constructor(event: Event) {
-    super(event, EventType.NFTUnlisted)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-  }
-}
-
-// TODO
-export class NFTSoldEvent extends BlockchainEvent {
-  nftId: number
-  marketplaceId: number
-  buyer: string
-  listedPrice: string
-  marketplaceCut: string
-  royaltyCut: string
-
-  constructor(event: Event) {
-    super(event, EventType.NFTSold)
-
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.marketplaceId = Number.parseInt(event.data[1].toString())
-    this.buyer = event.data[2].toString()
-    this.listedPrice = event.data[3].toString()
-    this.marketplaceCut = event.data[4].toString()
-    this.royaltyCut = event.data[5].toString()
   }
 }
 
