@@ -9,6 +9,7 @@ import { Cache } from './cache';
 import epxress from 'express'
 import cors from 'cors'
 import fetch from 'node-fetch';
+import path from 'node:path';
 
 export interface NFT {
     nftId: number;
@@ -28,12 +29,13 @@ async function main() {
     const app = epxress();
 
     app.use(cors({
-        origin: "*"
+        origin: "*",
+        methods: "GET",
     }));
 
     // Defining the root
     app.get('/', (req, res) => {
-        res.send('hello world')
+        res.sendFile(path.join(__dirname, '/index.html'));
     })
 
     // Defining the root
