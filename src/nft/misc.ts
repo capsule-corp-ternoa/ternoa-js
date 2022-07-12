@@ -1,5 +1,5 @@
 import { Errors } from "../constants"
-import { getFreeBalance } from "../balance"
+import { getTransferrableBalance } from "../balance"
 import {
   getCollectionOffchainDataLimit,
   getCollectionSizeLimit,
@@ -28,10 +28,10 @@ export const formatRoyalty = async (royalty: number): Promise<number> => {
  * @return True if the account can afford to pay the NFT mint fee.
  */
 export const canPayNftMintFee = async (address: string): Promise<boolean> => {
-  const freeBalance = await getFreeBalance(address)
+  const balance = await getTransferrableBalance(address)
   const nftMintFee = await getInitialMintFee()
 
-  return freeBalance.gt(nftMintFee)
+  return balance.gt(nftMintFee)
 }
 
 /**
