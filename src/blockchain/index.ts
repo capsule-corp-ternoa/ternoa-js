@@ -12,7 +12,7 @@ import { ConditionalVariable } from "../misc"
 
 import { IFormatBalanceOptions } from "./interfaces"
 import { SubmittableExtrinsic } from "@polkadot/api/types"
-import { getFreeBalance } from "../balance"
+import { getTransferrableBalance } from "../balance"
 import { getCapsuleMintFee } from "../capsule"
 import { getNftMintFee } from "../nft"
 
@@ -188,9 +188,9 @@ export const getTxFees = async (txHex: TransactionHash, address: string): Promis
  * @param tx Signed transaction object
  */
 export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>): Promise<void> => {
-  const freeBalance = await getFreeBalance(tx.signer.toString())
+  const balance = await getTransferrableBalance(tx.signer.toString())
   const fees = await getTxFees(tx.toHex(), tx.signer.toString())
-  if (freeBalance.cmp(fees) === -1) throw new Error(Errors.INSUFFICIENT_FUNDS)
+  if (balance.cmp(fees) === -1) throw new Error(Errors.INSUFFICIENT_FUNDS)
 }
 
 /**

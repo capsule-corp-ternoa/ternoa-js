@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { chainQuery, Errors, txPallets } from "../constants"
+import { chainQuery, txPallets } from "../constants"
 import { query, numberToBalance } from "../blockchain"
 
 /**
@@ -23,14 +23,25 @@ export const getBalances = async (
 }
 
 /**
- * @name getFreeBalance
- * @summary Get the free balance of an account
- * @param address Public address of the account to get free balance for
- * @returns The free balance of the account
+ * @name getTotalBalance
+ * @summary Get the total balance of an account (free & reserve balances)
+ * @param address Public address of the account to get total balance for
+ * @returns The total balance of an account (free & reserve balances)
  */
-export const getFreeBalance = async (address: string): Promise<BN> => {
-  const balances = await getBalances(address)
-  return balances.free
+export const getTotalBalance = async (address: string): Promise<BN> => {
+  const { free, reserved } = await getBalances(address)
+  return free.add(reserved)
+}
+
+/**
+ * @name getTransferrableBalance
+ * @summary Get the transferrable balance of an account
+ * @param address Public address of the account to get transferrable balance for
+ * @returns The transferrable balance of an account
+ */
+export const getTransferrableBalance = async (address: string): Promise<BN> => {
+  const { free, miscFrozen } = await getBalances(address)
+  return free.sub(miscFrozen)
 }
 
 /**
@@ -40,8 +51,8 @@ export const getFreeBalance = async (address: string): Promise<BN> => {
  * @param value Token amount to transfer
  */
 export const checkBalanceForTransfer = async (address: string, value: number | BN): Promise<boolean> => {
-  const amount = typeof value === "number" ? await numberToBalance(value) : value;
-  const freeBalance = await getFreeBalance(address);
+  const amount = typeof value === "number" ? await numberToBalance(value) : value
+  const { free } = await getBalances(address)
 
-  return freeBalance.gt(amount);
+  return free.gt(amount)
 }
