@@ -13,7 +13,6 @@ import { ConditionalVariable } from "../misc"
 import { IFormatBalanceOptions } from "./interfaces"
 import { SubmittableExtrinsic } from "@polkadot/api/types"
 import { getTransferrableBalance } from "../balance"
-import { getCapsuleMintFee } from "../capsule"
 import { getNftMintFee } from "../nft"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
@@ -152,16 +151,8 @@ export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> =>
   const api = getRawApi()
   const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
-    case `${txPallets.nft}_${txActions.create}`: {
+    case `${txPallets.nft}_${txActions.createNft}`: {
       return await getNftMintFee()
-    }
-    case `${txPallets.capsules}_${txActions.create}`: {
-      const capsuleMintFee = await getCapsuleMintFee()
-      const nftMintFee = await getNftMintFee()
-      return capsuleMintFee.add(nftMintFee)
-    }
-    case `${txPallets.capsules}_${txActions.createFromNft}`: {
-      return await getCapsuleMintFee()
     }
     default: {
       return new BN(0)
@@ -225,13 +216,11 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
  * @param txArgs Arguments of the transaction
  * @returns Transaction object unsigned
  */
-const createTx = async (
+export const createTx = async (
   txPallet: string,
   txExtrinsic: string,
   txArgs: any[] = [],
-): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => {
-  return getRawApi().tx[txPallet][txExtrinsic](...txArgs)
-}
+): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => getRawApi().tx[txPallet][txExtrinsic](...txArgs)
 
 /**
  * @name createTxHex
@@ -251,7 +240,7 @@ export const createTxHex = async (
 }
 
 /**
- * @name signTx
+ * @name signTxHex
  * @summary Sign a transaction.
  * @param keyring Keyring pair to sign the data
  * @param txHex Tx hex of the unsigned transaction to be signed
@@ -259,25 +248,24 @@ export const createTxHex = async (
  * @param validity Number of blocks during which transaction can be submitted, default to immortal
  * @returns Hex value of the signed transaction
  */
-export const signTx = async (
+export const signTxHex = async (
   keyring: IKeyringPair,
   txHex: TransactionHash,
   nonce = -1,
   validity = 0,
 ): Promise<TransactionHash> => {
-  const api = getRawApi()
-  const txSigned = await api.tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
+  const txSigned = await getRawApi().tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
 }
 
 /**
- * @name submitTx
+ * @name submitTxHex
  * @summary Send a signed transaction on the blockchain.
  * @param txHex Transaction hex of the signed transaction to be submitted
  * @param callback Callback function to enable subscription, if not given, no subscription will be made
  * @returns Hash of the transaction
  */
-export const submitTx = async (
+export const submitTxHex = async (
   txHex: TransactionHash,
   callback?: (result: ISubmittableResult) => void,
 ): Promise<TransactionHash> => {
@@ -458,7 +446,7 @@ export const submitTxNonBlocking = async (
   const events: BlockchainEvents = new BlockchainEvents([])
 
   if (keyring) {
-    tx = await signTx(keyring, tx)
+    tx = await signTxHex(keyring, tx)
   }
 
   const callback = (result: ISubmittableResult) => {
@@ -471,7 +459,7 @@ export const submitTxNonBlocking = async (
     }
   }
 
-  await submitTx(tx, callback)
+  await submitTxHex(tx, callback)
 
   return [conVar, events]
 }
