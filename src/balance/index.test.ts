@@ -1,4 +1,4 @@
-import BN from "bn.js"
+/* import BN from "bn.js"
 import { isHex } from "@polkadot/util"
 import { createTestPairs } from "../_misc/testingPairs"
 import { generateSeed } from "../account"
@@ -57,3 +57,4 @@ describe("Testing transfer", (): void => {
     expect(isHex(res)).toBe(true)
   })
 })
+ */

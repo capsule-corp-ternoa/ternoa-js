@@ -7,7 +7,7 @@ import { query } from "../blockchain"
  * @summary Get the amount of caps needed to mint a capsule.
  * @returns Capsule mint fee
  */
-export const getCapsuleMintFee = async () => {
+export const getCapsuleMintFee = async (): Promise<BN> => {
   const fee: any = await query(txPallets.capsules, chainQuery.capsuleMintFee)
   return fee as BN
 }

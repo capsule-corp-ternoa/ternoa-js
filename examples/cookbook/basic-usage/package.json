@@ -1,0 +1,11 @@
+{
+    "name": "name-aa",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "ts-node index.ts"
+    },
+    "devDependencies": {
+        "ts-node": "10.8.2"
+    }
+}

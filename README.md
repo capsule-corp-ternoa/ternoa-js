@@ -16,7 +16,7 @@ npm install ternoa-js
 
 ## Quick Start
 
-Functions are organized by theme. In the exemple below, the import of _generateSeed_ and _getKeyringFromSeed_ from the subpath **ternoa-js/account** allows us to generate a new account and display its address.
+Functions are organized by theme. In the example below, the import of _generateSeed_ and _getKeyringFromSeed_ from the subpath **ternoa-js/account** allows us to generate a new account and display its address.
 
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
