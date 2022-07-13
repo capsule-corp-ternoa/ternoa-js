@@ -16,6 +16,11 @@ npm install ternoa-js
 
 ## Quick Start
 
+The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
+It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function in **ternoa-js/blockchain**.
+
+It's not strictly necessary to initialize the internal SDK API but it's good practice to do it as soon as possible. Otherwise, the API will be forcefully initialized in the first SDK call.
+
 Functions are organized by theme. In the example below, the import of _generateSeed_ and _getKeyringFromSeed_ from the subpath **ternoa-js/account** allows us to generate a new account and display its address.
 
 ```javascript
@@ -30,12 +35,31 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 })
 ```
 
-The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
-It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function in **ternoa-js/blockchain**.
+Among all the features provided by the Ternoa SDK, this short snippet of code allows you to create an NFT, submit and sign it at a glance. This single line \_createNft_function, require a few parameters : some offchainData metadatas, a royalty, a collection id if you want this NFT to belong to a collection, a boolean to define its soulbound status, the keyring to sign and submit the transaction, and a callback parameter, to define at which point we want to get the results of the transaction execution.
+
+```javascript
+import { createNft } from "ternoa-js/nft"
+import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
+
+const createMyFirstNFT = async () => {
+  try {
+    // we will need a keyring to sing and submit the transaction
+    const account = await generateSeed()
+    const keyring = await getKeyringFromSeed(account.seed)
+
+    // Here we create, sing and submit the transaction
+    await createNft("My first NFT", 10, 1, false, keyring, WaitUntil.BlockInclusion)
+  } catch (e) {
+    console.log(e)
+  }
+}
+```
 
 ## Documentation
 
 The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://docs.ternoa.network/).
+
+Discover our End-to-End Test Dapp here : [ternoa-js-test-dapp](https://e2e.ternoa.network/).
 
 <!---
 ### Cookbook examples
