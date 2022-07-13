@@ -43,7 +43,7 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 
 const createMyFirstNFT = async () => {
   try {
-    // we will need a keyring to sing and submit the transaction
+    // We will need a keyring to sign and submit the transaction
     const account = await generateSeed()
     const keyring = await getKeyringFromSeed(account.seed)
 
