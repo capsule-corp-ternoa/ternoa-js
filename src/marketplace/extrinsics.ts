@@ -1,6 +1,7 @@
 import { IKeyringPair } from "@polkadot/types/types"
 import {
   MarketplaceCreatedEvent,
+  MarketplaceConfigSetEvent,
   MarketplaceKindSetEvent,
   MarketplaceMintFeeSetEvent,
   MarketplaceOwnerSetEvent,
@@ -27,6 +28,39 @@ export const createMarketplace = async (
   const events = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceCreatedEvent)
 }
+
+// // WIP: Datas must be check first from indexer
+// /// TODO DOC!
+// export const setMarketplaceConfigurationTx = async (
+//   id: number,
+//   commissionFee: number | BN | undefined = undefined,
+//   listingFee: number | BN | undefined = undefined,
+//   accountList: [string] | undefined = undefined,
+//   offchainData: string | undefined = undefined,
+// ): Promise<TransactionHash> => {
+//   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
+//     id,
+//     commissionFee,
+//     listingFee,
+//     accountList,
+//     offchainData,
+//   ])
+// }
+
+// /// TODO DOC!
+// export const setMarketplaceConfiguration = async (
+//   id: number,
+//   commissionFee: number | BN | undefined = undefined,
+//   listingFee: number | BN | undefined = undefined,
+//   accountList: [string] | undefined = undefined,
+//   offchainData: string | undefined = undefined,
+//   keyring: IKeyringPair,
+//   waitUntil: WaitUntil,
+// ): Promise<MarketplaceConfigSetEvent> => {
+//   const tx = await setMarketplaceConfigurationTx(id, commissionFee, listingFee, accountList, offchainData)
+//   const events = await submitTxBlocking(tx, waitUntil, keyring)
+//   return events.findEventOrThrow(MarketplaceConfigSetEvent)
+// }
 
 /// TODO DOC!
 export const setMarketplaceOwnerTx = async (id: number, recipient: string): Promise<TransactionHash> => {
