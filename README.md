@@ -61,9 +61,9 @@ The official SDK documentation is available: [ternoa-js sdk documentation](http:
 
 Discover our End-to-End Test Dapp here : [ternoa-js-test-dapp](https://e2e.ternoa.network/).
 
-<!---
-### Cookbook examples
--->
+### Cookbook example
+
+If you are looking for a quick overview about how the basic-usage and how to create your first NFT, we recommand you to look at the exemple section [cookbook/basic-usage](https://github.com/capsule-corp-ternoa/ternoa-js/tree/1.1.0-basicNFTs-collections/examples/cookbook/basic-usage)
 
 ## SDK Development
 
