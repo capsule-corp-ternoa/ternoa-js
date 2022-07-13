@@ -426,7 +426,14 @@ export const numberToBalance = async (_input: number): Promise<BN> => {
   return result
 }
 
-/// TODO DOC!
+/**
+ * @name submitTxBlocking
+ * @summary             Signs and submits a transaction. It blocks the execution flow until the transaction is in a block or in a finalized block.
+ * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
+ * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @param keyring       Account that will sign the transaction if provided
+ * @returns             A list of blockchain events related to an extrinsics execution.
+ */
 export const submitTxBlocking = async (
   tx: TransactionHash,
   waitUntil: WaitUntil,
@@ -438,7 +445,14 @@ export const submitTxBlocking = async (
   return events
 }
 
-/// TODO DOC!
+/**
+ * @name submitTxNonBlocking
+ * @summary             Signs and submits a transaction in a non-blocking way. Signing is optional.
+ * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
+ * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @param keyring       Account that will sign the transaction if provided
+ * @returns             Returns a pair objects that are used to track the progress of the transaction execution. The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned objects is an array of events which gets populated automatically once the operation is finished.
+ */
 export const submitTxNonBlocking = async (
   tx: TransactionHash,
   waitUntil: WaitUntil,
