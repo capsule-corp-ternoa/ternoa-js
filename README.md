@@ -35,7 +35,7 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 })
 ```
 
-Among all the features provided by the Ternoa SDK, this short snippet of code allows you to create an NFT, submit and sign it at a glance. This single line \_createNft_function, require a few parameters : some offchainData metadatas, a royalty, a collection id if you want this NFT to belong to a collection, a boolean to define its soulbound status, the keyring to sign and submit the transaction, and a callback parameter, to define at which point we want to get the results of the transaction execution.
+Among all the features provided by the Ternoa SDK, this short snippet of code allows you to create an NFT, submit and sign it at a glance. This single line _createNft_ function, require a few parameters : some `offchainData` metadatas, a `royalty`, a `collectionId` if you want this NFT to belong to a collection, a boolean to define its `isSoulbound` status, the `keyring` to sign and submit the transaction, and a `waitUntil` callback parameter, to define at which point we want to get the results of the transaction execution.
 
 ```javascript
 import { createNft } from "ternoa-js/nft"
