@@ -22,8 +22,8 @@ let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
 
 /**
  * @name initializeApi
- * @summary Initialize substrate api with selected or default wss endpoint.
- * @description The default chainEndpoint is "wss://alphanet.ternoa.com"
+ * @summary       Initialize substrate api with selected or default wss endpoint.
+ * @description   The default chainEndpoint is "wss://alphanet.ternoa.com"
  */
 export const initializeApi = async (endpoint?: string): Promise<void> => {
   if (endpoint) chainEndpoint = endpoint
@@ -37,8 +37,8 @@ export const initializeApi = async (endpoint?: string): Promise<void> => {
 
 /**
  * @name getRawApi
- * @summary Get initialized substrate Api instance.
- * @returns Raw polkadot api instance, a wrapper around the RPC and interfaces of the chain.
+ * @summary   Get initialized substrate Api instance.
+ * @returns   Raw polkadot api instance, a wrapper around the RPC and interfaces of the chain.
  */
 export const getRawApi = (): ApiPromise => {
   if (!api) throw new Error(Errors.API_NOT_INITIALIZED)
@@ -48,8 +48,8 @@ export const getRawApi = (): ApiPromise => {
 
 /**
  * @name isApiConnected
- * @summary Check if the Api instance existed and if it is connected.
- * @returns Boolean, true if the underlying provider is connected, false otherwise
+ * @summary   Check if the Api instance existed and if it is connected.
+ * @returns   Boolean, true if the underlying provider is connected, false otherwise
  */
 export const isApiConnected = (): boolean => {
   return Boolean(api && api.isConnected)
@@ -57,8 +57,8 @@ export const isApiConnected = (): boolean => {
 
 /**
  * @name getApiEndpoint
- * @summary Returns the wss api endpoint
- * @returns String, the api endpoint connected with.
+ * @summary   Returns the wss api endpoint
+ * @returns   String, the api endpoint connected with.
  */
 export const getApiEndpoint = (): string => {
   return chainEndpoint
@@ -66,7 +66,7 @@ export const getApiEndpoint = (): string => {
 
 /**
  * @name safeDisconnect
- * @summary Disconnect safely from the underlying provider, halting all network traffic
+ * @summary   Disconnect safely from the underlying provider, halting all network traffic
  */
 export const safeDisconnect = async (): Promise<void> => {
   if (isApiConnected()) await api.disconnect()
@@ -74,7 +74,7 @@ export const safeDisconnect = async (): Promise<void> => {
 
 /**
  * @name query
- * @summary Generic function to make a chain query.
+ * @summary   Generic function to make a chain query.
  * @example
  * <BR>
  *
@@ -86,11 +86,11 @@ export const safeDisconnect = async (): Promise<void> => {
  * const data = await query('system', 'account', ['5GesFQSwhmuMKAHcDrfm21Z5xrq6kW93C1ch2Xosq1rXx2Eh']);
  *
  * ```
- * @param module The section required to make the chain query (eg. "system")
- * @param call The call depending on the section (eg. "account")
- * @param args Array of args for the call
- * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Result of the query storage call
+ * @param module    The section required to make the chain query (eg. "system")
+ * @param call      The call depending on the section (eg. "account")
+ * @param args      Array of args for the call
+ * @param callback  Callback function to enable subscription, if not given, no subscription will be made
+ * @returns         Result of the query storage call
  */
 export const query = async (
   module: string,
@@ -110,7 +110,7 @@ export const query = async (
 
 /**
  * @name consts
- * @summary Generic function to get a chain constant.
+ * @summary   Generic function to get a chain constant.
  * @example
  * <BR>
  *
@@ -128,10 +128,10 @@ export const consts = (section: string, constantName: string): Codec => {
 
 /**
  * @name getTxInitialFee
- * @summary Get the weight fee estimation for a transaction.
- * @param txHex Transaction hex
- * @param address Public address of the sender
- * @returns Transaction fee estimation
+ * @summary         Get the weight fee estimation for a transaction.
+ * @param txHex     Transaction hex
+ * @param address   Public address of the sender
+ * @returns         Transaction fee estimation
  */
 export const getTxInitialFee = async (txHex: TransactionHash, address: string): Promise<Balance> => {
   const api = getRawApi()
@@ -142,10 +142,10 @@ export const getTxInitialFee = async (txHex: TransactionHash, address: string): 
 
 /**
  * @name getTxAdditionalFee
- * @summary Get the fee needed by Ternoa for specific transaction services.
- * @description Some Ternoa's services required additional fees on top of chain gas fees, for example: minting a marketplace, minting an NFT or creating a capsule.
- * @param txHex Transaction hex
- * @returns Fee estimation
+ * @summary       Get the fee needed by Ternoa for specific transaction services.
+ * @description   Some Ternoa's services required additional fees on top of chain gas fees, for example: minting a marketplace, minting an NFT or creating a capsule.
+ * @param txHex   Transaction hex
+ * @returns       Fee estimation
  */
 export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> => {
   const api = getRawApi()
@@ -162,10 +162,10 @@ export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> =>
 
 /**
  * @name getTxFees
- * @summary Get the total fees for a transaction hex.
- * @param txHex Hex of the transaction
- * @param address Public address of the sender
- * @returns Total estimated fee which is the sum of the chain initial fee and the optional additional fee
+ * @summary         Get the total fees for a transaction hex.
+ * @param txHex     Hex of the transaction
+ * @param address   Public address of the sender
+ * @returns         Total estimated fee which is the sum of the chain initial fee and the optional additional fee
  */
 export const getTxFees = async (txHex: TransactionHash, address: string): Promise<BN> => {
   const extrinsicFee = await getTxInitialFee(txHex, address)
@@ -175,8 +175,8 @@ export const getTxFees = async (txHex: TransactionHash, address: string): Promis
 
 /**
  * @name checkFundsForTxFees
- * @summary Check if a signed transaction sender has enough funds to pay transaction gas fees on transaction submit.
- * @param tx Signed transaction object
+ * @summary   Check if a signed transaction sender has enough funds to pay transaction gas fees on transaction submit.
+ * @param tx  Signed transaction object
  */
 export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", ISubmittableResult>): Promise<void> => {
   const balance = await getTransferrableBalance(tx.signer.toString())
@@ -186,9 +186,9 @@ export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", IS
 
 /**
  * @name isTransactionSuccess
- * @summary Check if a transaction result is successful.
- * @param result Generic result passed as a parameter in a transaction callback
- * @returns Object containing a boolean success field indicating if transaction is successful
+ * @summary       Check if a transaction result is successful.
+ * @param result  Generic result passed as a parameter in a transaction callback
+ * @returns       Object containing a boolean success field indicating if transaction is successful
  * and a indexInterrupted field to indicate where the transaction stopped in case of a batch
  */
 export const isTransactionSuccess = (result: ISubmittableResult): { success: boolean; indexInterrupted?: number } => {
@@ -210,11 +210,11 @@ export const isTransactionSuccess = (result: ISubmittableResult): { success: boo
 
 /**
  * @name createTx
- * @summary Create a transaction.
- * @param txPallet Pallet module of the transaction
- * @param txExtrinsic Subsequent extrinsic method of the transaction
- * @param txArgs Arguments of the transaction
- * @returns Transaction object unsigned
+ * @summary             Create a transaction.
+ * @param txPallet      Pallet module of the transaction
+ * @param txExtrinsic   Subsequent extrinsic method of the transaction
+ * @param txArgs        Arguments of the transaction
+ * @returns             Transaction object unsigned
  */
 export const createTx = async (
   txPallet: string,
@@ -224,11 +224,11 @@ export const createTx = async (
 
 /**
  * @name createTxHex
- * @summary Create a transaction in hex format.
- * @param txPallet Pallet module of the transaction
- * @param txExtrinsic Subsequent extrinsic method of the transaction
- * @param txArgs Arguments of the transaction
- * @returns Hex value of the transaction
+ * @summary             Create a transaction in hex format.
+ * @param txPallet      Pallet module of the transaction
+ * @param txExtrinsic   Subsequent extrinsic method of the transaction
+ * @param txArgs        Arguments of the transaction
+ * @returns             Hex value of the transaction
  */
 export const createTxHex = async (
   txPallet: string,
@@ -241,12 +241,12 @@ export const createTxHex = async (
 
 /**
  * @name signTxHex
- * @summary Sign a transaction.
- * @param keyring Keyring pair to sign the data
- * @param txHex Tx hex of the unsigned transaction to be signed
- * @param nonce Nonce to be used in the transaction, default to next available
- * @param validity Number of blocks during which transaction can be submitted, default to immortal
- * @returns Hex value of the signed transaction
+ * @summary         Sign a transaction.
+ * @param keyring   Keyring pair to sign the data
+ * @param txHex     Tx hex of the unsigned transaction to be signed
+ * @param nonce     Nonce to be used in the transaction, default to next available
+ * @param validity  Number of blocks during which transaction can be submitted, default to immortal
+ * @returns         Hex value of the signed transaction
  */
 export const signTxHex = async (
   keyring: IKeyringPair,
@@ -260,10 +260,10 @@ export const signTxHex = async (
 
 /**
  * @name submitTxHex
- * @summary Send a signed transaction on the blockchain.
- * @param txHex Transaction hex of the signed transaction to be submitted
- * @param callback Callback function to enable subscription, if not given, no subscription will be made
- * @returns Hash of the transaction
+ * @summary         Send a signed transaction on the blockchain.
+ * @param txHex     Transaction hex of the signed transaction to be submitted
+ * @param callback  Callback function to enable subscription, if not given, no subscription will be made
+ * @returns         Hash of the transaction
  */
 export const submitTxHex = async (
   txHex: TransactionHash,
@@ -291,9 +291,9 @@ export const submitTxHex = async (
 
 /**
  * @name batchTx
- * @summary Create a batch transaction of dispatch calls.
- * @param txHexes Transactions to execute in the batch call
- * @returns Submittable extrinsic unsigned
+ * @summary         Create a batch transaction of dispatch calls.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Submittable extrinsic unsigned
  */
 export const batchTx = async (
   txHexes: TransactionHash[],
@@ -305,9 +305,9 @@ export const batchTx = async (
 
 /**
  * @name batchTxHex
- * @summary Create a batch transaction of dispatch calls in hex format.
- * @param txHexes Transactions to execute in the batch call
- * @returns Hex of the submittable extrinsic unsigned
+ * @summary         Create a batch transaction of dispatch calls in hex format.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Hex of the submittable extrinsic unsigned
  */
 export const batchTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
   const tx = await batchTx(txHexes)
@@ -316,9 +316,9 @@ export const batchTxHex = async (txHexes: TransactionHash[]): Promise<Transactio
 
 /**
  * @name batchAllTx
- * @summary Create a batchAll transaction of dispatch calls.
- * @param txHexes Transactions to execute in the batch call
- * @returns Submittable extrinsic unsigned
+ * @summary         Create a batchAll transaction of dispatch calls.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Submittable extrinsic unsigned
  */
 export const batchAllTx = async (
   txHexes: TransactionHash[],
@@ -330,9 +330,9 @@ export const batchAllTx = async (
 
 /**
  * @name batchAllTxHex
- * @summary Create a batchAll transaction of dispatch calls in hex format.
- * @param txHexes Transactions to execute in the batch call
- * @returns Hex of the submittable extrinsic unsigned
+ * @summary         Create a batchAll transaction of dispatch calls in hex format.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Hex of the submittable extrinsic unsigned
  */
 export const batchAllTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
   const tx = await batchAllTx(txHexes)
@@ -341,9 +341,9 @@ export const batchAllTxHex = async (txHexes: TransactionHash[]): Promise<Transac
 
 /**
  * @name isValidAddress
- * @summary Check if an address is a valid Ternoa address.
+ * @summary   Check if an address is a valid Ternoa address.
  * @param address
- * @returns Boolean, true if the address is valid, false otherwise
+ * @returns   Boolean, true if the address is valid, false otherwise
  */
 export const isValidAddress = (address: string): boolean => {
   try {
@@ -356,11 +356,11 @@ export const isValidAddress = (address: string): boolean => {
 
 /**
  * @name isValidSignature
- * @summary Check if a message has been signed by the passed address.
- * @param signedMessage Message to check.
+ * @summary               Check if a message has been signed by the passed address.
+ * @param signedMessage   Message to check.
  * @param signature
- * @param address Address to verify the signer.
- * @returns Boolean, true if the address signed the message, false otherwise
+ * @param address         Address to verify the signer.
+ * @returns               Boolean, true if the address signed the message, false otherwise
  */
 export const isValidSignature = (signedMessage: string, signature: TransactionHash, address: string): boolean => {
   const publicKey = decodeAddress(address)
@@ -371,10 +371,10 @@ export const isValidSignature = (signedMessage: string, signature: TransactionHa
 
 /**
  * @name balanceToNumber
- * @summary Format balance from BN to number.
- * @param input BN input.
- * @param options Formatting options from IFormatBalanceOptions.
- * @returns Formatted balance with SI and unit notation.
+ * @summary         Format balance from BN to number.
+ * @param input     BN input.
+ * @param options   Formatting options from IFormatBalanceOptions.
+ * @returns         Formatted balance with SI and unit notation.
  */
 export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): string => {
   formatBalancePolkadotUtil.setDefaults({ decimals: 18, unit: options?.unit ?? "CAPS" })
@@ -383,9 +383,9 @@ export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): str
 
 /**
  * @name numberToBalance
- * @summary Format balance from number to BN.
- * @param _input Number input
- * @returns BN output
+ * @summary       Format balance from number to BN.
+ * @param _input  Number input
+ * @returns       BN output
  */
 export const numberToBalance = async (_input: number): Promise<BN> => {
   const input = String(_input)

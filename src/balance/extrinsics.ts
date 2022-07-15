@@ -81,7 +81,7 @@ export const balancesTransferKeepAliveTx = async (to: string, value: number | BN
 
 /**
  * @name balancesTransferKeepAlive
- * @summary             Transfers some liquid free balance to another account with a check that the transfer will not kill the origin account
+ * @summary             Transfers some liquid free balance to another account with a check that the transfer will not kill the origin account.
  * @param to            Public address of the account to transfer the amount to.
  * @param value         Token amount to transfer.
  * @param keyring       Account that will sign the transaction.

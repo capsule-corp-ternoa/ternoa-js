@@ -36,9 +36,9 @@ export const getNextCollectionId = async (): Promise<number> => {
 
 /**
  * @name getNftData
- * @summary Provides the data related to one NFT.
- * @param nftId The NFT id.
- * @returns A JSON object with the NFT data. ex:{owner, creator, offchainData, (...)}
+ * @summary       Provides the data related to one NFT.
+ * @param nftId   The NFT id.
+ * @returns       A JSON object with the NFT data. ex:{owner, creator, offchainData, (...)}
  */
 export const getNftData = async (nftId: number): Promise<INftData | null> => {
   const data = await query(txPallets.nft, chainQuery.nfts, [nftId])
@@ -59,9 +59,9 @@ export const getNftData = async (nftId: number): Promise<INftData | null> => {
 
 /**
  * @name getCollectionData
- * @summary Provides the data related to one NFT collection. ex:{owner, creator, offchainData, limit, isClosed(...)}
- * @param collectionId The collection id.
- * @returns A JSON object with data of a single NFT collection.
+ * @summary             Provides the data related to one NFT collection. ex:{owner, creator, offchainData, limit, isClosed(...)}
+ * @param collectionId  The collection id.
+ * @returns             A JSON object with data of a single NFT collection.
  */
 export const getCollectionData = async (collectionId: number): Promise<ICollectionData | null> => {
   const data = await query(txPallets.nft, chainQuery.collections, [collectionId])

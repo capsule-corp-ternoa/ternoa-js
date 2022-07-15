@@ -168,7 +168,7 @@ export const transferNftTx = async (id: number, recipient: string): Promise<Tran
 
 /**
  * @name transferNft
- * @summary           Sends on our NFTs to someone.
+ * @summary           Sends an NFT to someone.
  * @param id          The ID of the NFT.
  * @param recipient   Destination account.
  * @param keyring     Account that will sign the transaction.
