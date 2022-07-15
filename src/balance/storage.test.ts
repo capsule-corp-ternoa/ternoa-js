@@ -1,23 +1,56 @@
-import BN from "bn.js"
 import { createTestPairs } from "../_misc/testingPairs"
 import { generateSeed } from "../account"
-import { checkBalanceForTransfer, getFreeBalance } from "./storage"
+import { initializeApi } from "../blockchain"
+import { checkBalanceForTransfer, getBalances, getTotalBalance, getTransferrableBalance } from "./storage"
 
-describe("Testing getFreeBalance", (): void => {
+beforeAll(async () => {
+  const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
+  await initializeApi(endpoint)
+})
+
+describe("Testing getBalances", (): void => {
+  it("Should get an empty account free balance for a new one", async (): Promise<void> => {
+    const account = await generateSeed()
+    const balance = await getBalances(account.address)
+    expect(balance.free.isZero()).toBe(true)
+  })
+
+  it("Should get a positive account free balance on the testing account", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const balance = await getBalances(testAccount.address)
+    expect(balance.free.isZero()).toBe(false)
+  })
+})
+
+describe("Testing getTotalBalance", (): void => {
   it("Should get an empty account balance for a new one", async (): Promise<void> => {
     const account = await generateSeed()
-    const freeBalance = await getFreeBalance(account.address)
-    expect(freeBalance.isZero()).toBe(true)
+    const balance = await getTotalBalance(account.address)
+    expect(balance.isZero()).toBe(true)
   })
 
   it("Should get a positive account balance on the testing account", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
-    const freeBalance = await getFreeBalance(testAccount.address)
-    expect(freeBalance.cmp(new BN(0))).toBe(1)
+    const balance = await getTotalBalance(testAccount.address)
+    expect(balance.isZero()).toBe(false)
   })
 })
 
-describe("Testing getFreeBalance", (): void => {
+describe("Testing getTransferrableBalance", (): void => {
+  it("Should get an empty account balance for a new one", async (): Promise<void> => {
+    const account = await generateSeed()
+    const balance = await getTransferrableBalance(account.address)
+    expect(balance.isZero()).toBe(true)
+  })
+
+  it("Should get a positive account balance on the testing account", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const balance = await getTransferrableBalance(testAccount.address)
+    expect(balance.isZero()).toBe(false)
+  })
+})
+
+describe("Testing checkBalanceForTransfer", (): void => {
   it("Insufficient funds to transfer", async (): Promise<void> => {
     const account = await generateSeed()
     const hasEnoughFunds = await checkBalanceForTransfer(account.address, 1)

@@ -497,9 +497,9 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
         error: string
       }
     }
-    this.errorType = event.data[1].toString()
-    this.details = event.data[2].toString()
-    this.dispatchInfo = event.data[3].toJSON() as {
+    this.errorType = event.data[1]?.toString()
+    this.details = event.data[2]?.toString()
+    this.dispatchInfo = event.data[3]?.toJSON() as {
       weigth: string
       class: string
       paysFee: string
