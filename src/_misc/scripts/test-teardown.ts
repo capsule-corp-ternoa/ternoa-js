@@ -1,26 +1,28 @@
 import BN from "bn.js"
 import dotenv from "dotenv"
 import { getKeyringFromSeed } from "../../account"
-import { getFreeBalance, transferAll } from "../../balance"
+import { getTransferrableBalance, balancesTransferAll } from "../../balance"
 import { safeDisconnect } from "../../blockchain"
+import { Errors, WaitUntil } from "../../constants"
 import { PAIRSSR25519 } from "../testingPairs"
 
 dotenv.config()
 
-const timer = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+module.exports = async (): Promise<void> => {
+  if (!process.env.SEED_TEST_FUNDS) throw new Error(Errors.SEED_NOT_FOUND)
 
-module.exports = async () => {
-  if (!process.env.SEED_TEST_FUNDS_PUBLIC)
-    throw new Error("Test can't finish without public seed address to send test funds")
+  const dstKeyring = await getKeyringFromSeed(process.env.SEED_TEST_FUNDS)
   const pairs = PAIRSSR25519
-  await timer(15000)
-  //If some pairs contains caps, we send all to funds account
-  for (const pair of pairs) {
-    const keyring = await getKeyringFromSeed(pair.seed)
-    const freeBalance = await getFreeBalance(keyring.address)
-    if (freeBalance.cmp(new BN("100000000000000000000")) === 1) {
-      await transferAll(process.env.SEED_TEST_FUNDS_PUBLIC, false, keyring)
-    }
-  }
+
+  const zero = new BN("0")
+  const keyrings = await Promise.all(pairs.map((pair) => getKeyringFromSeed(pair.seed)))
+  const balances = await Promise.all(pairs.map((pair) => getTransferrableBalance(pair.publicKey)))
+  const filtered_keyrings = keyrings.filter((_, i) => balances[i].gt(zero))
+  await Promise.all(
+    filtered_keyrings.map((keyring) =>
+      balancesTransferAll(dstKeyring.address, false, keyring, WaitUntil.BlockInclusion),
+    ),
+  )
+
   await safeDisconnect()
 }
