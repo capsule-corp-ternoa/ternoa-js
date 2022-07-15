@@ -43,12 +43,8 @@ const createMyFirstNFT = async () => {
     // We initialize an API instance connected to the Alphanet chain
     await initializeApi()
 
-    // We will need a keyring to sign and submit the transaction
-    const account = await generateSeed()
-    const keyring = await getKeyringFromSeed(account.seed)
-
-    // Here we create, sign and submit the transaction
-    await createNft("My first NFT", 10, 1, false, keyring, WaitUntil.BlockInclusion)
+    // Here we create, sign and submit the NFT transaction with your keyring
+    await createNft("My first NFT", 10, undefined, false, keyring, WaitUntil.BlockInclusion)
   } catch (e) {
     console.log(e)
   }
