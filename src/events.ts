@@ -264,7 +264,7 @@ export class NFTDelegatedEvent extends BlockchainEvent {
     super(event, EventType.NFTDelegated)
 
     this.nftId = Number.parseInt(event.data[0].toString())
-    this.recipient = event.data[1] ? event.data[1].toString() : undefined
+    this.recipient = event.data[1].toString()
   }
 }
 

@@ -32,7 +32,7 @@ export const createNftTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHash> => {
-  const formatedRoyalty = await formatRoyalty(royalty)
+  const formatedRoyalty = formatRoyalty(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
     formatedRoyalty,
@@ -131,7 +131,7 @@ export const delegateNft = async (
  * @returns       Unsigned unsubmitted Set-Royalty-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHash> => {
-  const formatedRoyalty = await formatRoyalty(amount)
+  const formatedRoyalty = formatRoyalty(amount)
   return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
 }
 
@@ -170,18 +170,18 @@ export const transferNftTx = async (id: number, recipient: string): Promise<Tran
  * @name transferNft
  * @summary           Sends on our NFTs to someone.
  * @param id          The ID of the NFT.
- * @param number      Destination account.
+ * @param recipient   Destination account.
  * @param keyring     Account that will sign the transaction.
  * @param waitUntil   Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns           NFTTransferredEvent Blockchain event.
  */
 export const transferNft = async (
   id: number,
-  number: string,
+  recipient: string,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<NFTTransferredEvent> => {
-  const tx = await transferNftTx(id, number)
+  const tx = await transferNftTx(id, recipient)
   const events = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTTransferredEvent)
 }
