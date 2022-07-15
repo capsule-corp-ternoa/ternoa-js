@@ -10,7 +10,7 @@ export interface INftData {
   owner: string
   creator: string
   offchainData: string
-  collectionId: number | null
+  collectionId: number | undefined
   royalty: number
   state: INftState
 }

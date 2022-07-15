@@ -1,9 +1,15 @@
 export * from "./account"
 export * from "./balance"
 export * from "./blockchain"
-export * from "./capsule"
-export * from "./fee"
-export * from "./marketplace"
 export * from "./nft"
+export * from "./events"
+export * from "./misc"
+
+export * as accountModule from "./account"
+export * as balanceModule from "./balance"
+export * as Blockchain from "./blockchain"
+export * as Nft from "./nft"
+export * as Events from "./events"
+export * as miscModule from "./misc"
 
 export { hexToString, hexToU8a, stringToHex, u8aToHex } from "@polkadot/util"

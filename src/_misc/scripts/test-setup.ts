@@ -1,33 +1,23 @@
-import { BN } from "bn.js"
+import BN from "bn.js"
 import dotenv from "dotenv"
 import { getKeyringFromSeed } from "../../account"
-import { getFreeBalance, transferAll, transferKeepAlive } from "../../balance"
+import { balancesTransferTx } from "../../balance"
+import { batchAllTxHex, initializeApi, submitTxBlocking } from "../../blockchain"
+import { Errors, WaitUntil } from "../../constants"
 import { PAIRSSR25519 } from "../testingPairs"
 
 dotenv.config()
 
-const timer = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+module.exports = async (): Promise<void> => {
+  if (!process.env.SEED_TEST_FUNDS) throw new Error(Errors.SEED_NOT_FOUND)
+  const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
 
-module.exports = async () => {
-  if (!process.env.SEED_TEST_FUNDS) throw new Error("Test can't process without seed to get test funds")
+  await initializeApi(endpoint)
   const keyring = await getKeyringFromSeed(process.env.SEED_TEST_FUNDS)
   const pairs = PAIRSSR25519
-  //If some pairs contains caps, we send all to funds account
-  for (const pair of pairs) {
-    const pairFreeBalance = await getFreeBalance(pair.publicKey)
-    if (pairFreeBalance.cmp(new BN("100000000000000000000")) === 1) {
-      const pairKeyring = await getKeyringFromSeed(pair.seed)
-      await transferAll(keyring.address, true, pairKeyring)
-    }
-  }
-  await timer(5000)
-  //Then we send equal share to each test pair
-  const freeBalance = await getFreeBalance(keyring.address)
-  if (freeBalance.cmp(new BN("100000000000000000000")) === 1) {
-    const share = freeBalance.sub(new BN("100000000000000000000")).div(new BN(pairs.length))
-    for (const pair of pairs) {
-      await transferKeepAlive(pair.publicKey, share, keyring)
-    }
-  }
-  await timer(5000)
+
+  const amount = new BN("100000000000000000000")
+  const txs = await Promise.all(pairs.map((pair) => balancesTransferTx(pair.publicKey, amount)))
+  const batchTx = await batchAllTxHex(txs)
+  await submitTxBlocking(batchTx, WaitUntil.BlockInclusion, keyring)
 }

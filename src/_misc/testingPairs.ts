@@ -33,7 +33,7 @@ export const PAIRSSR25519: PairDef[] = [
  * @name testKeyring
  * @summary Create keyring pairs with locked test accounts
  */
-export const createTestPairs = async () => {
+export const createTestPairs = async (): Promise<TestKeyringMap> => {
   await cryptoWaitReady()
   const keyring = new Keyring()
 
