@@ -17,7 +17,6 @@ async function createPackageFile() {
         account: ["./account/index.d.ts"],
         balance: ["./balance/index.d.ts"],
         blockchain: ["./blockchain/index.d.ts"],
-        capsule: ["./capsule/index.d.ts"],
         nft: ["./nft/index.d.ts"],
         constants: ["./constants/index.d.ts"],
       },
