@@ -16,10 +16,7 @@ npm install ternoa-js
 
 ## Quick Start
 
-The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
-It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function in **ternoa-js/blockchain**.
-
-It's not strictly necessary to initialize the internal SDK API but it's good practice to do it as soon as possible. Otherwise, the API will be forcefully initialized in the first SDK call.
+An API instance must be initialize using the _initializeApi_ function in **ternoa-js/blockchain** before calling some SDK functions. The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`. It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function.
 
 Functions are organized by theme. In the example below, the import of _generateSeed_ and _getKeyringFromSeed_ from the subpath **ternoa-js/account** allows us to generate a new account and display its address.
 
@@ -43,11 +40,14 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 
 const createMyFirstNFT = async () => {
   try {
+    // We initialize an API instance connected to the Alphanet chain
+    await initializeApi()
+
     // We will need a keyring to sign and submit the transaction
     const account = await generateSeed()
     const keyring = await getKeyringFromSeed(account.seed)
 
-    // Here we create, sing and submit the transaction
+    // Here we create, sign and submit the transaction
     await createNft("My first NFT", 10, 1, false, keyring, WaitUntil.BlockInclusion)
   } catch (e) {
     console.log(e)
@@ -59,7 +59,7 @@ const createMyFirstNFT = async () => {
 
 The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://docs.ternoa.network/).
 
-Discover our End-to-End Test DApp here and create your first NFT using our testing DApp: [ternoa-js-test-dapp](https://e2e.ternoa.network/).
+Discover our End-to-End Test dApp here to learn and test the Ternoa SDK : [ternoa-js-test-dapp](https://e2e.ternoa.network/).
 
 ### Cookbook example
 
