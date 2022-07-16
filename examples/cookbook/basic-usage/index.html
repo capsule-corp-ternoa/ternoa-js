@@ -1,58 +1,66 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title></title>
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="" />
-    <link href="res/prism.css" rel="stylesheet" />
-  </head>
 
-  <body>
-    <script>
-      function show(shown) {
-        let list = ["Page0", "Page1", "Page2"]
-        for (page of list) {
-          document.getElementById(page).style.display = page == shown ? "block" : "none"
-        }
-        return false
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title></title>
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="" />
+  <link href="res/prism.css" rel="stylesheet" />
+</head>
+
+<body>
+  <script>
+    function show(shown) {
+      let list = ["Page0", "Page1", "Page2"]
+      for (page of list) {
+        document.getElementById(page).style.display = page == shown ? "block" : "none"
       }
-    </script>
-    <script src="res/prism.js"></script>
+      return false
+    }
+  </script>
+  <script src="res/prism.js"></script>
 
+  <div class="content">
     <div id="Page0">
-      <b>Tutorial name:</b> Basic SDK usage <br /><b>Date:</b> 2022-07-06 <br /><b>Keywords:</b> Create-Collection
-      Create-NFT Dummy-Data <br /><b>Author:</b> Tiimy
+      <h1>Basic SDK usage by Ternoa team</h1>
+      <dl>
+        <dt><b>Tutorial name:</b> Basic SDK usage</dt>
+        <dt><b>Date:</b> 2022-07-06</dt>
+        <dt><b>Keywords:</b> Create-Collection Create-NFT Dummy-Data</dt>
+        <dt><b>Author:</b> Tiimy</dt>
+      </dl>
 
-      <br /><br />Hello! 👋 My name is Tiimy 🌞
+      <h2>Hello! 👋 My name is Tiimy 🌞</h2>
+      <p>My job is to show you how powerful and yet convenient our API is. In this exercise, we will go through the most common workflow and
+        make sure that you understand the basic principles in coding with our SDK.</p>
 
-      <br />My job is to show you how powerful and yet convenient our API is. <br />In this exercise, we will go through
-      the most common workflow and make sure that you understand the basic principles in coding with our SDK.
 
       <blockquote>
-        <b
-          >⚠️ It's important to mention that we will be using dummy data in this exercise. For a an example with
+        <b>⚠️ It's important to mention that we will be using dummy data in this exercise. For a an example with
           production data check out the metadata exercise.
         </b>
       </blockquote>
 
-      Let's first lay down all the tasks that we need to do:
-      <br />
-      Tasks: <br />&nbsp;&nbsp;&nbsp;&nbsp; I. Create a collection with the name Bored Dog Yacht Club (limited to 10)
-      <br />&nbsp;&nbsp;&nbsp;&nbsp; II. Create 10 dog NFTs <br />
+      <p>
+        Let's first lay down all the tasks that we need to do: <br /><br />
+        <b>Tasks:</b>
+        <ol>
+          <li>Create a collection with the name Bored Dog Yacht Club (limited to 10)</li>
+          <li>Create 10 dog NFTs</li>
+        </ol>
 
-      <br /><br />Seems easy, right? So let's start! <br /><br /><button onclick="return show('Page1');">
+        <br />Seems easy, right? So let's start! <br />
+      </p>
+      <button onclick="return show('Page1');">
         Click here to continue!
       </button>
     </div>
 
     <div id="Page1" style="display: none">
-      <br />
-      Tasks: <br />&nbsp;&nbsp;&nbsp;&nbsp;
-      <b>I. Create a collection with the name Bored Dog Yacht Club (limited to 10) </b> <br />&nbsp;&nbsp;&nbsp;&nbsp;
-      II. Create 10 dog NFTs <br />
+      <h1>1. Create a collection with the name Bored Dog Yacht Club (limited to 10)</h1>
 
       <h3>API</h3>
       This will initialize the internal SDK API. It's not strictly necessary but it's good practice to initialize the
@@ -133,9 +141,7 @@
     </div>
 
     <div id="Page2" style="display: none">
-      <br />
-      Tasks: <br />&nbsp;&nbsp;&nbsp;&nbsp; I. Create a collection with the name Bored Dog Yacht Club (limited to 10)
-      <br />&nbsp;&nbsp;&nbsp;&nbsp; <b>II. Create 10 dog NFTs </b>
+      <h1>2. Create 10 dog NFTs</h1>
 
       <h3>Define dog names</h3>
       Here we define the name of the dogs that we will use. The first step in creating our Dog NFTs we to define how
@@ -217,5 +223,7 @@
 
       <br /><br /><button onclick="return show('Page1');">Go back</button>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
