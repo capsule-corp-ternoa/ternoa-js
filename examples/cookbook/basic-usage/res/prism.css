@@ -134,3 +134,35 @@ pre[class*="language-"] {
 .token.entity {
   cursor: help;
 }
+
+/* Custom Style */
+
+body {
+  font: 100% Rockwell, Arvo, serif;
+}
+
+button {
+  padding: 20px 30px;
+  background: #677efe;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  box-shadow: 0px 4px 10px #677efe99;
+  color: white;
+  cursor: pointer;
+}
+
+ol {
+  display: inline-block;
+}
+
+.content {
+  margin: 2% 4%;
+  padding: 2% 4%;
+  background-color: rgba(69, 88, 255, 0.1);
+  border-radius: 2rem;
+}
+
+#Page0 {
+  text-align: center;
+}
