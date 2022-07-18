@@ -78,6 +78,9 @@ export enum chainQuery {
   account = "account",
   number = "number",
   collections = "collections",
+  nextMarketplaceId = "nextMarketplaceId",
+  marketplaces = "marketplaces",
+  listedNfts = "listedNfts",
 }
 
 export enum chainConstants {
@@ -119,6 +122,8 @@ export enum Errors {
   ROYALTY_MUST_BE_PERCENTAGE = "ROYALTY_MUST_BE_PERCENTAGE",
   NFT_CONVERSION_ERROR = "NFT_CONVERSION_ERROR",
   COLLECTION_CONVERSION_ERROR = "COLLECTION_CONVERSION_ERROR",
+  MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
+  LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
 }
 
 export type TransactionHash = `0x${string}`
