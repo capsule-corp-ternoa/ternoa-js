@@ -86,6 +86,8 @@ export enum chainConstants {
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
+  offchainDataLimit = "offchainDataLimit",
+  accountSizeLimit = "accountSizeLimit",
 }
 
 export enum WaitUntil {
