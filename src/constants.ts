@@ -1,6 +1,7 @@
 import BN from "bn.js"
 
 export enum txPallets {
+  marketplace = "marketplace",
   nft = "nft",
   utility = "utility",
   balances = "balances",
@@ -14,6 +15,7 @@ export enum txActions {
   unlist = "unlist",
   burn = "burn",
 
+  //TO DO : CLEAN list below
   create = "create",
   transfer = "transfer",
   transferAll = "transferAll",
@@ -44,16 +46,27 @@ export enum txActions {
   closeCollection = "closeCollection",
   burnCollection = "burnCollection",
   setNftMintFee = "setNftMintFee",
+
+  // marketplace
+  buyNft = "buyNft",
+  createMarketplace = "createMarketplace",
+  listNft = "listNft",
+  unlistNft = "unlistNft",
+  setMarketplaceConfiguration = "setMarketplaceConfiguration",
+  setMarketplaceKind = "setMarketplaceKind",
+  setMarketplaceOwner = "setMarketplaceOwner",
+  setMarketplaceMintFee = "setMarketplaceMintFee",
 }
 
 export enum txEvent {
-  nftsCreated = "Created",
-  nftsBurned = "Burned",
-  nftsTransfered = "Transfered",
   ExtrinsicSuccess = "ExtrinsicSuccess",
   ExtrinsicFailed = "ExtrinsicFailed",
   BatchCompleted = "BatchCompleted",
   BatchInterrupted = "BatchInterrupted",
+  nftsCreated = "Created",
+  nftsBurned = "Burned",
+  nftsTransfered = "Transfered",
+  MarketplaceCreated = "MarketplaceCreated",
 }
 
 export enum chainQuery {
@@ -61,6 +74,7 @@ export enum chainQuery {
   nfts = "nfts",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
+  marketplaceMintFee = "marketplaceMintFee",
   account = "account",
   number = "number",
   collections = "collections",
@@ -77,6 +91,11 @@ export enum chainConstants {
 export enum WaitUntil {
   BlockInclusion,
   BlockFinalization,
+}
+
+export enum MarketplaceKind {
+  Public = "Public",
+  Private = "Private",
 }
 
 export enum Errors {

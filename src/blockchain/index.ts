@@ -14,6 +14,7 @@ import { IFormatBalanceOptions } from "./interfaces"
 import { SubmittableExtrinsic } from "@polkadot/api/types"
 import { getTransferrableBalance } from "../balance"
 import { getNftMintFee } from "../nft"
+import { getMarketplaceMintFee } from "../marketplace"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
@@ -153,6 +154,9 @@ export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> =>
   switch (`${tx.method.section}_${tx.method.method}`) {
     case `${txPallets.nft}_${txActions.createNft}`: {
       return await getNftMintFee()
+    }
+    case `${txPallets.marketplace}_${txActions.create}`: {
+      return await getMarketplaceMintFee()
     }
     default: {
       return new BN(0)
