@@ -40,7 +40,7 @@ export const getMarketplaceData = async (marketplaceId: number): Promise<IMarket
     const result = data.toJSON() as any as IMarketplaceData
     // The offchainData instead of being a string int's going tob a HEX.
     // To fix this, we need to convert it to a normal string.
-    result.offchainData = hex2a(result.offchainData)
+    result.offchainData = result.offchainData && hex2a(result.offchainData)
     return result
   } catch (error) {
     throw new Error(`${Errors.MARKETPLACE_CONVERSION_ERROR}`)
