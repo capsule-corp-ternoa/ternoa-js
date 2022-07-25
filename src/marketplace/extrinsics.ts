@@ -41,38 +41,61 @@ export const createMarketplace = async (
   return events.findEventOrThrow(MarketplaceCreatedEvent)
 }
 
-// // WIP: Datas must be check first from indexer
-// /// TODO DOC!
-// export const setMarketplaceConfigurationTx = async (
-//   id: number,
-//   commissionFee: number | BN | undefined = undefined,
-//   listingFee: number | BN | undefined = undefined,
-//   accountList: [string] | undefined = undefined,
-//   offchainData: string | undefined = undefined,
-// ): Promise<TransactionHash> => {
-//   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
-//     id,
-//     commissionFee,
-//     listingFee,
-//     accountList,
-//     offchainData,
-//   ])
-// }
+/**
+ * @name setMarketplaceConfigurationTx
+ * @summary               Creates an unsigned unsubmitted Create-Marketplace-Configuration Transaction Hash.
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage.
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage.
+ * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
+ * @param offchainData    Off-chain related NFT metadata. Can be an IPFS Hash, an URL or plain text.
+ * @returns               Unsigned unsubmitted Create-Marketplace-Configuration Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const setMarketplaceConfigurationTx = async (
+  id: number,
+  commissionFee: number | BN | undefined = undefined,
+  listingFee: number | BN | undefined = undefined,
+  accountList: [string] | undefined = undefined, // or [] ??
+  offchainData: string | undefined = undefined,
+): Promise<TransactionHash> => {
+  return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
+    id,
+    commissionFee,
+    listingFee,
+    accountList,
+    offchainData,
+  ])
+}
 
-// /// TODO DOC!
-// export const setMarketplaceConfiguration = async (
-//   id: number,
-//   commissionFee: number | BN | undefined = undefined,
-//   listingFee: number | BN | undefined = undefined,
-//   accountList: [string] | undefined = undefined,
-//   offchainData: string | undefined = undefined,
-//   keyring: IKeyringPair,
-//   waitUntil: WaitUntil,
-// ): Promise<MarketplaceConfigSetEvent> => {
-//   const tx = await setMarketplaceConfigurationTx(id, commissionFee, listingFee, accountList, offchainData)
-//   const events = await submitTxBlocking(tx, waitUntil, keyring)
-//   return events.findEventOrThrow(MarketplaceConfigSetEvent)
-// }
+/**
+ * @name setMarketplaceConfiguration
+ * @summary               Set or Remove the four marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.
+ *
+ * Each of the four parameters of the marketplace, need on of the type below as below :
+ * NoOperation :  Nothing change. Null or undefined ??
+ * Removed :      Current datas will be deleted.
+ * Set :          To add new value: Commission Fee and Listing Fee require to precise their type : flat or percentage.
+ *
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage.
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage.
+ * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
+ * @param offchainData    Off-chain related NFT metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param keyring         Account that will sign the transaction.
+ * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns               MarketplaceConfigSetEvent Blockchain event.
+ */
+export const setMarketplaceConfiguration = async (
+  id: number,
+  commissionFee: number | BN | undefined = undefined,
+  listingFee: number | BN | undefined = undefined,
+  accountList: [string] | undefined = undefined,
+  offchainData: string | undefined = undefined,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<MarketplaceConfigSetEvent> => {
+  const tx = await setMarketplaceConfigurationTx(id, commissionFee, listingFee, accountList, offchainData)
+  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(MarketplaceConfigSetEvent)
+}
 
 /**
  * @name setMarketplaceOwnerTx
