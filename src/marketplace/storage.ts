@@ -1,8 +1,8 @@
 import BN from "bn.js"
+import { hexToString } from "@polkadot/util"
 import { Balance, chainQuery, Errors, txPallets } from "../constants"
 import { query } from "../blockchain"
 import { IListedNft, IMarketplaceData } from "./interfaces"
-import { hex2a } from "../misc"
 
 /**
  * @name getMarketplaceMintFee
@@ -37,10 +37,9 @@ export const getMarketplaceData = async (marketplaceId: number): Promise<IMarket
   }
 
   try {
-    const result = data.toJSON() as any as IMarketplaceData
-    // The offchainData instead of being a string int's going tob a HEX.
-    // To fix this, we need to convert it to a normal string.
-    result.offchainData = result.offchainData && hex2a(result.offchainData)
+    const result = data.toJSON() as IMarketplaceData
+    // The offchainData is an hexadecimal string, we convert it to a human readable string.
+    if (result.offchainData) result.offchainData = hexToString(result.offchainData)
     return result
   } catch (error) {
     throw new Error(`${Errors.MARKETPLACE_CONVERSION_ERROR}`)

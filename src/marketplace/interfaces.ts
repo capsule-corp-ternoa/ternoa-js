@@ -23,6 +23,7 @@ export type OffchainDataType =
   | MarketplaceConfigAction.Noop
   | MarketplaceConfigAction.Remove
   | { [MarketplaceConfigAction.Set]: TransactionHash }
+
 export type IMarketplaceData = {
   owner: string
   kind: string

@@ -1,4 +1,4 @@
-export interface INftState {
+export type INftState = {
   isCapsule: boolean
   listedForSale: boolean
   isSecret: boolean
@@ -6,7 +6,7 @@ export interface INftState {
   isSoulbound: boolean
 }
 
-export interface INftData {
+export type INftData = {
   owner: string
   creator: string
   offchainData: string
