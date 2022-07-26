@@ -11,10 +11,10 @@ import { getTransferrableBalance } from "../balance"
 import { Errors, txActions, txEvent, txPallets, WaitUntil } from "../constants"
 import { BlockchainEvent, BlockchainEvents } from "../events"
 import { getMarketplaceMintFee } from "../marketplace"
-import { ConditionalVariable } from "../misc"
 import { getNftMintFee } from "../nft"
 
 import { IFormatBalanceOptions, TransactionHashType } from "./types"
+import { ConditionalVariable } from "./utils"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
@@ -469,3 +469,4 @@ export const submitTxNonBlocking = async (
 }
 
 export * from "./types"
+export * from "./utils"
