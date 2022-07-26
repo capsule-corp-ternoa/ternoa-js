@@ -203,7 +203,7 @@ export const listNft = async (
  * @returns               Unsigned unsubmitted Unlist-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const unlistNftTx = async (nft_id: number): Promise<TransactionHash> => {
-  return await createTxHex(txPallets.marketplace, txActions.unlist, [nft_id])
+  return await createTxHex(txPallets.marketplace, txActions.unlistNft, [nft_id])
 }
 
 /**
