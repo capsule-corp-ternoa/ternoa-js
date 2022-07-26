@@ -1,7 +1,8 @@
 import { initializeApi } from "../blockchain"
-import { MarketplaceKind, WaitUntil } from "../constants"
+import { WaitUntil } from "../constants"
 import { createNft } from "../nft"
 import { createTestPairs } from "../_misc/testingPairs"
+import { MarketplaceKind } from "./enum"
 import { createMarketplace, listNft } from "./extrinsics"
 import { getMarketplaceMintFee, getNextMarketplaceId, getMarketplaceData, getNftForSale } from "./storage"
 

@@ -1,7 +1,8 @@
 import BN from "bn.js"
 import type { IKeyringPair } from "@polkadot/types/types"
-import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
-import { createTxHex, submitTxBlocking, numberToBalance } from "../blockchain"
+
+import { createTxHex, submitTxBlocking, numberToBalance, TransactionHashType } from "../blockchain"
+import { txActions, txPallets, WaitUntil } from "../constants"
 import { BalancesTransferEvent } from "../events"
 
 /**
@@ -11,7 +12,7 @@ import { BalancesTransferEvent } from "../events"
  * @param value         Token amount to transfer.
  * @returns             Unsigned unsubmitted Balance-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const balancesTransferTx = async (to: string, value: number | BN): Promise<TransactionHash> => {
+export const balancesTransferTx = async (to: string, value: number | BN): Promise<TransactionHashType> => {
   const amount = typeof value === "number" ? await numberToBalance(value) : value
   return await createTxHex(txPallets.balances, txActions.transfer, [to, amount])
 }
@@ -43,7 +44,7 @@ export const balancesTransfer = async (
  * @param keepAlive     Ensure that the transfer does not kill the account, it retains the Existential Deposit.
  * @returns             Unsigned unsubmitted Balance-TransfertAll Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const balancesTransferAllTx = async (to: string, keepAlive = true): Promise<TransactionHash> => {
+export const balancesTransferAllTx = async (to: string, keepAlive = true): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.balances, txActions.transferAll, [to, keepAlive])
 }
 
@@ -74,7 +75,7 @@ export const balancesTransferAll = async (
  * @param value         Token amount to transfer.
  * @returns             Unsigned unsubmitted Balance-TransfertKeepAlive Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const balancesTransferKeepAliveTx = async (to: string, value: number | BN): Promise<TransactionHash> => {
+export const balancesTransferKeepAliveTx = async (to: string, value: number | BN): Promise<TransactionHashType> => {
   const amount = typeof value === "number" ? await numberToBalance(value) : value
   return await createTxHex(txPallets.balances, txActions.transferKeepAlive, [to, amount])
 }

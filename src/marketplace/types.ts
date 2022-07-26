@@ -1,5 +1,8 @@
 import BN from "bn.js"
-import { MarketplaceConfigAction, TransactionHash } from "../constants"
+
+import { TransactionHashType } from "../blockchain"
+
+import { MarketplaceConfigAction } from "./enum"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -22,9 +25,9 @@ export type AccountListType =
 export type OffchainDataType =
   | MarketplaceConfigAction.Noop
   | MarketplaceConfigAction.Remove
-  | { [MarketplaceConfigAction.Set]: TransactionHash }
+  | { [MarketplaceConfigAction.Set]: TransactionHashType }
 
-export type IMarketplaceData = {
+export type MarketplaceDataType = {
   owner: string
   kind: string
   commissionFee: IFeeType | undefined

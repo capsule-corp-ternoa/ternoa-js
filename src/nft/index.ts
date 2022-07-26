@@ -1,10 +1,5 @@
+export * from "./constants"
 export * from "./extrinsics"
 export * from "./storage"
-export * from "./constants"
-export * from "./misc"
-export * from "./interfaces"
-
-export * as Extrinsics from "./extrinsics"
-export * as Storage from "./storage"
-export * as Constants from "./constants"
-export * as Misc from "./misc"
+export * from "./types"
+export * from "./utils"

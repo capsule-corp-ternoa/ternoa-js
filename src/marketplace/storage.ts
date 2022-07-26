@@ -1,17 +1,19 @@
 import BN from "bn.js"
 import { hexToString } from "@polkadot/util"
-import { Balance, chainQuery, Errors, txPallets } from "../constants"
-import { query } from "../blockchain"
-import { IListedNft, IMarketplaceData } from "./interfaces"
+
+import { query, BalanceType } from "../blockchain"
+import { chainQuery, Errors, txPallets } from "../constants"
+
+import { IListedNft, MarketplaceDataType } from "./types"
 
 /**
  * @name getMarketplaceMintFee
  * @summary               Fee to mint a Marketplace. (extra fee on top of the tx fees).
  * @returns               Marketplace mint fee.
  */
-export const getMarketplaceMintFee = async (): Promise<Balance> => {
+export const getMarketplaceMintFee = async (): Promise<BalanceType> => {
   const fee = await query(txPallets.marketplace, chainQuery.marketplaceMintFee)
-  return fee as any as Balance
+  return fee as any as BalanceType
 }
 
 /**
@@ -30,14 +32,14 @@ export const getNextMarketplaceId = async (): Promise<number> => {
  * @param marketplaceId   The Markeplace id.
  * @returns               A JSON object with the marketplace data. ex:{owner, kind, accountList, (...)}
  */
-export const getMarketplaceData = async (marketplaceId: number): Promise<IMarketplaceData | null> => {
+export const getMarketplaceData = async (marketplaceId: number): Promise<MarketplaceDataType | null> => {
   const data = await query(txPallets.marketplace, chainQuery.marketplaces, [marketplaceId])
   if (data.isEmpty == true) {
     return null
   }
 
   try {
-    const result = data.toJSON() as IMarketplaceData
+    const result = data.toJSON() as MarketplaceDataType
     // The offchainData is an hexadecimal string, we convert it to a human readable string.
     if (result.offchainData) result.offchainData = hexToString(result.offchainData)
     return result

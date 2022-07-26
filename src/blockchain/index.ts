@@ -1,20 +1,20 @@
+import BN from "bn.js"
 import { cryptoWaitReady, signatureVerify } from "@polkadot/util-crypto"
 import { ApiPromise, WsProvider } from "@polkadot/api"
+import { SubmittableExtrinsic } from "@polkadot/api/types"
 import type { ISubmittableResult, IKeyringPair, Codec } from "@polkadot/types/types"
 import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, BN_TEN } from "@polkadot/util"
 import type { Balance } from "@polkadot/types/interfaces/runtime"
-import BN from "bn.js"
 
-import { Errors, TransactionHash, txActions, txEvent, txPallets, WaitUntil } from "../constants"
-import { BlockchainEvent, BlockchainEvents } from "../events"
-import { ConditionalVariable } from "../misc"
-
-import { IFormatBalanceOptions } from "./interfaces"
-import { SubmittableExtrinsic } from "@polkadot/api/types"
 import { getTransferrableBalance } from "../balance"
-import { getNftMintFee } from "../nft"
+import { Errors, txActions, txEvent, txPallets, WaitUntil } from "../constants"
+import { BlockchainEvent, BlockchainEvents } from "../events"
 import { getMarketplaceMintFee } from "../marketplace"
+import { ConditionalVariable } from "../misc"
+import { getNftMintFee } from "../nft"
+
+import { IFormatBalanceOptions, TransactionHashType } from "./types"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
@@ -134,7 +134,7 @@ export const consts = (section: string, constantName: string): Codec => {
  * @param address   Public address of the sender
  * @returns         Transaction fee estimation
  */
-export const getTxInitialFee = async (txHex: TransactionHash, address: string): Promise<Balance> => {
+export const getTxInitialFee = async (txHex: TransactionHashType, address: string): Promise<Balance> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
   const info = await tx.paymentInfo(address)
@@ -148,7 +148,7 @@ export const getTxInitialFee = async (txHex: TransactionHash, address: string): 
  * @param txHex   Transaction hex
  * @returns       Fee estimation
  */
-export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> => {
+export const getTxAdditionalFee = async (txHex: TransactionHashType): Promise<BN> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
@@ -171,7 +171,7 @@ export const getTxAdditionalFee = async (txHex: TransactionHash): Promise<BN> =>
  * @param address   Public address of the sender
  * @returns         Total estimated fee which is the sum of the chain initial fee and the optional additional fee
  */
-export const getTxFees = async (txHex: TransactionHash, address: string): Promise<BN> => {
+export const getTxFees = async (txHex: TransactionHashType, address: string): Promise<BN> => {
   const extrinsicFee = await getTxInitialFee(txHex, address)
   const additionalFee = await getTxAdditionalFee(txHex)
   return extrinsicFee.add(additionalFee)
@@ -238,7 +238,7 @@ export const createTxHex = async (
   txPallet: string,
   txExtrinsic: string,
   txArgs: any[] = [],
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   const tx = await createTx(txPallet, txExtrinsic, txArgs)
   return tx.toHex()
 }
@@ -254,10 +254,10 @@ export const createTxHex = async (
  */
 export const signTxHex = async (
   keyring: IKeyringPair,
-  txHex: TransactionHash,
+  txHex: TransactionHashType,
   nonce = -1,
   validity = 0,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   const txSigned = await getRawApi().tx(txHex).signAsync(keyring, { nonce, blockHash: api.genesisHash, era: validity })
   return txSigned.toHex()
 }
@@ -270,9 +270,9 @@ export const signTxHex = async (
  * @returns         Hash of the transaction
  */
 export const submitTxHex = async (
-  txHex: TransactionHash,
+  txHex: TransactionHashType,
   callback?: (result: ISubmittableResult) => void,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
   if (callback === undefined) {
@@ -300,7 +300,7 @@ export const submitTxHex = async (
  * @returns         Submittable extrinsic unsigned
  */
 export const batchTx = async (
-  txHexes: TransactionHash[],
+  txHexes: TransactionHashType[],
 ): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => {
   const api = getRawApi()
   const tx = createTx(txPallets.utility, txActions.batch, [txHexes.map((x) => api.tx(x))])
@@ -313,7 +313,7 @@ export const batchTx = async (
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Hex of the submittable extrinsic unsigned
  */
-export const batchTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
+export const batchTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
   const tx = await batchTx(txHexes)
   return tx.toHex()
 }
@@ -325,7 +325,7 @@ export const batchTxHex = async (txHexes: TransactionHash[]): Promise<Transactio
  * @returns         Submittable extrinsic unsigned
  */
 export const batchAllTx = async (
-  txHexes: TransactionHash[],
+  txHexes: TransactionHashType[],
 ): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => {
   const api = getRawApi()
   const tx = createTx(txPallets.utility, txActions.batchAll, [txHexes.map((x) => api.tx(x))])
@@ -338,7 +338,7 @@ export const batchAllTx = async (
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Hex of the submittable extrinsic unsigned
  */
-export const batchAllTxHex = async (txHexes: TransactionHash[]): Promise<TransactionHash> => {
+export const batchAllTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
   const tx = await batchAllTx(txHexes)
   return tx.toHex()
 }
@@ -366,7 +366,7 @@ export const isValidAddress = (address: string): boolean => {
  * @param address         Address to verify the signer.
  * @returns               Boolean, true if the address signed the message, false otherwise
  */
-export const isValidSignature = (signedMessage: string, signature: TransactionHash, address: string): boolean => {
+export const isValidSignature = (signedMessage: string, signature: TransactionHashType, address: string): boolean => {
   const publicKey = decodeAddress(address)
   const hexPublicKey = u8aToHex(publicKey)
 
@@ -423,7 +423,7 @@ export const numberToBalance = async (_input: number): Promise<BN> => {
  * @returns             A list of blockchain events related to an extrinsics execution.
  */
 export const submitTxBlocking = async (
-  tx: TransactionHash,
+  tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
 ): Promise<BlockchainEvents> => {
@@ -442,7 +442,7 @@ export const submitTxBlocking = async (
  * @returns             Returns a pair objects that are used to track the progress of the transaction execution. The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned objects is an array of events which gets populated automatically once the operation is finished.
  */
 export const submitTxNonBlocking = async (
-  tx: TransactionHash,
+  tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
 ): Promise<[ConditionalVariable, BlockchainEvents]> => {
@@ -468,4 +468,4 @@ export const submitTxNonBlocking = async (
   return [conVar, events]
 }
 
-export * from "./interfaces"
+export * from "./types"

@@ -1,5 +1,6 @@
 import { Event } from "@polkadot/types/interfaces/system"
-import { Errors, MarketplaceKind } from "./constants"
+import { Errors } from "./constants"
+import { MarketplaceKind } from "./marketplace/enum"
 
 export enum EventType {
   // Balances

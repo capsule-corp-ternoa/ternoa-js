@@ -1,8 +1,9 @@
 import { buyNft, createMarketplace, listNft, setMarketplaceKind, setMarketplaceOwner, unlistNft } from "./extrinsics"
 import { initializeApi } from "../blockchain"
-import { MarketplaceKind, WaitUntil } from "../constants"
+import { WaitUntil } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 import { createNft, getNftData } from "../nft"
+import { MarketplaceKind } from "./enum"
 
 const TEST_DATA = {
   nftId: 0,

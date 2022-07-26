@@ -1,3 +1,5 @@
+import BN from "bn.js"
+
 export interface IFormatBalanceOptions {
   /**
    * @description The number of decimals.
@@ -24,3 +26,6 @@ export interface IFormatBalanceOptions {
    */
   unit?: string
 }
+
+export type TransactionHashType = `0x${string}`
+export type BalanceType = BN

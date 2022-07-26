@@ -1,5 +1,3 @@
-import BN from "bn.js"
-
 export enum txPallets {
   marketplace = "marketplace",
   nft = "nft",
@@ -98,22 +96,6 @@ export enum WaitUntil {
   BlockFinalization,
 }
 
-export enum MarketplaceKind {
-  Public = "Public",
-  Private = "Private",
-}
-
-export enum MarketplaceConfigAction {
-  Noop = "Noop",
-  Remove = "Remove",
-  Set = "set",
-}
-
-export enum MarketplaceConfigFeeType {
-  Percentage = "percentage",
-  Flat = "flat",
-}
-
 export enum Errors {
   EXTRINSIC_FAILED = "EXTRINSIC_FAILED",
   EVENT_NOT_FOUND = "EVENT_NOT_FOUND",
@@ -136,6 +118,3 @@ export enum Errors {
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
 }
-
-export type TransactionHash = `0x${string}`
-export type Balance = BN
