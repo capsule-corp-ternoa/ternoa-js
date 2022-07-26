@@ -13,7 +13,7 @@ import {
 } from "../events"
 import { createTxHex, submitTxBlocking } from "../blockchain"
 import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
-import { formatRoyalty } from "./misc"
+import { formatPermill } from "./misc"
 
 // NFTs
 
@@ -32,7 +32,7 @@ export const createNftTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHash> => {
-  const formatedRoyalty = formatRoyalty(royalty)
+  const formatedRoyalty = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
     formatedRoyalty,
@@ -131,7 +131,7 @@ export const delegateNft = async (
  * @returns       Unsigned unsubmitted Set-Royalty-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHash> => {
-  const formatedRoyalty = formatRoyalty(amount)
+  const formatedRoyalty = formatPermill(amount)
   return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
 }
 
