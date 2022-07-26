@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { MarketplaceConfigAction, TransactionHash } from "../constants"
+import { MarketplaceConfigAction } from "../constants"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -8,7 +8,7 @@ type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T
 
 export interface IFeeType {
   percentage: number
-  flat: BN
+  flat: BN | number
 }
 
 export type SetFeeType = { [MarketplaceConfigAction.Set]: RequireOnlyOne<IFeeType> }
@@ -22,7 +22,7 @@ export type AccountListType =
 export type OffchainDataType =
   | MarketplaceConfigAction.Noop
   | MarketplaceConfigAction.Remove
-  | { [MarketplaceConfigAction.Set]: TransactionHash }
+  | { [MarketplaceConfigAction.Set]: string }
 
 export type IMarketplaceData = {
   owner: string

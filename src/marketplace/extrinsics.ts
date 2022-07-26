@@ -20,6 +20,7 @@ import {
 } from "../constants"
 import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./interfaces"
 import BN from "bn.js"
+import { formatMarketplaceFee } from "./utils"
 
 /**
  * @name createMarketplaceTx
@@ -65,6 +66,8 @@ export const setMarketplaceConfigurationTx = async (
   accountList: AccountListType = MarketplaceConfigAction.Noop,
   offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
 ): Promise<TransactionHash> => {
+  await formatMarketplaceFee(commissionFee)
+  await formatMarketplaceFee(listingFee)
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
     id,
     commissionFee,

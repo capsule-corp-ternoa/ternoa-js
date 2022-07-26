@@ -1,8 +1,17 @@
-import { buyNft, createMarketplace, listNft, setMarketplaceKind, setMarketplaceOwner, unlistNft } from "./extrinsics"
+import {
+  buyNft,
+  createMarketplace,
+  listNft,
+  setMarketplaceConfiguration,
+  setMarketplaceKind,
+  setMarketplaceOwner,
+  unlistNft,
+} from "./extrinsics"
 import { initializeApi } from "../blockchain"
-import { MarketplaceKind, WaitUntil } from "../constants"
+import { MarketplaceConfigAction, MarketplaceKind, WaitUntil } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 import { createNft, getNftData } from "../nft"
+import { CommissionFeeType } from "./interfaces"
 
 const TEST_DATA = {
   nftId: 0,
@@ -22,15 +31,38 @@ describe("Testing Marketplace extrinsics", (): void => {
     expect(mpEvent.marketplaceId > 0).toBe(true)
   })
 
-  it("Testing to update the marketplace configuration", async (): Promise<void> => {
-    // const { test: testAccount, dest: destAccount } = await createTestPairs()
-    // const mpEvent = await setMarketplaceOwner(
-    //   TEST_DATA.marketplaceId,
-    //   testAccount.address,
-    //   destAccount,
-    //   WaitUntil.BlockInclusion,
-    // )
-    // expect(mpEvent.marketplaceId === TEST_DATA.marketplaceId && mpEvent.owner === destAccount.address).toBe(true)
+  it("Testing to set all marketplace parameters configuration", async (): Promise<void> => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const mpEvent = await setMarketplaceConfiguration(
+      TEST_DATA.marketplaceId,
+      { [MarketplaceConfigAction.Set]: { percentage: 10 } },
+      { [MarketplaceConfigAction.Set]: { flat: 10 } },
+      { [MarketplaceConfigAction.Set]: [destAccount.address] },
+      { [MarketplaceConfigAction.Set]: "Hello" },
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+    const mpCommissionFee = mpEvent.commissionFee as CommissionFeeType
+    console.log("add", mpEvent.commissionFee)
+    expect(typeof mpCommissionFee === "object" && mpCommissionFee.set.percentage === 100000).toBe(true)
+  })
+  it("Testing to Remove and keep(Noop) the marketplace parameters configuration", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const mpEvent = await setMarketplaceConfiguration(
+      TEST_DATA.marketplaceId,
+      MarketplaceConfigAction.Noop,
+      MarketplaceConfigAction.Remove,
+      MarketplaceConfigAction.Remove,
+      MarketplaceConfigAction.Noop,
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+    expect(
+      mpEvent.commissionFee === "Noop" &&
+        mpEvent.listingFee === "Remove" &&
+        mpEvent.accountList === "Remove" &&
+        mpEvent.offchainData === "Noop",
+    ).toBe(true)
   })
 
   it("Testing to set new marketplace owner", async (): Promise<void> => {
