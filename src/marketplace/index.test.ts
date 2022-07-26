@@ -8,10 +8,11 @@ import {
   unlistNft,
 } from "./extrinsics"
 import { initializeApi } from "../blockchain"
-import { MarketplaceConfigAction, MarketplaceKind, WaitUntil } from "../constants"
+import { WaitUntil } from "../constants"
 import { createTestPairs } from "../_misc/testingPairs"
 import { createNft, getNftData } from "../nft"
-import { CommissionFeeType } from "./interfaces"
+import { MarketplaceConfigAction, MarketplaceKind } from "./enum"
+import { SetFeeType } from "./types"
 
 const TEST_DATA = {
   nftId: 0,
@@ -42,9 +43,8 @@ describe("Testing Marketplace extrinsics", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const mpCommissionFee = mpEvent.commissionFee as CommissionFeeType
-    console.log("add", mpEvent.commissionFee)
-    expect(typeof mpCommissionFee === "object" && mpCommissionFee.set.percentage === 100000).toBe(true)
+    const mpCommissionFee = JSON.parse(mpEvent.commissionFee) as SetFeeType
+    expect(mpCommissionFee.set.percentage === 100000).toBe(true)
   })
   it("Testing to Remove and keep(Noop) the marketplace parameters configuration", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()

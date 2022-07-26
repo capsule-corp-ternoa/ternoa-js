@@ -1,6 +1,6 @@
+import { formatPermill } from "../nft/utils"
 import { numberToBalance } from "../blockchain"
-import { formatPermill } from "../nft/misc"
-import { CommissionFeeType, ListingFeeType } from "./interfaces"
+import { CommissionFeeType, ListingFeeType } from "./types"
 
 /**
  * @name formatMarketplaceFee

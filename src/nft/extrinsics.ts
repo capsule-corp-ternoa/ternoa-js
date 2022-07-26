@@ -1,4 +1,7 @@
 import { IKeyringPair } from "@polkadot/types/types"
+
+import { createTxHex, submitTxBlocking, TransactionHashType } from "../blockchain"
+import { txActions, txPallets, WaitUntil } from "../constants"
 import {
   CollectionBurnedEvent,
   CollectionClosedEvent,
@@ -11,9 +14,8 @@ import {
   NFTRoyaltySetEvent,
   NFTTransferredEvent,
 } from "../events"
-import { createTxHex, submitTxBlocking } from "../blockchain"
-import { TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
-import { formatPermill } from "./misc"
+
+import { formatPermill } from "./utils"
 
 // NFTs
 
@@ -31,7 +33,7 @@ export const createNftTx = async (
   royalty = 0,
   collectionId: number | undefined = undefined,
   isSoulbound = false,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   const formatedRoyalty = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
@@ -71,7 +73,7 @@ export const createNft = async (
  * @param id  The ID of the NFT.
  * @returns   Unsigned unsubmitted Burn-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const burnNftTx = async (id: number): Promise<TransactionHash> => {
+export const burnNftTx = async (id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.burnNft, [id])
 }
 
@@ -99,7 +101,7 @@ export const burnNft = async (id: number, keyring: IKeyringPair, waitUntil: Wait
 export const delegateNftTx = async (
   id: number,
   recipient: string | undefined = undefined,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.delegateNft, [id, recipient])
 }
 
@@ -130,7 +132,7 @@ export const delegateNft = async (
  * @param amount  The new royalty value.
  * @returns       Unsigned unsubmitted Set-Royalty-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHash> => {
+export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHashType> => {
   const formatedRoyalty = formatPermill(amount)
   return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
 }
@@ -162,7 +164,7 @@ export const setRoyalty = async (
  * @param recipient   Destination account.
  * @returns           Unsigned unsubmitted Transfer-NFT Transaction Hash. The Hash is only valid for 5 minutes
  */
-export const transferNftTx = async (id: number, recipient: string): Promise<TransactionHash> => {
+export const transferNftTx = async (id: number, recipient: string): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.transferNft, [id, recipient])
 }
 
@@ -193,7 +195,7 @@ export const transferNft = async (
  * @param collection_id   The ID of the Collection.
  * @returns               Unsigned unsubmitted Add-NFT-To-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const addNftToCollectionTx = async (nft_id: number, collection_id: number): Promise<TransactionHash> => {
+export const addNftToCollectionTx = async (nft_id: number, collection_id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.addNftToCollection, [nft_id, collection_id])
 }
 
@@ -229,7 +231,7 @@ export const addNftToCollection = async (
 export const createCollectionTx = async (
   offchainData: string,
   limit: number | undefined = undefined,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.createCollection, [offchainData, limit])
 }
 
@@ -260,7 +262,7 @@ export const createCollection = async (
  * @param limit   Amount of NFTs that can be associated with this collection.
  * @returns       Unsigned unsubmitted Limit-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const limitCollectionTx = async (id: number, limit: number): Promise<TransactionHash> => {
+export const limitCollectionTx = async (id: number, limit: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.limitCollection, [id, limit])
 }
 
@@ -290,7 +292,7 @@ export const limitCollection = async (
  * @param id  The ID of the Collection.
  * @returns   Unsigned unsubmitted Close-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const closeCollectionTx = async (id: number): Promise<TransactionHash> => {
+export const closeCollectionTx = async (id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.closeCollection, [id])
 }
 
@@ -318,7 +320,7 @@ export const closeCollection = async (
  * @param id  The ID of the Collection.
  * @returns   Unsigned unsubmitted Burn-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const burnCollectionTx = async (id: number): Promise<TransactionHash> => {
+export const burnCollectionTx = async (id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.burnCollection, [id])
 }
 

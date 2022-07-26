@@ -1,5 +1,8 @@
 import { Event } from "@polkadot/types/interfaces/system"
-import { Errors, MarketplaceKind } from "./constants"
+
+import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./marketplace/types"
+import { Errors } from "./constants"
+import { MarketplaceKind } from "./marketplace/enum"
 
 export enum EventType {
   // Balances
@@ -300,7 +303,7 @@ export class NFTDelegatedEvent extends BlockchainEvent {
  */
 export class NFTRoyaltySetEvent extends BlockchainEvent {
   nftId: number
-  royalty: number // number ??
+  royalty: number
 
   /**
    * Construct the data object from the NFTRoyaltySetEvent event
@@ -456,11 +459,10 @@ export class MarketplaceCreatedEvent extends BlockchainEvent {
  * This class represents the on-chain MarketplaceConfigSetEvent event.
  */
 export class MarketplaceConfigSetEvent extends BlockchainEvent {
-  // This is not production ready - WIP for it since we focus on basic NFT for now.
   marketplaceId: number
-  commissionFee: string | number // u128 or permil or enum
-  listingFee: string | number // u128 or permil or enum
-  accountList: string[] | string //can pass the {set : ["", "", ""] }
+  commissionFee: string
+  listingFee: string
+  accountList: string
   offchainData: string
 
   /**
@@ -474,8 +476,7 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
     this.commissionFee = event.data[1].toString()
     this.listingFee = event.data[2].toString()
     this.accountList = event.data[3].toString()
-    const offchainData = event.data[4].toHuman()
-    this.offchainData = offchainData ? offchainData.toString() : ""
+    this.offchainData = event.data[4].toString()
   }
 }
 

@@ -1,17 +1,17 @@
 import BN from "bn.js"
 import { hexToString } from "@polkadot/util"
-import { query } from "../blockchain"
-import { Balance, chainQuery, Errors, txPallets } from "../constants"
-import { ICollectionData, INftData } from "./interfaces"
+import { query, BalanceType } from "../blockchain"
+import { chainQuery, Errors, txPallets } from "../constants"
+import { ICollectionData, INftData } from "./types"
 
 /**
  * @name nftMintFee
  * @summary Fee to mint an NFT (extra fee on top of the tx fees).
  * @returns NFT mint fee.
  */
-export const getNftMintFee = async (): Promise<Balance> => {
+export const getNftMintFee = async (): Promise<BalanceType> => {
   const fee = await query(txPallets.nft, chainQuery.nftMintFee)
-  return fee as any as Balance
+  return fee as any as BalanceType
 }
 
 /**

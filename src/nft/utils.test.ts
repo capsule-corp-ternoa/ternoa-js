@@ -1,5 +1,5 @@
 // import { Errors } from "../constants"
-import { formatPermill } from "."
+import { formatPermill } from "./utils"
 
 describe("Testing formatPermill", (): void => {
   it("Should format royalty from a percent number to a permill", () => {

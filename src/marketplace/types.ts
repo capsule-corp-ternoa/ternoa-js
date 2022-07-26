@@ -1,5 +1,6 @@
 import BN from "bn.js"
-import { MarketplaceConfigAction } from "../constants"
+
+import { MarketplaceConfigAction } from "./enum"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -24,7 +25,7 @@ export type OffchainDataType =
   | MarketplaceConfigAction.Remove
   | { [MarketplaceConfigAction.Set]: string }
 
-export type IMarketplaceData = {
+export type MarketplaceDataType = {
   owner: string
   kind: string
   commissionFee: IFeeType | undefined

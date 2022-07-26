@@ -1,4 +1,8 @@
+import BN from "bn.js"
 import { IKeyringPair } from "@polkadot/types/types"
+
+import { createTxHex, submitTxBlocking, numberToBalance, TransactionHashType } from "../blockchain"
+import { txActions, txPallets, WaitUntil } from "../constants"
 import {
   MarketplaceCreatedEvent,
   MarketplaceConfigSetEvent,
@@ -9,17 +13,9 @@ import {
   NFTSoldEvent,
   NFTUnlistedEvent,
 } from "../events"
-import { createTxHex, submitTxBlocking, numberToBalance } from "../blockchain"
-import {
-  MarketplaceConfigAction,
-  MarketplaceKind,
-  TransactionHash,
-  txActions,
-  txPallets,
-  WaitUntil,
-} from "../constants"
-import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./interfaces"
-import BN from "bn.js"
+
+import { MarketplaceConfigAction, MarketplaceKind } from "./enum"
+import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./types"
 import { formatMarketplaceFee } from "./utils"
 
 /**
@@ -28,7 +24,7 @@ import { formatMarketplaceFee } from "./utils"
  * @param kind            Kind of marketplace : It must be public or private.
  * @returns               Unsigned unsubmitted Create-Marketplace Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const createMarketplaceTx = async (kind: MarketplaceKind): Promise<TransactionHash> => {
+export const createMarketplaceTx = async (kind: MarketplaceKind): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.marketplace, txActions.createMarketplace, [kind])
 }
 
@@ -65,7 +61,7 @@ export const setMarketplaceConfigurationTx = async (
   listingFee: ListingFeeType = MarketplaceConfigAction.Noop,
   accountList: AccountListType = MarketplaceConfigAction.Noop,
   offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   await formatMarketplaceFee(commissionFee)
   await formatMarketplaceFee(listingFee)
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
@@ -115,7 +111,7 @@ export const setMarketplaceConfiguration = async (
  * @param recipient       Adress of the new marketplace owner.
  * @returns               Unsigned unsubmitted Set-Marketplace-Owner Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const setMarketplaceOwnerTx = async (id: number, recipient: string): Promise<TransactionHash> => {
+export const setMarketplaceOwnerTx = async (id: number, recipient: string): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceOwner, [id, recipient])
 }
 
@@ -145,7 +141,7 @@ export const setMarketplaceOwner = async (
  * @param kind            Kind of marketplace : It must be public or private.
  * @returns               Unsigned unsubmitted Set-Marketplace-Kind Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const setMarketplaceKindTx = async (id: number, kind: MarketplaceKind): Promise<TransactionHash> => {
+export const setMarketplaceKindTx = async (id: number, kind: MarketplaceKind): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceKind, [id, kind])
 }
 
@@ -180,7 +176,7 @@ export const listNftTx = async (
   nft_id: number,
   marketplace_id: number,
   price: number | BN,
-): Promise<TransactionHash> => {
+): Promise<TransactionHashType> => {
   const formatted_price = typeof price === "number" ? await numberToBalance(price) : price
   return await createTxHex(txPallets.marketplace, txActions.listNft, [nft_id, marketplace_id, formatted_price])
 }
@@ -213,7 +209,7 @@ export const listNft = async (
  * @param nft_id          NFT Id of the NFT to be unlisted from sale.
  * @returns               Unsigned unsubmitted Unlist-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const unlistNftTx = async (nft_id: number): Promise<TransactionHash> => {
+export const unlistNftTx = async (nft_id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.marketplace, txActions.unlistNft, [nft_id])
 }
 
@@ -241,7 +237,7 @@ export const unlistNft = async (
  * @param nft_id          NFT Id of the NFT for sale.
  * @returns               Unsigned unsubmitted Buy-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const buyNftTx = async (nft_id: number): Promise<TransactionHash> => {
+export const buyNftTx = async (nft_id: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.marketplace, txActions.buyNft, [nft_id])
 }
 
@@ -265,7 +261,7 @@ export const buyNft = async (nft_id: number, keyring: IKeyringPair, waitUntil: W
  * @param fee             Fee to mint a marketplace.
  * @returns               Unsigned unsubmitted Set-Marketplace-Mint-Fee Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<TransactionHash> => {
+export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<TransactionHashType> => {
   const formatted_price = typeof fee === "number" ? await numberToBalance(fee) : fee
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceMintFee, [formatted_price])
 }
