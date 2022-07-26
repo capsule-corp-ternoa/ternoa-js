@@ -103,6 +103,17 @@ export enum MarketplaceKind {
   Private = "Private",
 }
 
+export enum MarketplaceConfigAction {
+  Noop = "Noop",
+  Remove = "Remove",
+  Set = "set",
+}
+
+export enum MarketplaceConfigFeeType {
+  Percentage = "percentage",
+  Flat = "flat",
+}
+
 export enum Errors {
   EXTRINSIC_FAILED = "EXTRINSIC_FAILED",
   EVENT_NOT_FOUND = "EVENT_NOT_FOUND",

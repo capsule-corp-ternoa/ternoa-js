@@ -10,7 +10,15 @@ import {
   NFTUnlistedEvent,
 } from "../events"
 import { createTxHex, submitTxBlocking, numberToBalance } from "../blockchain"
-import { MarketplaceKind, TransactionHash, txActions, txPallets, WaitUntil } from "../constants"
+import {
+  MarketplaceConfigAction,
+  MarketplaceKind,
+  TransactionHash,
+  txActions,
+  txPallets,
+  WaitUntil,
+} from "../constants"
+import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./interfaces"
 import BN from "bn.js"
 
 /**
@@ -52,10 +60,10 @@ export const createMarketplace = async (
  */
 export const setMarketplaceConfigurationTx = async (
   id: number,
-  commissionFee: number | BN | undefined = undefined,
-  listingFee: number | BN | undefined = undefined,
-  accountList: [string] | undefined = undefined, // or [] ??
-  offchainData: string | undefined = undefined,
+  commissionFee: CommissionFeeType = MarketplaceConfigAction.Noop,
+  listingFee: ListingFeeType = MarketplaceConfigAction.Noop,
+  accountList: AccountListType = MarketplaceConfigAction.Noop,
+  offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
 ): Promise<TransactionHash> => {
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
     id,
@@ -71,9 +79,9 @@ export const setMarketplaceConfigurationTx = async (
  * @summary               Set or Remove the four marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.
  *
  * Each of the four parameters of the marketplace, need on of the type below as below :
- * NoOperation :  Nothing change. Null or undefined ??
- * Removed :      Current datas will be deleted.
- * Set :          To add new value: Commission Fee and Listing Fee require to precise their type : flat or percentage.
+ * Noop :     No Operation, nothing change.
+ * Removed :  Current datas will be deleted.
+ * Set :      To add new value: Commission Fee and Listing Fee require to precise their type : flat or percentage.
  *
  * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage.
  * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage.
@@ -85,10 +93,10 @@ export const setMarketplaceConfigurationTx = async (
  */
 export const setMarketplaceConfiguration = async (
   id: number,
-  commissionFee: number | BN | undefined = undefined,
-  listingFee: number | BN | undefined = undefined,
-  accountList: [string] | undefined = undefined,
-  offchainData: string | undefined = undefined,
+  commissionFee: CommissionFeeType = MarketplaceConfigAction.Noop,
+  listingFee: ListingFeeType = MarketplaceConfigAction.Noop,
+  accountList: AccountListType = MarketplaceConfigAction.Noop,
+  offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<MarketplaceConfigSetEvent> => {
