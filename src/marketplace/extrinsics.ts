@@ -48,12 +48,22 @@ export const createMarketplace = async (
 
 /**
  * @name setMarketplaceConfigurationTx
- * @summary               Creates an unsigned unsubmitted Create-Marketplace-Configuration Transaction Hash.
- * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage.
- * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage.
+ * @summary               Creates an unsigned unsubmitted Set-Marketplace-Configuration Transaction Hash.
+ *
+ * Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
+ * Noop :                 No Operation, nothing change.
+ * Removed :              Current datas will be deleted.
+ * Set :                  Un object that update parameter value:
+ *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
+ *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
+ *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
+ *
+ * @param id              Marketplace Id of the marketplace to update.
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
- * @param offchainData    Off-chain related NFT metadata. Can be an IPFS Hash, an URL or plain text.
- * @returns               Unsigned unsubmitted Create-Marketplace-Configuration Transaction Hash. The Hash is only valid for 5 minutes.
+ * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
+ * @returns               MarketplaceConfigSetEvent Blockchain event.
  */
 export const setMarketplaceConfigurationTx = async (
   id: number,
@@ -75,17 +85,21 @@ export const setMarketplaceConfigurationTx = async (
 
 /**
  * @name setMarketplaceConfiguration
- * @summary               Set or Remove the four marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.
+ * @summary               Set or Remove (Noop for No Operation) the marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.
  *
- * Each of the four parameters of the marketplace, need on of the type below as below :
- * Noop :     No Operation, nothing change.
- * Removed :  Current datas will be deleted.
- * Set :      To add new value: Commission Fee and Listing Fee require to precise their type : flat or percentage.
+ * Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
+ * Noop :                 No Operation, nothing change.
+ * Removed :              Current datas will be deleted.
+ * Set :                  Un object that update parameter value:
+ *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
+ *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
+ *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
  *
- * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage.
- * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage.
+ * @param id              Marketplace Id of the marketplace to update.
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
- * @param offchainData    Off-chain related NFT metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               MarketplaceConfigSetEvent Blockchain event.
