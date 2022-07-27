@@ -16,7 +16,8 @@ describe("Testing balance transfers", (): void => {
     expect(
       event.from === testAccount.address &&
         event.to === destAccount.address &&
-        event.amount === oneCapsAmount.toString(),
+        event.amount === oneCapsAmount.toString() &&
+        event.amountRounded === 1,
     ).toBe(true)
   })
 
@@ -32,7 +33,8 @@ describe("Testing balance transfers", (): void => {
     expect(
       event.from === testAccount.address &&
         event.to === destAccount.address &&
-        event.amount === oneCapsAmount.toString(),
+        event.amount === oneCapsAmount.toString() &&
+        event.amountRounded === 1,
     ).toBe(true)
   })
 })

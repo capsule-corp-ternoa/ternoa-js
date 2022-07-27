@@ -1,3 +1,9 @@
+import { createTestPairs } from "../_misc/testingPairs"
+import { initializeApi, numberToBalance } from "../blockchain"
+import { WaitUntil } from "../constants"
+import { createNft, getNftData } from "../nft"
+
+import { MarketplaceConfigAction, MarketplaceConfigFeeType, MarketplaceKind } from "./enum"
 import {
   buyNft,
   createMarketplace,
@@ -7,12 +13,6 @@ import {
   setMarketplaceOwner,
   unlistNft,
 } from "./extrinsics"
-import { initializeApi } from "../blockchain"
-import { WaitUntil } from "../constants"
-import { createTestPairs } from "../_misc/testingPairs"
-import { createNft, getNftData } from "../nft"
-import { MarketplaceConfigAction, MarketplaceKind } from "./enum"
-import { SetFeeType } from "./types"
 
 const TEST_DATA = {
   nftId: 0,
@@ -29,22 +29,35 @@ describe("Testing Marketplace extrinsics", (): void => {
     const { test: testAccount } = await createTestPairs()
     const mpEvent = await createMarketplace(MarketplaceKind.Public, testAccount, WaitUntil.BlockInclusion)
     TEST_DATA.marketplaceId = mpEvent.marketplaceId
-    expect(mpEvent.marketplaceId > 0).toBe(true)
+    expect(
+      mpEvent.marketplaceId > 0 && mpEvent.kind === MarketplaceKind.Public && mpEvent.owner === testAccount.address,
+    ).toBe(true)
   })
 
   it("Testing to set all marketplace parameters configuration", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const mpEvent = await setMarketplaceConfiguration(
       TEST_DATA.marketplaceId,
-      { [MarketplaceConfigAction.Set]: { percentage: 10 } },
-      { [MarketplaceConfigAction.Set]: { flat: 10 } },
+      { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Percentage]: 10 } },
+      { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Flat]: 100 } },
       { [MarketplaceConfigAction.Set]: [destAccount.address] },
       { [MarketplaceConfigAction.Set]: "Hello" },
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const mpCommissionFee = JSON.parse(mpEvent.commissionFee) as SetFeeType
-    expect(mpCommissionFee.set.percentage === 100000).toBe(true)
+    const listingFee = (await numberToBalance(100)).toString()
+    expect(
+      mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
+        mpEvent.commissionFee === "10" &&
+        mpEvent.commissionFeeRounded === 10 &&
+        mpEvent.commissionFeeType === MarketplaceConfigFeeType.Percentage &&
+        mpEvent.listingFee === listingFee &&
+        mpEvent.listingFeeRounded === 100 &&
+        mpEvent.listingFeeType === MarketplaceConfigFeeType.Flat &&
+        mpEvent.accountList?.length === 1 &&
+        mpEvent.accountList?.includes(destAccount.address) &&
+        mpEvent.offchainData === "Hello",
+    ).toBe(true)
   })
   it("Testing to Remove and keep(Noop) the marketplace parameters configuration", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
@@ -58,10 +71,14 @@ describe("Testing Marketplace extrinsics", (): void => {
       WaitUntil.BlockInclusion,
     )
     expect(
-      mpEvent.commissionFee === "Noop" &&
-        mpEvent.listingFee === "Remove" &&
-        mpEvent.accountList === "Remove" &&
-        mpEvent.offchainData === "Noop",
+      mpEvent.commissionFee === undefined &&
+        mpEvent.commissionFeeRounded === undefined &&
+        mpEvent.commissionFeeType === undefined &&
+        mpEvent.listingFee === null &&
+        mpEvent.listingFeeRounded === null &&
+        mpEvent.listingFeeType === null &&
+        mpEvent.accountList?.length === 0 &&
+        mpEvent.offchainData === undefined,
     ).toBe(true)
   })
 
@@ -84,7 +101,7 @@ describe("Testing Marketplace extrinsics", (): void => {
       destAccount,
       WaitUntil.BlockInclusion,
     )
-    expect(mpEvent.marketplaceId === TEST_DATA.marketplaceId && mpEvent.kind === "Private").toBe(true)
+    expect(mpEvent.marketplaceId === TEST_DATA.marketplaceId && mpEvent.kind === MarketplaceKind.Private).toBe(true)
   })
 })
 
@@ -101,16 +118,26 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
       WaitUntil.BlockInclusion,
     )
     TEST_DATA.nftId = nEvent.nftId
-    await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
+    const mpEvent = await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    expect(nData?.state.listedForSale).toBe(true)
+    const price = (await numberToBalance(10)).toString()
+    expect(
+      mpEvent.nftId === TEST_DATA.nftId &&
+        mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
+        mpEvent.price === price &&
+        mpEvent.priceRounded === 10 &&
+        mpEvent.commissionFee === "10" &&
+        mpEvent.commissionFeeRounded === 10 &&
+        mpEvent.commissionFeeType === MarketplaceConfigFeeType.Percentage &&
+        nData?.state.listedForSale,
+    ).toBe(true)
   })
 
   it("Testing to Unlist an NFT on a marketplace", async (): Promise<void> => {
     const { dest: destAccount } = await createTestPairs()
-    await unlistNft(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const mpEvent = await unlistNft(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    expect(nData?.state.listedForSale).toBe(false)
+    expect(mpEvent.nftId === TEST_DATA.nftId && nData?.state.listedForSale).toBe(false)
   })
 
   it("Testing to Buy an NFT from a marketplace", async (): Promise<void> => {
@@ -118,6 +145,20 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
     await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
     const mpEvent = await buyNft(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    expect(mpEvent.marketplaceId === TEST_DATA.marketplaceId && nData?.owner === testAccount.address).toBe(true)
+    const listedPrice = (await numberToBalance(10)).toString()
+    const marketplaceCut = (await numberToBalance(1)).toString()
+    const royaltyCut = (await numberToBalance(0)).toString()
+    expect(
+      mpEvent.nftId === TEST_DATA.nftId &&
+        mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
+        mpEvent.buyer === testAccount.address &&
+        mpEvent.listedPrice === listedPrice &&
+        mpEvent.listedPriceRounded === 10 &&
+        mpEvent.marketplaceCut === marketplaceCut &&
+        mpEvent.marketplaceCutRounded === 1 &&
+        mpEvent.royaltyCut === royaltyCut &&
+        mpEvent.royaltyCutRounded === 0 &&
+        nData?.owner === testAccount.address,
+    ).toBe(true)
   })
 })
