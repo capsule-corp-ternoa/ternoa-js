@@ -5,11 +5,13 @@
 
 import "@polkadot/api-augment"
 import { WaitUntil } from "../../../src/constants"
-import { NFTCreatedEvent } from "../../../src/events"
+import { NFTCreatedEvent, NFTListedEvent } from "../../../src/events"
 
 import { getKeyringFromSeed } from "../../../src/account/index"
 import { createCollection, createNftTx } from "../../../src/nft/index"
-import { batchAllTxHex, initializeApi, submitTxBlocking } from "../../../src/blockchain/index"
+import { batchAllTxHex, initializeApi, signTxHex, submitTxBlocking } from "../../../src/blockchain/index"
+import { MarketplaceKind } from "../../../src/marketplace/enum"
+import { buyNft, createMarketplace, listNftTx } from "../../../src/marketplace"
 
 async function main() {
   // This will initialize the internal SDK API.
@@ -142,7 +144,107 @@ async function main() {
 
   //
   // That's it for our doggo NFTs. The second step is done and we have created our NFTs and assigned them to our
-  // step 1 collection. We will soon be able to create a marketplace for them to be sold, using the Ternoa SDK. Stay tuned!
+  // step 1 collection. In the next step we will create a marketplace for them to be sold.
+  //
+
+  // Here we define the type (kind) of the marketplace.
+  //
+  // Our blockchain can differentiate between two types of marketplaces: Public ones and Private ones.
+  // On Public marketplaces anyone can list their NFTs and anyone can buy them.
+  // On Private marketplaces only certain people are allowed ot list their NFTs and anyone can buy them.
+  //
+  // There are a lot more functionality that comes with our marketplaces (like the commission or listing fee)
+  // but for the sake of simplicity we will ignore this aspect and just create a simple plain Public marketplace.
+  const kind = MarketplaceKind.Public
+
+  // Here we create our marketplace.
+  //
+  // Only the "kind" predefined data is needed in order to create a marketplace. It's important to mention
+  // that creating a marketplace it's cheap and currently besides the transaction fees it the signer also
+  // needs to pay an additional Marketplace Mint fee. What this actually is and how to handle it is explained
+  // in more details in another exercise.
+  const marketplaceEvent = await createMarketplace(kind, keyring, WaitUntil.BlockInclusion)
+
+  //
+  // That's it for creating a Marketplace. Literally we needed two lines for it (it can also be done in one :P)
+  // In the next step we will list all our nfts for sale on our newly created marketplace.
+  //
+
+  // Here we define the price of our NFTs.
+  //
+  // There are two ways in how we can define the price.
+  // If a "number" is used then 100 would mean that the price of each NFT will be 100 CAPS.
+  // if a "BN" is used then we would have needed to create a BN object with the following literal
+  // "100000000000000000000" to get the same result. It's currently not really visible on why
+  // you would use the second notation but there are reasons for it and they are covered in details
+  // in another exercise.
+  // For the sake of simplicity and convenience we will use a "number".
+  const price = 100
+
+  // Here we create one listNftTx for each dog NFT.
+  //
+  // To list an NFT for sale only three inputs are needed. The NFT ID, the Marketplace ID and the price of the
+  // NFT. It's important to pick the right marketplace to list our NFTs because some marketplaces might be
+  // popular and heavily used but they could have high listing or commission fees. In this case we use our own
+  // marketplace to list our NFTs so no additional hidden fees will occur.
+  const signableListTxs = await Promise.all(
+    dogs.map((dog) => listNftTx(dog.nftId, marketplaceEvent.marketplaceId, price)),
+  )
+
+  // Here we batch (group) all those created transaction into one transaction,
+  //
+  // It's the same story as before. We group all our transactions so that instead of calling them one by one we just need
+  // to do it once.
+  const signableListBatchTx = await batchAllTxHex(signableListTxs)
+
+  // Here we sign the batch transaction.
+  //
+  // This is not mandatory since the submitTxBlocking can do this for us but it's good to know how to do it manually.
+  const signedListBatchTx = await signTxHex(keyring, signableListBatchTx)
+
+  // Here we submit our batch transaction.
+  //
+  // Now we don't need to pass our keyring since we have signed the transaction in the previous step.
+  //
+  // Events that are always there are the ExtrinsicSuccessEvent or ExtrinsicFailedEvent event which can tell
+  // us if our transaction was either successful or it failed. If batching is used (we use it here) the following
+  // events can also available: ItemCompletedEvent, BatchInterruptedEvent, or BatchCompletedEvent.
+  const allEvents2 = await submitTxBlocking(signedListBatchTx, WaitUntil.BlockInclusion)
+
+  // Here we get only the events that we are interested in.
+  //
+  // If not event is found it would mean that either we are looking for the wrong event or
+  // something went wrong.
+  const listedDogs = allEvents2.findEvents(NFTListedEvent)
+
+  // Here we print out the events that we got from listing our dog NFTs for sale. This is just for debug purposes.
+  listedDogs.forEach((listedDog) => console.log(listedDog))
+
+  //
+  // That's it for listing our dog NFTs for sale.
+  // In the next and final step we will buy one of our NFTs :)
+  //
+
+  // This will create a keyring from the provided account seed.
+  //
+  // To buy one of our NFTs we need to use a second account for this.
+  const keyring2 = await getKeyringFromSeed("//TernoaTestAccount2")
+
+  // Here we buy one of our NFTs with the second account.
+  //
+  // The second account provided in the previous step is going to be used to buy the first
+  // NFT that was listed with our original account.
+  const buyNftEvent = await buyNft(listedDogs[0].nftId, keyring2, WaitUntil.BlockInclusion)
+
+  // Here we print out the event that we got from buying our own dog NFT. This is just for debug purposes.
+  console.log(buyNftEvent)
+
+  //
+  // That's all. We have successfully ended our long journey started from creating a collection, then
+  // creating our beloved doggo NFTs, creating our own marketplace, listing our NFTs and in the end we
+  // even bought our own NFT. With this you should have a basic understanding on how to use the SDK
+  // in the most simplest way. The SDK itself has more functions and can provide more flexibility
+  // but this is explored in other exercises.
   //
 
   process.exit()
