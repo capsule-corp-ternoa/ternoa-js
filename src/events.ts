@@ -1,5 +1,9 @@
 import { Event } from "@polkadot/types/interfaces/system"
+import { bnToBn, hexToString } from "@polkadot/util"
+
 import { Errors } from "./constants"
+import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
+import { roundBalance } from "./utils"
 
 export enum EventType {
   // Balances
@@ -24,6 +28,16 @@ export enum EventType {
   CollectionLimited = "nft.CollectionLimited",
   CollectionClosed = "nft.CollectionClosed",
   CollectionBurned = "nft.CollectionBurned",
+
+  // Marketplace
+  MarketplaceCreated = "marketplace.MarketplaceCreated",
+  MarketplaceOwnerSet = "marketplace.MarketplaceOwnerSet",
+  MarketplaceKindSet = "marketplace.MarketplaceKindSet",
+  MarketplaceConfigSet = "marketplace.MarketplaceConfigSet",
+  MarketplaceMintFeeSet = "marketplace.MarketplaceMintFeeSet",
+  NFTListed = "marketplace.NFTListed",
+  NFTUnlisted = "marketplace.NFTUnlisted",
+  NFTSold = "marketplace.NFTSold",
 
   // Utility
   ItemCompleted = "utility.ItemCompleted",
@@ -88,6 +102,23 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
+      // Marketplace
+      case EventType.MarketplaceCreated:
+        return new MarketplaceCreatedEvent(event)
+      case EventType.MarketplaceOwnerSet:
+        return new MarketplaceOwnerSetEvent(event)
+      case EventType.MarketplaceKindSet:
+        return new MarketplaceKindSetEvent(event)
+      case EventType.MarketplaceConfigSet:
+        return new MarketplaceConfigSetEvent(event)
+      case EventType.MarketplaceMintFeeSet:
+        return new MarketplaceMintFeeSetEvent(event)
+      case EventType.NFTListed:
+        return new NFTListedEvent(event)
+      case EventType.NFTUnlisted:
+        return new NFTUnlistedEvent(event)
+      case EventType.NFTSold:
+        return new NFTSoldEvent(event)
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
@@ -114,6 +145,7 @@ export class BlockchainEvent {
 export class BalancesWithdrawEvent extends BlockchainEvent {
   who: string //AccountId32
   amount: string // u128
+  amountRounded: number
 
   /**
    * Construct the data object from the BalancesWithdrawEvent event
@@ -124,6 +156,7 @@ export class BalancesWithdrawEvent extends BlockchainEvent {
 
     this.who = event.data[0].toString()
     this.amount = event.data[1].toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 
@@ -133,6 +166,7 @@ export class BalancesWithdrawEvent extends BlockchainEvent {
 export class BalancesDepositEvent extends BlockchainEvent {
   who: string // AccountId32
   amount: string // u128
+  amountRounded: number
 
   /**
    * Construct the data object from the BalancesDepositEvent event
@@ -140,9 +174,11 @@ export class BalancesDepositEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BalancesDeposit)
+    const [who, amount] = event.data
 
-    this.who = event.data[0].toString()
-    this.amount = event.data[1].toString()
+    this.who = who.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 
@@ -153,6 +189,7 @@ export class BalancesTransferEvent extends BlockchainEvent {
   from: string // AccountId32
   to: string // AccountId32
   amount: string // u128
+  amountRounded: number
 
   /**
    * Construct the data object from the BalancesTransferEvent event
@@ -160,10 +197,12 @@ export class BalancesTransferEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BalancesTransfer)
+    const [from, to, amount] = event.data
 
-    this.from = event.data[0].toString()
-    this.to = event.data[1].toString()
-    this.amount = event.data[2].toString()
+    this.from = from.toString()
+    this.to = to.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 
@@ -173,6 +212,7 @@ export class BalancesTransferEvent extends BlockchainEvent {
 export class BalancesEndowedEvent extends BlockchainEvent {
   account: string // AccountId32
   freeBalance: string // u128
+  freeBalanceRounded: number
 
   /**
    * Construct the data object from the BalancesEndowedEvent event
@@ -180,9 +220,11 @@ export class BalancesEndowedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BalancesEndowed)
+    const [account, freeBalance] = event.data
 
-    this.account = event.data[0].toString()
-    this.freeBalance = event.data[1].toString()
+    this.account = account.toString()
+    this.freeBalance = freeBalance.toString()
+    this.freeBalanceRounded = roundBalance(this.freeBalance)
   }
 }
 
@@ -191,6 +233,7 @@ export class BalancesEndowedEvent extends BlockchainEvent {
  */
 export class TreasuryDepositEvent extends BlockchainEvent {
   value: string // u128
+  valueRounded: number
 
   /**
    * Construct the data object the TreasuryDepositEvent event
@@ -198,8 +241,10 @@ export class TreasuryDepositEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.TreasuryDeposit)
+    const [value] = event.data
 
-    this.value = event.data[0].toString()
+    this.value = value.toString()
+    this.valueRounded = roundBalance(this.value)
   }
 }
 
@@ -208,11 +253,13 @@ export class TreasuryDepositEvent extends BlockchainEvent {
  */
 export class NFTCreatedEvent extends BlockchainEvent {
   nftId: number
-  owner: string
+  owner: string // AccountId32
   offchainData: string
   royalty: number
-  collectionId?: number
-  isSoulbound: string
+  collectionId: number | null
+  isSoulbound: boolean
+  mintFee: string // u128
+  mintFeeRounded: number
 
   /**
    * Construct the data object from the NFTCreatedEvent event
@@ -220,15 +267,16 @@ export class NFTCreatedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTCreated)
+    const [nftId, owner, offchainData, royalty, collectionId, isSoulbound, mintFee] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-    this.royalty = Number.parseInt(event.data[3].toString())
-    this.collectionId = event.data[4] ? Number.parseInt(event.data[4].toString()) : undefined
-    this.isSoulbound = event.data[5].toString()
-
-    const offchainData = event.data[2].toHuman()
-    this.offchainData = offchainData ? offchainData.toString() : ""
+    this.nftId = Number.parseInt(nftId.toString())
+    this.owner = owner.toString()
+    this.royalty = Number.parseInt(royalty.toString()) / 10000
+    this.collectionId = Number.parseInt(collectionId.toString()) || null
+    this.isSoulbound = isSoulbound.toString() === "true"
+    this.offchainData = hexToString(offchainData.toString())
+    this.mintFee = mintFee.toString()
+    this.mintFeeRounded = roundBalance(this.mintFee)
   }
 }
 
@@ -244,8 +292,9 @@ export class NFTBurnedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTBurned)
+    const [nftId] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
+    this.nftId = Number.parseInt(nftId.toString())
   }
 }
 
@@ -254,7 +303,7 @@ export class NFTBurnedEvent extends BlockchainEvent {
  */
 export class NFTDelegatedEvent extends BlockchainEvent {
   nftId: number
-  recipient?: string
+  recipient: string | null // AccountId32
 
   /**
    * Construct the data object from the NFTDelegatedEvent event
@@ -262,9 +311,10 @@ export class NFTDelegatedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTDelegated)
+    const [nftId, recipient] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.recipient = event.data[1].toString()
+    this.nftId = Number.parseInt(nftId.toString())
+    this.recipient = recipient?.toString() || null
   }
 }
 
@@ -273,7 +323,7 @@ export class NFTDelegatedEvent extends BlockchainEvent {
  */
 export class NFTRoyaltySetEvent extends BlockchainEvent {
   nftId: number
-  royalty: number // number ??
+  royalty: number
 
   /**
    * Construct the data object from the NFTRoyaltySetEvent event
@@ -281,9 +331,10 @@ export class NFTRoyaltySetEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTRoyaltySet)
+    const [nftId, royalty] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.royalty = Number.parseInt(event.data[1].toString())
+    this.nftId = Number.parseInt(nftId.toString())
+    this.royalty = Number.parseInt(royalty.toString()) / 10000
   }
 }
 
@@ -292,8 +343,8 @@ export class NFTRoyaltySetEvent extends BlockchainEvent {
  */
 export class NFTTransferredEvent extends BlockchainEvent {
   nftId: number
-  sender: string
-  recipient: string
+  sender: string // AccountId32
+  recipient: string // AccountId32
 
   /**
    * Construct the data object from the NFTTransferredEvent event
@@ -301,10 +352,11 @@ export class NFTTransferredEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTTransferred)
+    const [nftId, sender, recipient] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.sender = event.data[1].toString()
-    this.recipient = event.data[2].toString()
+    this.nftId = Number.parseInt(nftId.toString())
+    this.sender = sender.toString()
+    this.recipient = recipient.toString()
   }
 }
 
@@ -321,9 +373,10 @@ export class NFTAddedToCollectionEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NFTAddedToCollection)
+    const [nftId, collectionId] = event.data
 
-    this.nftId = Number.parseInt(event.data[0].toString())
-    this.collectionId = Number.parseInt(event.data[1].toString())
+    this.nftId = Number.parseInt(nftId.toString())
+    this.collectionId = Number.parseInt(collectionId.toString())
   }
 }
 
@@ -332,9 +385,9 @@ export class NFTAddedToCollectionEvent extends BlockchainEvent {
  */
 export class CollectionCreatedEvent extends BlockchainEvent {
   collectionId: number
-  owner: string
+  owner: string // AccountId32
   offchainData: string
-  limit?: number
+  limit: number | null
 
   /**
    * Construct the data object from the CollectionCreatedEvent event
@@ -342,13 +395,12 @@ export class CollectionCreatedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.CollectionCreated)
+    const [collectionId, owner, offchainData, limit] = event.data
 
-    this.collectionId = Number.parseInt(event.data[0].toString())
-    this.owner = event.data[1].toString()
-    this.limit = event.data[3] !== undefined ? Number.parseInt(event.data[3].toString()) : undefined
-
-    const offchainData = event.data[2].toHuman()
-    this.offchainData = offchainData ? offchainData.toString() : ""
+    this.collectionId = Number.parseInt(collectionId.toString())
+    this.owner = owner.toString()
+    this.limit = Number.parseInt(limit.toString()) || null
+    this.offchainData = hexToString(offchainData.toString())
   }
 }
 
@@ -365,9 +417,10 @@ export class CollectionLimitedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.CollectionLimited)
+    const [collectionId, limit] = event.data
 
-    this.collectionId = Number.parseInt(event.data[0].toString())
-    this.limit = Number.parseInt(event.data[1].toString())
+    this.collectionId = Number.parseInt(collectionId.toString())
+    this.limit = Number.parseInt(limit.toString())
   }
 }
 
@@ -383,8 +436,9 @@ export class CollectionClosedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.CollectionClosed)
+    const [collectionId] = event.data
 
-    this.collectionId = Number.parseInt(event.data[0].toString())
+    this.collectionId = Number.parseInt(collectionId.toString())
   }
 }
 
@@ -400,12 +454,279 @@ export class CollectionBurnedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.CollectionBurned)
+    const [collectionId] = event.data
 
-    this.collectionId = Number.parseInt(event.data[0].toString())
+    this.collectionId = Number.parseInt(collectionId.toString())
+  }
+}
+/**
+ * This class represents the on-chain MarketplaceCreatedEvent event.
+ */
+export class MarketplaceCreatedEvent extends BlockchainEvent {
+  marketplaceId: number
+  owner: string // AccountId32
+  kind: MarketplaceKind // Public / Private
+
+  /**
+   * Construct the data object from MarketplaceCreatedEvent event
+   * @param event The MarketplaceCreatedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MarketplaceCreated)
+
+    this.marketplaceId = Number.parseInt(event.data[0].toString())
+    this.owner = event.data[1].toString()
+    this.kind = event.data[2].toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
   }
 }
 
-// TODO
+/**
+ * This class represents the on-chain MarketplaceConfigSetEvent event.
+ */
+export class MarketplaceConfigSetEvent extends BlockchainEvent {
+  marketplaceId: number
+  commissionFeeType?: string | null
+  commissionFee?: string | null
+  commissionFeeRounded?: number | null
+  listingFeeType?: string | null
+  listingFee?: string | null
+  listingFeeRounded?: number | null
+  accountList?: string[]
+  offchainData?: string | null
+
+  /**
+   * Construct the data object from MarketplaceConfigSetEvent event
+   * @param event The MarketplaceConfigSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MarketplaceConfigSet)
+    const [marketplaceId, commissionFee, listingFee, accountList, offchainData] = event.data
+
+    const isCommissionFeeSet = commissionFee.toString() !== "Noop" && commissionFee.toString() !== "Remove"
+    const isCommissionFeeRemoved = commissionFee.toString() === "Remove"
+    const isListingFeeSet = listingFee.toString() !== "Noop" && listingFee.toString() !== "Remove"
+    const isListingFeeRemoved = listingFee.toString() === "Remove"
+    const isAccountListSet = accountList.toString() !== "Noop" && accountList.toString() !== "Remove"
+    const isAccountListRemoved = accountList.toString() === "Remove"
+    const isOffchainDataSet = offchainData.toString() !== "Noop" && offchainData.toString() !== "Remove"
+    const isOffchainDataRemoved = offchainData.toString() === "Remove"
+
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.commissionFeeType = undefined
+    this.commissionFee = undefined
+    this.commissionFeeRounded = undefined
+    this.listingFeeType = undefined
+    this.listingFee = undefined
+    this.listingFeeRounded = undefined
+    this.accountList = undefined
+    this.offchainData = undefined
+
+    if (isCommissionFeeSet) {
+      const parsedDatas = JSON.parse(commissionFee.toString())
+      parsedDatas.set.flat
+        ? ((this.commissionFee = bnToBn(parsedDatas.set.flat).toString()),
+          (this.commissionFeeRounded = roundBalance(this.commissionFee)),
+          (this.commissionFeeType = MarketplaceConfigFeeType.Flat))
+        : ((this.commissionFee = String(Number(parsedDatas.set.percentage.toString()) / 10000)),
+          (this.commissionFeeRounded = Number(this.commissionFee)),
+          (this.commissionFeeType = MarketplaceConfigFeeType.Percentage))
+    } else if (isCommissionFeeRemoved) {
+      this.commissionFee = null
+      this.commissionFeeRounded = null
+      this.commissionFeeType = null
+    }
+
+    if (isListingFeeSet) {
+      const parsedDatas = JSON.parse(listingFee.toString())
+      parsedDatas.set.flat
+        ? ((this.listingFee = bnToBn(parsedDatas.set.flat).toString()),
+          (this.listingFeeRounded = roundBalance(this.listingFee)),
+          (this.listingFeeType = MarketplaceConfigFeeType.Flat))
+        : ((this.listingFee = String(Number(parsedDatas.set.percentage.toString()) / 10000)),
+          (this.listingFeeRounded = Number(this.listingFee)),
+          (this.listingFeeType = MarketplaceConfigFeeType.Percentage))
+    } else if (isListingFeeRemoved) {
+      this.listingFee = null
+      this.listingFeeRounded = null
+      this.listingFeeType = null
+    }
+
+    if (isAccountListSet) {
+      this.accountList = []
+      const parsedDatas = JSON.parse(accountList.toString())
+      parsedDatas.set.map((account: string) => this.accountList?.push(account.toString()))
+    } else if (isAccountListRemoved) {
+      this.accountList = []
+    }
+
+    if (isOffchainDataSet) {
+      const parsedDatas = JSON.parse(offchainData.toString())
+      this.offchainData = hexToString(parsedDatas.set.toString())
+    } else if (isOffchainDataRemoved) {
+      this.offchainData = null
+    }
+  }
+}
+
+/**
+ * This class represents the on-chain MarketplaceOwnerSetEvent event.
+ */
+export class MarketplaceOwnerSetEvent extends BlockchainEvent {
+  marketplaceId: number
+  owner: string // AccountId32
+
+  /**
+   * Construct the data object from MarketplaceOwnerSetEvent event
+   * @param event The MarketplaceOwnerSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MarketplaceOwnerSet)
+    const [marketplaceId, owner] = event.data
+
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.owner = owner.toString()
+  }
+}
+
+/**
+ * This class represents the on-chain MarketplaceKindSetEvent event.
+ */
+export class MarketplaceKindSetEvent extends BlockchainEvent {
+  marketplaceId: number
+  kind: MarketplaceKind // Public / Private
+
+  /**
+   * Construct the data object from MarketplaceKindSetEvent event
+   * @param event The MarketplaceKindSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MarketplaceKindSet)
+    const [marketplaceId, kind] = event.data
+
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.kind = kind.toString() == "Public" ? MarketplaceKind.Public : MarketplaceKind.Private
+  }
+}
+
+/**
+ * This class represents the on-chain MarketplaceMintFeeSetEvent event.
+ */
+export class MarketplaceMintFeeSetEvent extends BlockchainEvent {
+  fee: string
+  feeRounded: number
+
+  /**
+   * Construct the data object from MarketplaceMintFeeSetEvent event
+   * @param event The MarketplaceMintFeeSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MarketplaceMintFeeSet)
+    const [fee] = event.data
+
+    this.fee = fee.toString()
+    this.feeRounded = roundBalance(this.fee)
+  }
+}
+
+/**
+ * This class represents the on-chain NFTListedEvent event.
+ */
+export class NFTListedEvent extends BlockchainEvent {
+  nftId: number
+  marketplaceId: number
+  price: string
+  priceRounded: number
+  commissionFeeType?: string | null
+  commissionFee?: string | null
+  commissionFeeRounded?: number | null
+
+  /**
+   * Construct the data object from NFTListedEvent event
+   * @param event The NFTListedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.NFTListed)
+    const [nftId, marketplaceId, price, commissionFee] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.price = price.toString()
+    this.priceRounded = roundBalance(this.price)
+    this.commissionFeeType = undefined
+    this.commissionFee = undefined
+    this.commissionFeeRounded = undefined
+
+    const parsedCommissionFee = commissionFee.toString() && JSON.parse(commissionFee.toString())
+    const isMarketplaceCommissionFeeFlat = parsedCommissionFee && parsedCommissionFee.flat
+    const isMarketplaceCommissionFeePercentage = parsedCommissionFee && parsedCommissionFee.percentage
+    if (isMarketplaceCommissionFeeFlat) {
+      this.commissionFeeType = MarketplaceConfigFeeType.Flat
+      this.commissionFee = bnToBn(parsedCommissionFee.flat).toString()
+      this.commissionFeeRounded = roundBalance(this.commissionFee)
+    } else if (isMarketplaceCommissionFeePercentage) {
+      this.commissionFeeType = MarketplaceConfigFeeType.Percentage
+      this.commissionFee = String(Number(parsedCommissionFee.percentage.toString()) / 10000)
+      this.commissionFeeRounded = Number(this.commissionFee)
+    }
+  }
+}
+
+/**
+ * This class represents the on-chain NFTUnlistedEvent event.
+ */
+export class NFTUnlistedEvent extends BlockchainEvent {
+  nftId: number
+
+  /**
+   * Construct the data object from NFTUnlistedEvent event
+   * @param event The NFTUnlistedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.NFTUnlisted)
+    const [nftId] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain NFTSoldEvent event.
+ */
+export class NFTSoldEvent extends BlockchainEvent {
+  nftId: number
+  marketplaceId: number
+  buyer: string
+  listedPrice: string
+  listedPriceRounded: number
+  marketplaceCut: string
+  marketplaceCutRounded: number
+  royaltyCut: string
+  royaltyCutRounded: number
+
+  /**
+   * Construct the data object from NFTSoldEvent event
+   * @param event The NFTSoldEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.NFTSold)
+    const [nftId, marketplaceId, buyer, listedPrice, marketplaceCut, royaltyCut] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.buyer = buyer.toString()
+    this.listedPrice = listedPrice.toString()
+    this.listedPriceRounded = roundBalance(this.listedPrice)
+    this.marketplaceCut = marketplaceCut.toString()
+    this.marketplaceCutRounded = roundBalance(this.marketplaceCut)
+    this.royaltyCut = royaltyCut.toString()
+    this.royaltyCutRounded = roundBalance(this.royaltyCut)
+  }
+}
+
+/**
+ * This class represents the on-chain ItemCompletedEvent event,
+ * when a single item within a Batch of dispatches has completed with no error.
+ */
 export class ItemCompletedEvent extends BlockchainEvent {
   /**
    * Construct the data object from the ItemCompletedEvent event
@@ -429,8 +750,8 @@ export class BatchInterruptedEvent extends BlockchainEvent {
       error: string
     }
   }
-  errorType: string
-  details: string
+  errorType?: string
+  details?: string
 
   /**
    * Construct the data object from the BatchInterruptedEvent event
@@ -438,16 +759,17 @@ export class BatchInterruptedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BatchInterrupted)
+    const [index, error, errorType, details] = event.data
 
-    this.index = Number.parseInt(event.data[0].toString())
-    this.error = event.data[1].toJSON() as {
+    this.index = Number.parseInt(index.toString())
+    this.error = error.toJSON() as {
       module: {
         index: number
         error: string
       }
     }
-    this.errorType = event.data[2].toString()
-    this.details = event.data[3].toString()
+    this.errorType = errorType?.toString()
+    this.details = details?.toString()
   }
 }
 
@@ -477,8 +799,8 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
       error: string
     }
   }
-  errorType: string
-  details: string
+  errorType?: string
+  details?: string
   dispatchInfo: {
     weigth: string
     class: string
@@ -490,16 +812,17 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.ExtrinsicFailed)
+    const [dispatchError, errorType, details, dispatchInfo] = event.data
 
-    this.dispatchError = event.data[0].toJSON() as {
+    this.dispatchError = dispatchError.toJSON() as {
       module: {
         index: number
         error: string
       }
     }
-    this.errorType = event.data[1]?.toString()
-    this.details = event.data[2]?.toString()
-    this.dispatchInfo = event.data[3]?.toJSON() as {
+    this.errorType = errorType?.toString()
+    this.details = details?.toString()
+    this.dispatchInfo = dispatchInfo?.toJSON() as {
       weigth: string
       class: string
       paysFee: string
@@ -524,8 +847,9 @@ export class ExtrinsicSuccessEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.ExtrinsicSuccess)
+    const [dispatchInfo] = event.data
 
-    this.dispatchInfo = event.data[0].toJSON() as {
+    this.dispatchInfo = dispatchInfo.toJSON() as {
       weigth: string
       class: string
       paysFee: string
@@ -546,8 +870,9 @@ export class NewAccountEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.NewAccount)
+    const [account] = event.data
 
-    this.account = event.data[0].toString()
+    this.account = account.toString()
   }
 }
 
