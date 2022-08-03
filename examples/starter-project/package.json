@@ -9,7 +9,7 @@
     "ternoa-js": "1.2.0-rc0"
   },
   "devDependencies": {
-    "@tsconfig/node18-strictest-esm": "^1.0.0"
+    "@tsconfig/node18-strictest-esm": "1.0.0"
   },
   "type": "module"
 }
