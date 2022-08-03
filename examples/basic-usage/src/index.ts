@@ -1,23 +1,17 @@
-// Exercise Name: Basic SDK Usage
-// Date : 2022-07-06
-// Keywords: Create-Collection Create-NFT Dummy-Data
-// Author: Charmander
+import { NFTCreatedEvent, NFTListedEvent, batchAllTxHex, initializeApi, signTxHex, submitTxBlocking, safeDisconnect } from "ternoa-js"
 
-import "@polkadot/api-augment"
-import { WaitUntil } from "../../../src/constants"
-import { NFTCreatedEvent, NFTListedEvent } from "../../../src/events"
+import { createCollection, createNftTx } from "ternoa-js/nft/index.js"
+import { buyNft, createMarketplace, listNftTx } from "ternoa-js/marketplace/index.js"
+import { MarketplaceKind } from "ternoa-js/marketplace/enum.js"
 
-import { getKeyringFromSeed } from "../../../src/account/index"
-import { createCollection, createNftTx } from "../../../src/nft/index"
-import { batchAllTxHex, initializeApi, signTxHex, submitTxBlocking } from "../../../src/blockchain/index"
-import { MarketplaceKind } from "../../../src/marketplace/enum"
-import { buyNft, createMarketplace, listNftTx } from "../../../src/marketplace"
+import { getKeyringFromSeed } from "ternoa-js/account/index.js"
+import { WaitUntil } from "ternoa-js/constants.js"
 
 async function main() {
   // This will initialize the internal SDK API.
   //
   // It's not strictly necessary but it's good practice to initialize the API as soon as possible.
-  // This call can be omitted but then in the first SDK call the API will be forcefully initialized.
+  // If this call is omitted then the first SDK call will return an exception.
   // You can also specify the endpoint by passing the endpoint address as the first argument.
   await initializeApi()
 
@@ -220,6 +214,10 @@ async function main() {
   // Here we print out the events that we got from listing our dog NFTs for sale. This is just for debug purposes.
   listedDogs.forEach((listedDog) => console.log(listedDog))
 
+  if (listedDogs[0] == undefined) {
+    throw new Error("Something went wrong.")
+  }
+
   //
   // That's it for listing our dog NFTs for sale.
   // In the next and final step we will buy one of our NFTs :)
@@ -246,6 +244,8 @@ async function main() {
   // in the most simplest way. The SDK itself has more functions and can provide more flexibility
   // but this is explored in other exercises.
   //
+
+  await safeDisconnect();
 
   process.exit()
 }
