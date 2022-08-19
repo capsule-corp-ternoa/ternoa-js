@@ -81,6 +81,61 @@
 <p>If you use Visual Studio Code editor we suggest you to install <a href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint">ESLint</a> and <a href="https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode">Prettier</a> extensions.</p>
 </blockquote>
 
+<a href="#build-and-run-with-podman" id="build-and-run-with-podman" style="color: inherit; text-decoration: none;">
+  <h2>Build And Run With Podman</h2>
+</a>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Downloads the package lists and &quot;updates&quot; them.</span><br/><span class="hl-1">  sudo apt update -y</span><br/><span class="hl-1">  </span><span class="hl-5"># Installing podman.</span><br/><span class="hl-1">  sudo apt install podman</span><br/><span class="hl-1">  </span><span class="hl-5"># Building the image using podman and the already available Dockerfile.</span><br/><span class="hl-1">  podman build -t tsdk </span><span class="hl-2">.</span><br/><span class="hl-1">  </span><span class="hl-5"># Checking if everything is OK.</span><br/><span class="hl-1">  podman images | grep tsdk</span><br/><span class="hl-1">  </span><span class="hl-5"># Run the tsk image.</span><br/><span class="hl-1">  podman run tsdk</span>
+</code></pre>
+
+<a href="#run-with-podman-tips" id="run-with-podman-tips" style="color: inherit; text-decoration: none;">
+  <h2>Run With Podman Tips</h2>
+</a>
+<p>In the next examples some useful Podman commands will be shown. It&#39;s important to note that most flags have been omitted in order to make the examples more concise. Before running anything make sure that the image was built from the the &quot;Build And Run With Podman&quot; step.</p>
+<p>If no command arguments are given by default it will try to build the starter-project project. To cancel this add <code>bash</code> at the end of the command. Example: <code>podman run tsdk bash</code>.</p>
+
+<a href="#remove-container-after-exit" id="remove-container-after-exit" style="color: inherit; text-decoration: none;">
+  <h3>Remove Container After Exit</h3>
+</a>
+<p>A container that was run and it&#39;s job has been finished or the user has exited will not automatically be removed instead it will enter the Exit state.
+To make sure that the container is deleted and removed after it&#39;s being used the flag <code>--rm</code> should be used.</p>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># The --rm flag removes the container after usage.</span><br/><span class="hl-1">  podman run --rm tsdk</span><br/><span class="hl-1">  </span><span class="hl-5"># Check if any container is running or stopped. </span><br/><span class="hl-1">  podman ps -a</span>
+</code></pre>
+
+<a href="#persistent-storage" id="persistent-storage" style="color: inherit; text-decoration: none;">
+  <h3>Persistent Storage</h3>
+</a>
+<p>Container uses a local copy of the repo in order to compile and run examples. This means that if code changes are made inside the container that they will not propagate and they will be lost. To change this the virtual container volume <code>/workdir</code> needs to be mapped to a directory on the host machine that contains the Ternoa-js repo. With the mapping done any change in the mapped directory will be visible to the container.</p>
+<p>This can be useful if you want to develop applications without installing all the dependencies for it. For the workflow check the <a href="#create-a-detached-instance-and-access-its-shell">Create A Development Environment</a> segment.</p>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Flag -v tells the host machine to map the physical &quot;./.&quot; path with the virtual container one &quot;/workdir&quot;. If no command arguments are given this will try to compile and run the starter-project project.</span><br/><span class="hl-1">  podman run -v ./.:/workdir tsdk</span>
+</code></pre>
+
+<a href="#run-the-container-and-access-its-shell" id="run-the-container-and-access-its-shell" style="color: inherit; text-decoration: none;">
+  <h3>Run The Container And Access Its Shell</h3>
+</a>
+<p>The predefined operation/command of the container when run is to compile and run the starter-project. To execute a different operation additional commands can be passed at the end of the run command. Example: passing <code>bash</code> will run the bash shell session instead the default operation.</p>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># If no command arguments are given this will try to compile and run the starter-project project. By passing &quot;bash&quot; we make sure that we run a bash shell session once the container starts.</span><br/><span class="hl-1">  podman run -it tsdk bash</span>
+</code></pre>
+
+<a href="#create-a-detached-instance-and-access-its-shell" id="create-a-detached-instance-and-access-its-shell" style="color: inherit; text-decoration: none;">
+  <h3>Create A Detached Instance And Access Its Shell</h3>
+</a>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Flag &quot;-d&quot; runs the container in detached mode. </span><br/><span class="hl-1">  podman run -d tsdk bash</span><br/><span class="hl-1">  </span><span class="hl-5"># Access its shell.</span><br/><span class="hl-1">  podman </span><span class="hl-2">exec</span><span class="hl-1"> -itl bash</span>
+</code></pre>
+
+<a href="#create-a-development-environment" id="create-a-development-environment" style="color: inherit; text-decoration: none;">
+  <h3>Create A Development Environment</h3>
+</a>
+<p>The dockerfile is made in a way that it can be used to develope new applications with it.
+Example of a typical workflows:</p>
+<ul>
+<li>The host installs git, clones the repo and install a code editor like VS Code.</li>
+<li>The host runs the container in a interactive mode with /workdir pointing to a workdir on host machine (can be your own project or ternoa-js).</li>
+<li>The host writes code via a code editor and uses the terminal (which is connected to the container) to run the <code>tsc</code> and <code>node</code> commands.</li>
+<li>With that setup all the changes are done locally on the host machine while the container is only used to compile and run the app.</li>
+</ul>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Flag &quot;--name&quot; is used to name the container.</span><br/><span class="hl-1">  podman run -it --name my_sdk_env -v ./.:/workdir tsdk bash</span><br/><span class="hl-1">  </span><span class="hl-5"># Do some activity and the exit the container</span><br/><span class="hl-1">  [root@d4ad8ec11655:/workdir] nano -V</span><br/><span class="hl-1">  [root@d4ad8ec11655:/workdir] apt install nano</span><br/><span class="hl-1">  [root@d4ad8ec11655:/workdir] </span><span class="hl-2">exit</span><br/><br/><span class="hl-1">  </span><span class="hl-5"># Return to the same container</span><br/><span class="hl-1">  podman start my_sdk_env</span><br/><span class="hl-1">  podman </span><span class="hl-2">exec</span><span class="hl-1"> -it my_sdk_env /bin/bash</span><br/><span class="hl-1">  [root@d4ad8ec11655:/workdir] nano -V</span>
+</code></pre>
+
 <a href="#license" id="license" style="color: inherit; text-decoration: none;">
   <h2>License</h2>
 </a>
