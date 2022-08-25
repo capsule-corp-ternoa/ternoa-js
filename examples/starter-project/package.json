@@ -1,0 +1,15 @@
+{
+  "name": "starter-project",
+  "version": "1.0.0",
+  "description": "You can use this project to bootstrap your own one.",
+  "scripts": {
+    "start": "tsc && node src/index.js"
+  },
+  "dependencies": {
+    "ternoa-js": "1.2.0-rc0"
+  },
+  "devDependencies": {
+    "@tsconfig/node18-strictest-esm": "1.0.0"
+  },
+  "type": "module"
+}

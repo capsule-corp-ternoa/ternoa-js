@@ -16,7 +16,7 @@ module.exports = async (): Promise<void> => {
   const keyring = await getKeyringFromSeed(process.env.SEED_TEST_FUNDS)
   const pairs = PAIRSSR25519
 
-  const amount = new BN("100000000000000000000")
+  const amount = new BN("1000000000000000000000")
   const txs = await Promise.all(pairs.map((pair) => balancesTransferTx(pair.publicKey, amount)))
   const batchTx = await batchAllTxHex(txs)
   await submitTxBlocking(batchTx, WaitUntil.BlockInclusion, keyring)

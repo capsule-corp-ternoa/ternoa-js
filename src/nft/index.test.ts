@@ -29,7 +29,12 @@ describe("Testing to create/limit a collection", (): void => {
     const { test: testAccount } = await createTestPairs()
     const cEvent = await createCollection("Collection Test", undefined, testAccount, WaitUntil.BlockInclusion)
     TEST_DATA.collectionId = cEvent.collectionId
-    expect(cEvent.collectionId > 0).toBe(true)
+    expect(
+      cEvent.collectionId > 0 &&
+        cEvent.owner === testAccount.address &&
+        cEvent.offchainData === "Collection Test" &&
+        cEvent.limit === null,
+    ).toBe(true)
   })
 
   it("Testing to limit a collection", async (): Promise<void> => {
@@ -44,13 +49,20 @@ describe("Testing NFT extrinsics", (): void => {
     const { test: testAccount } = await createTestPairs()
     const nEvent = await createNft("Test NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
     TEST_DATA.nftId = nEvent.nftId
-    expect(nEvent.nftId > 0).toBe(true)
+    expect(
+      nEvent.nftId > 0 &&
+        nEvent.owner === testAccount.address &&
+        nEvent.offchainData === "Test NFT Data" &&
+        nEvent.royalty === 0 &&
+        nEvent.collectionId === null &&
+        nEvent.isSoulbound === false,
+    ).toBe(true)
   })
 
   it("Testing to set NFT royalties", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const nEvent = await setRoyalty(TEST_DATA.nftId, 10, testAccount, WaitUntil.BlockInclusion)
-    expect(nEvent.nftId === TEST_DATA.nftId && nEvent.royalty === 100000).toBe(true)
+    expect(nEvent.nftId === TEST_DATA.nftId && nEvent.royalty === 10).toBe(true)
   })
 
   it("Testing to add NFT to a collection", async (): Promise<void> => {
@@ -73,7 +85,7 @@ describe("Testing NFT extrinsics", (): void => {
   it("Testing to undelegate an NFT", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const nEvent = await delegateNft(TEST_DATA.nftId, undefined, testAccount, WaitUntil.BlockInclusion)
-    expect(nEvent.nftId === TEST_DATA.nftId && nEvent.recipient === "").toBe(true)
+    expect(nEvent.nftId === TEST_DATA.nftId && nEvent.recipient === null).toBe(true)
   })
 
   it("Testing to transfer an NFT", async (): Promise<void> => {
