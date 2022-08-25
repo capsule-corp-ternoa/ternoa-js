@@ -16,3 +16,13 @@ export const blockNumberToDate = async (blockNumber: number) => {
   const date = new Date(Number(formatedTimestamp) * 1000).toLocaleString()
   return date
 }
+
+export const blockNumberToMsDuration = async (blockNumber: number, duration: number | undefined = 6) => {
+  const msDuration = blockNumber * duration * 1000
+  return msDuration
+}
+
+export const msDurationToBlockNumber = async (msDuration: number, duration: number | undefined = 6) => {
+  const blockNumber = msDuration / duration / 1000
+  return blockNumber
+}
