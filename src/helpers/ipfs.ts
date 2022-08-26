@@ -1,6 +1,7 @@
 import axios from "axios"
 import mime from "mime-types"
 import { INFTMetadata, ICollectionMetadata } from "../nft/types"
+import { IMarketplaceMetadata } from "../marketplace/types"
 
 import { removeURLSlash } from "./utils"
 
@@ -67,6 +68,17 @@ export const collectionIpfsUpload = async (data: ICollectionMetadata) => {
     bannerImage: bannerFileHash,
   }
   const finalBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
+  const finalFile = new File([finalBlob], "collection metadata")
+  return await uploadFiles(finalFile)
+}
+
+export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata) => {
+  const { name, logoUri } = data
+  const marketplaceMetadata = {
+    name,
+    logoUri,
+  }
+  const finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
   const finalFile = new File([finalBlob], "collection metadata")
   return await uploadFiles(finalFile)
 }
