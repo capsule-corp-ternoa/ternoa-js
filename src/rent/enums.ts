@@ -19,3 +19,9 @@ export enum RentFeeAction {
   Tokens = "Tokens",
   NFT = "NFT",
 }
+
+export enum CancellationFeeAction {
+  FixedTokens = "FixedTokens",
+  FlexibleTokens = "FlexibleTokens",
+  NFT = "NFT",
+}
