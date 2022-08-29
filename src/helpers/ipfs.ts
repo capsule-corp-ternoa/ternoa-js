@@ -1,26 +1,25 @@
 import axios from "axios"
 import mime from "mime-types"
 
-import { removeURLSlash } from "./utils"
-
-const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev"
+export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
 
 /**
  * @name ipfsFilesUpload
  * @summary             Uploads a file on an IFPS gateway.
  * @param file          File to upload on IPFS.
- * @param ipfsGateway   IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev.
+ * @param ipfsGateway   IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev/api/v0/add
+ * @param apiKey        API Key to validate the upload on the IPFS gateway.
  * @returns             A formatted object datas with name, hash, size and type.
  */
-export const ipfsFilesUpload = async (file: File, ipfsGateway?: string) => {
-  const IPFS_GATEWAY = ipfsGateway ? removeURLSlash(ipfsGateway) : removeURLSlash(DEFAULT_IPFS_GATEWAY)
-  const IPFS_UPLOAD_URL = IPFS_GATEWAY + "/api/v0"
+export const ipfsFileUpload = async (file: File, ipfsGateway?: string, apiKey?: string) => {
   const formData = new FormData()
   formData.append(`file`, file)
+  const headers = apiKey ? { apiKey: apiKey } : undefined
   const response = await axios
     .request({
       method: "post",
-      url: `${IPFS_UPLOAD_URL}/add`,
+      url: ipfsGateway ? ipfsGateway : DEFAULT_IPFS_GATEWAY,
+      headers: headers,
       data: formData,
     })
     .catch((err) => {
@@ -31,7 +30,7 @@ export const ipfsFilesUpload = async (file: File, ipfsGateway?: string) => {
 
 /**
  * @name formatIpfsResponse
- * @summary             Format the IPFS post response.
+ * @summary             Format the IPFS response from a gateway upload.
  * @param res           An IPFS post request response.
  * @returns             A formatted object datas with name, hash, size and type.
  */
