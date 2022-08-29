@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { DurationAction } from "./enums"
+import { AcceptanceAction, DurationAction } from "./enums"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -9,3 +9,7 @@ type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T
 export type DurationFixedType = { [DurationAction.Fixed]: RequireOnlyOne<number> }
 export type DurationSubscriptionType = { [DurationAction.Subscription]: number[] }
 export type DurationType = DurationAction.Infinite | DurationFixedType | DurationSubscriptionType
+
+export type AutoAcceptanceType = { [AcceptanceAction.AutoAcceptance]: string[] | null }
+export type ManualAcceptanceType = { [AcceptanceAction.ManualAcceptance]: string[] | null }
+export type AcceptanceType = AutoAcceptanceType | ManualAcceptanceType
