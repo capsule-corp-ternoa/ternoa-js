@@ -50,6 +50,7 @@
     "@babel/preset-typescript": "^7.16.7",
     "@jest/test-sequencer": "^28.1.0",
     "@types/jest": "^27.5.1",
+    "@types/mime-types": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
     "babel-jest": "^27.5.1",
@@ -68,6 +69,8 @@
   },
   "dependencies": {
     "@polkadot/api": "^8.3.2",
-    "bn.js": "^5.2.0"
+    "axios": "^0.27.2",
+    "bn.js": "^5.2.0",
+    "mime-types": "^2.1.35"
   }
 }
