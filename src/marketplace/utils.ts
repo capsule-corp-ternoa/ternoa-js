@@ -1,6 +1,8 @@
+import { CommissionFeeType, IMarketplaceMetadata, ListingFeeType } from "./types"
+
 import { formatPermill } from "../nft/utils"
 import { numberToBalance } from "../blockchain"
-import { CommissionFeeType, ListingFeeType } from "./types"
+import { uploadFiles } from "../helpers/ipfs"
 
 /**
  * @name formatMarketplaceFee
@@ -20,4 +22,15 @@ export const formatMarketplaceFee = async (fee: CommissionFeeType | ListingFeeTy
     }
   }
   return fee
+}
+
+export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata) => {
+  const { name, logoUri } = data
+  const marketplaceMetadata = {
+    name,
+    logoUri,
+  }
+  const finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
+  const finalFile = new File([finalBlob], "marketplace metadata")
+  return await uploadFiles(finalFile)
 }
