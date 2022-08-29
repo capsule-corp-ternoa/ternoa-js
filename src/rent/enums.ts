@@ -3,3 +3,8 @@ export enum DurationAction {
   Subscription = "Subscription",
   Infinite = "Infinite",
 }
+
+export enum AcceptanceAction {
+  AutoAcceptance = "AutoAcceptance",
+  ManualAcceptance = "ManualAcceptance",
+}
