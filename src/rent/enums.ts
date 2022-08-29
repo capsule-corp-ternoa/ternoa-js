@@ -14,3 +14,8 @@ export enum RevocationAction {
   OnSubscriptionChange = "OnSubscriptionChange",
   Anytime = "Anytime",
 }
+
+export enum RentFeeAction {
+  Tokens = "Tokens",
+  NFT = "NFT",
+}
