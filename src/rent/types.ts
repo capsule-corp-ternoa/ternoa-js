@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { AcceptanceAction, DurationAction, RentFeeAction, RevocationAction } from "./enums"
+import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction, RevocationAction } from "./enums"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -22,3 +22,11 @@ export type RevocationType =
 export type RentFeeTokensType = { [RentFeeAction.Tokens]: BN | number }
 export type RentFeeNFTType = { [RentFeeAction.NFT]: number }
 export type RentFeeType = RentFeeTokensType | RentFeeNFTType
+
+export type CancellationFeeFixedTokensType = { [CancellationFeeAction.FixedTokens]: BN | number }
+export type CancellationFeeFlexibleTokensType = { [CancellationFeeAction.FlexibleTokens]: BN | number }
+export type CancellationFeeNFTType = { [CancellationFeeAction.NFT]: number }
+export type CancellationFeeType =
+  | CancellationFeeFixedTokensType
+  | CancellationFeeFlexibleTokensType
+  | CancellationFeeNFTType
