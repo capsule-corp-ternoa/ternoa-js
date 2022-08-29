@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { AcceptanceAction, DurationAction } from "./enums"
+import { AcceptanceAction, DurationAction, RevocationAction } from "./enums"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -13,3 +13,8 @@ export type DurationType = DurationAction.Infinite | DurationFixedType | Duratio
 export type AutoAcceptanceType = { [AcceptanceAction.AutoAcceptance]: string[] | null }
 export type ManualAcceptanceType = { [AcceptanceAction.ManualAcceptance]: string[] | null }
 export type AcceptanceType = AutoAcceptanceType | ManualAcceptanceType
+
+export type RevocationType =
+  | RevocationAction.NoRevocation
+  | RevocationAction.OnSubscriptionChange
+  | RevocationAction.Anytime
