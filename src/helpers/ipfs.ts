@@ -5,7 +5,14 @@ import { removeURLSlash } from "./utils"
 
 const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev"
 
-export const uploadFiles = async (file: File, ipfsGateway?: string) => {
+/**
+ * @name ipfsFilesUpload
+ * @summary             Uploads a file on an IFPS gateway.
+ * @param file          File to upload on IPFS.
+ * @param ipfsGateway   IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev.
+ * @returns             A formatted object datas with name, hash, size and type.
+ */
+export const ipfsFilesUpload = async (file: File, ipfsGateway?: string) => {
   const IPFS_GATEWAY = ipfsGateway ? removeURLSlash(ipfsGateway) : removeURLSlash(DEFAULT_IPFS_GATEWAY)
   const IPFS_UPLOAD_URL = IPFS_GATEWAY + "/api/v0"
   const formData = new FormData()
@@ -22,6 +29,12 @@ export const uploadFiles = async (file: File, ipfsGateway?: string) => {
   return formatIpfsResponse(response.data)
 }
 
+/**
+ * @name formatIpfsResponse
+ * @summary             Format the IPFS post response.
+ * @param res           An IPFS post request response.
+ * @returns             A formatted object datas with name, hash, size and type.
+ */
 export const formatIpfsResponse = (res: any) => {
   const type = mime.lookup(res.Name)
   return {

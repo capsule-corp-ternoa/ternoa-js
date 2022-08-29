@@ -2,7 +2,7 @@ import { CommissionFeeType, IMarketplaceMetadata, ListingFeeType } from "./types
 
 import { formatPermill } from "../nft/utils"
 import { numberToBalance } from "../blockchain"
-import { uploadFiles } from "../helpers/ipfs"
+import { ipfsFilesUpload } from "../helpers/ipfs"
 
 /**
  * @name formatMarketplaceFee
@@ -24,6 +24,12 @@ export const formatMarketplaceFee = async (fee: CommissionFeeType | ListingFeeTy
   return fee
 }
 
+/**
+ * @name marketplaceIpfsUpload
+ * @summary         Uploads your marketplace offchain metadata on IPFS.
+ * @param data      Offchain metadata to be uploaded. It must fit the IMarketplaceMetadata interface format with a name and logoUri.
+ * @returns         The data object with the hash to add as offchain metadata in the extrinsic.
+ */
 export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata) => {
   const { name, logoUri } = data
   const marketplaceMetadata = {
@@ -32,5 +38,5 @@ export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata) => {
   }
   const finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
   const finalFile = new File([finalBlob], "marketplace metadata")
-  return await uploadFiles(finalFile)
+  return await ipfsFilesUpload(finalFile)
 }
