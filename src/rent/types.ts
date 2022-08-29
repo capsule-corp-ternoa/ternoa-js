@@ -1,5 +1,5 @@
 import BN from "bn.js"
-import { AcceptanceAction, DurationAction, RevocationAction } from "./enums"
+import { AcceptanceAction, DurationAction, RentFeeAction, RevocationAction } from "./enums"
 
 type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
@@ -18,3 +18,7 @@ export type RevocationType =
   | RevocationAction.NoRevocation
   | RevocationAction.OnSubscriptionChange
   | RevocationAction.Anytime
+
+export type RentFeeTokensType = { [RentFeeAction.Tokens]: BN | number }
+export type RentFeeNFTType = { [RentFeeAction.NFT]: number }
+export type RentFeeType = RentFeeTokensType | RentFeeNFTType
