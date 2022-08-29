@@ -1,6 +1,6 @@
 import { CommissionFeeType, IMarketplaceMetadata, ListingFeeType } from "./types"
 
-import { formatPermill } from "../nft/utils"
+import { formatPermill } from "../helpers/utils"
 import { numberToBalance } from "../blockchain"
 import { ipfsFilesUpload } from "../helpers/ipfs"
 
