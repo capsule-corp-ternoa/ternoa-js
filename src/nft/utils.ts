@@ -19,7 +19,7 @@ export const formatPermill = (percent: number): number => {
 
 export const nftIpfsUpload = async (data: INFTMetadata) => {
   const { description, file, title } = data
-  if (file === null) throw new Error("File cannot be null on ipfs upload")
+  if (file === null) throw new Error(Errors.IPFS_FILE_NULL_ON_UPLOAD)
   const { hash: fileHash } = await uploadFiles(file)
   const nftMetadata = {
     title,
@@ -41,7 +41,7 @@ export const nftIpfsUpload = async (data: INFTMetadata) => {
 
 export const collectionIpfsUpload = async (data: ICollectionMetadata) => {
   const { name, description, profileFile, bannerFile } = data
-  if (profileFile === null || bannerFile === null) throw new Error("File cannot be null on ipfs upload")
+  if (profileFile === null || bannerFile === null) throw new Error(Errors.IPFS_FILE_NULL_ON_UPLOAD)
   const { hash: profileFileHash } = await uploadFiles(profileFile)
   const { hash: bannerFileHash } = await uploadFiles(bannerFile)
   const collectionMetadata = {
