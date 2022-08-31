@@ -2,6 +2,7 @@ export enum txPallets {
   assets = "assets",
   marketplace = "marketplace",
   nft = "nft",
+  rent = "rent",
   utility = "utility",
   balances = "balances",
   associatedAccounts = "associatedAccounts",
@@ -74,6 +75,9 @@ export enum chainConstants {
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
   offchainDataLimit = "offchainDataLimit",
   accountSizeLimit = "accountSizeLimit",
+  actionsInBlockLimit = "actionsInBlockLimit",
+  contractExpirationDuration = "contractExpirationDuration",
+  simultaneousContractLimit = "simultaneousContractLimit",
 }
 
 export enum WaitUntil {
