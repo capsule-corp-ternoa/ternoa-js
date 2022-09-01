@@ -1,4 +1,5 @@
 export enum txPallets {
+  auction = "auction",
   marketplace = "marketplace",
   nft = "nft",
   rent = "rent",
@@ -88,6 +89,17 @@ export enum chainConstants {
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
   offchainDataLimit = "offchainDataLimit",
   accountSizeLimit = "accountSizeLimit",
+
+  // auction
+  auctionEndingPeriod = "auctionEndingPeriod",
+  auctionGracePeriod = "auctionGracePeriod",
+  bidderListLengthLimit = "bidderListLengthLimit",
+  maxAuctionDelay = "maxAuctionDelay",
+  minAuctionDuration = "minAuctionDuration",
+  maxAuctionDuration = "maxAuctionDuration",
+  parallelAuctionLimit = "parallelAuctionLimit",
+
+  // rent
   actionsInBlockLimit = "actionsInBlockLimit",
   contractExpirationDuration = "contractExpirationDuration",
   simultaneousContractLimit = "simultaneousContractLimit",
