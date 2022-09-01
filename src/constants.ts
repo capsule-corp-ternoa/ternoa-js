@@ -9,27 +9,12 @@ export enum txPallets {
 }
 
 export enum txActions {
-  buy = "buy",
-  list = "list",
-  unlist = "unlist",
-  burn = "burn",
   create = "create",
   transfer = "transfer",
   transferAll = "transferAll",
   transferKeepAlive = "transferKeepAlive",
-  finishSeries = "finishSeries",
   batch = "batch",
   batchAll = "batchAll",
-  createFromNft = "createFromNft",
-  remove = "remove",
-  setIpfsReference = "setIpfsReference",
-  setAltvrUsername = "setAltvrUsername",
-  setCommissionFee = "setCommissionFee",
-  setOwner = "setOwner",
-  setKind = "setMarketType",
-  setName = "setName",
-  setUri = "setUri",
-  setLogoUri = "setLogoUri",
 
   // nft
   createNft = "createNft",
