@@ -79,6 +79,12 @@ export enum chainQuery {
   nextMarketplaceId = "nextMarketplaceId",
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
+  contracts = "contracts",
+  numberOfCurrentContracts = "numberOfCurrentContracts",
+  availableQueue = "availableQueue",
+  fixedQueue = "fixedQueue",
+  subscriptionQueue = "subscriptionQueue",
+  offers = "offers",
 }
 
 export enum chainConstants {
@@ -121,4 +127,5 @@ export enum Errors {
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
   IPFS_FILE_UNDEFINED_ON_UPLOAD = "IPFS_FILE_UNDEFINED_ON_UPLOAD",
+  RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
 }
