@@ -129,7 +129,7 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
         mpEvent.commissionFee === "10" &&
         mpEvent.commissionFeeRounded === 10 &&
         mpEvent.commissionFeeType === MarketplaceConfigFeeType.Percentage &&
-        nData?.state.listedForSale,
+        nData?.state.isListed,
     ).toBe(true)
   })
 
@@ -137,7 +137,7 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
     const { dest: destAccount } = await createTestPairs()
     const mpEvent = await unlistNft(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    expect(mpEvent.nftId === TEST_DATA.nftId && nData?.state.listedForSale).toBe(false)
+    expect(mpEvent.nftId === TEST_DATA.nftId && nData?.state.isListed).toBe(false)
   })
 
   it("Testing to Buy an NFT from a marketplace", async (): Promise<void> => {
