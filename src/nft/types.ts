@@ -1,6 +1,6 @@
 export type NftState = {
   isCapsule: boolean
-  listedForSale: boolean
+  isListed: boolean
   isSecret: boolean
   isDelegated: boolean
   isSoulbound: boolean
