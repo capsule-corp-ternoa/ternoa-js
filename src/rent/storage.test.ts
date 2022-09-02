@@ -82,7 +82,7 @@ describe("Testing Active Rental Contracts data", (): void => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     await createContract(
       TEST_DATA.nftId,
-      { [DurationAction.Fixed]: 10000 },
+      { [DurationAction.Fixed]: 30 },
       {
         [AcceptanceAction.AutoAcceptance]: null,
       },
