@@ -1,12 +1,12 @@
 export enum DurationAction {
-  Fixed = "Fixed",
-  Subscription = "Subscription",
+  Fixed = "fixed",
+  Subscription = "subscription",
   Infinite = "Infinite",
 }
 
 export enum AcceptanceAction {
-  AutoAcceptance = "AutoAcceptance",
-  ManualAcceptance = "ManualAcceptance",
+  AutoAcceptance = "autoAcceptance",
+  ManualAcceptance = "manualAcceptance",
 }
 
 export enum RevocationAction {
@@ -16,12 +16,12 @@ export enum RevocationAction {
 }
 
 export enum RentFeeAction {
-  Tokens = "Tokens",
+  Tokens = "tokens",
   NFT = "NFT",
 }
 
 export enum CancellationFeeAction {
-  FixedTokens = "FixedTokens",
-  FlexibleTokens = "FlexibleTokens",
+  FixedTokens = "fixedTokens",
+  FlexibleTokens = "flexibleTokens",
   NFT = "NFT",
 }
