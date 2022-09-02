@@ -565,21 +565,23 @@ export class ContractCreatedEvent extends BlockchainEvent {
       renteeCancellationFee,
     ] = event.data
 
-    const parsedDuration = JSON.parse(duration.toString())
-    const isDurationFixed = parsedDuration.Fixed //toString() ?
-    const isDurationSubscription = parsedDuration.Subscription //toString() ?
+    const parsedDuration = duration.toString() !== DurationAction.Infinite && JSON.parse(duration.toString())
+    const isDurationFixed = parsedDuration && parsedDuration.fixed
+    const isDurationSubscription = parsedDuration && parsedDuration.subscription //toString() ?
     const parsedAcceptance = JSON.parse(acceptanceType.toString())
-    const isAutoAcceptance = parsedAcceptance.AutoAcceptance //toString() ?
+    const isAutoAcceptance = parsedAcceptance.autoAcceptance === null || parsedAcceptance.autoAcceptance //toString() ?
     const isrevocationTypeNoRevocation = revocationType.toString() === RevocationAction.NoRevocation
     const isrevocationTypeOnSubscriptionChange = revocationType.toString() === RevocationAction.OnSubscriptionChange
     const parsedRentFee = JSON.parse(rentFee.toString())
-    const isRentFeeToken = parsedRentFee.Token //toString() ?
-    const parsedRenterCancellationFee = renterCancellationFee && JSON.parse(renterCancellationFee.toString())
-    const isRenterCancellationFeeFixed = parsedRenterCancellationFee.FixedTokens //toString() ?
-    const isRenterCancellationFeeFlexible = parsedRenterCancellationFee.FlexibleTokens //toString() ?
-    const parsedRenteeCancellationFee = renteeCancellationFee && JSON.parse(renteeCancellationFee.toString())
-    const isRenteeCancellationFeeFixed = parsedRenteeCancellationFee.FixedTokens //toString() ?
-    const isRenteeCancellationFeeFlexible = parsedRenteeCancellationFee.FlexibleTokens //toString() ?
+    const isRentFeeToken = parsedRentFee.tokens //toString() ?
+    const parsedRenterCancellationFee = renterCancellationFee.toString() && JSON.parse(renterCancellationFee.toString())
+    const isRenterCancellationFeeFixed = parsedRenterCancellationFee && parsedRenterCancellationFee.fixedTokens //toString() ?
+    const isRenterCancellationFeeFlexible = parsedRenterCancellationFee && parsedRenterCancellationFee.flexibleTokens //toString() ?
+    const isRenterCancellationFeeNft = parsedRenterCancellationFee && parsedRenterCancellationFee.nft
+    const parsedRenteeCancellationFee = renteeCancellationFee.toString() && JSON.parse(renteeCancellationFee.toString())
+    const isRenteeCancellationFeeFixed = parsedRenterCancellationFee && parsedRenteeCancellationFee.fixedTokens //toString() ?
+    const isRenteeCancellationFeeFlexible = parsedRenterCancellationFee && parsedRenteeCancellationFee.flexibleTokens //toString() ?
+    const isRenteeCancellationFeeNft = parsedRenteeCancellationFee && parsedRenteeCancellationFee.nft
 
     this.nftId = Number.parseInt(nftId.toString())
     this.renter = renter.toString()
@@ -601,23 +603,26 @@ export class ContractCreatedEvent extends BlockchainEvent {
 
     if (isDurationFixed) {
       this.durationType = DurationAction.Fixed
-      this.blockDuration = Number.parseInt(parsedDuration.Fixed.toString())
+      this.blockDuration = Number.parseInt(parsedDuration.fixed.toString())
     } else if (isDurationSubscription) {
       this.durationType = DurationAction.Subscription
-      this.blockDuration = Number.parseInt(parsedDuration.Subscription[0].toString()) //TBC with Extrinsic
-      this.blockSubscriptionRenewal = Number.parseInt(parsedDuration.Subscription[1].toString()) //TBC with Extrinsic
+      this.blockDuration = Number.parseInt(parsedDuration.subscription[0].toString()) //TBC with Extrinsic
+      this.blockSubscriptionRenewal =
+        parsedDuration.subscription[1] && Number.parseInt(parsedDuration.subscription[1].toString()) //TBC with Extrinsic
     } else {
       this.durationType = DurationAction.Infinite
     }
 
     if (isAutoAcceptance) {
       this.acceptanceType = AcceptanceAction.AutoAcceptance
-      this.acceptanceList = [] //TBC with Extrinsic
-      parsedAcceptance.AutoAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
+      this.acceptanceList = []
+      parsedAcceptance.autoAcceptance &&
+        parsedAcceptance.autoAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
     } else {
       this.acceptanceType = AcceptanceAction.ManualAcceptance
-      this.acceptanceList = [] //TBC with Extrinsic
-      parsedAcceptance.ManualAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
+      this.acceptanceList = []
+      parsedAcceptance.manualAcceptance &&
+        parsedAcceptance.manualAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
     }
 
     if (isrevocationTypeNoRevocation) {
@@ -634,35 +639,35 @@ export class ContractCreatedEvent extends BlockchainEvent {
       this.rentFeeRounded = roundBalance(this.rentFee)
     } else {
       this.rentFeeType = RentFeeAction.NFT
-      this.rentFee = Number.parseInt(parsedRentFee.NFT.toString())
+      this.rentFee = Number.parseInt(parsedRentFee.nft.toString())
       this.rentFeeRounded = this.rentFee
     }
 
     if (isRenterCancellationFeeFixed) {
       this.renterCancellationFeeType = CancellationFeeAction.FixedTokens
-      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.FixedTokens).toString()
+      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.fixedTokens).toString()
       this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
     } else if (isRenterCancellationFeeFlexible) {
       this.renterCancellationFeeType = CancellationFeeAction.FlexibleTokens
-      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.FlexibleTokens).toString()
+      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.flexibleTokens).toString()
       this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
-    } else {
+    } else if (isRenterCancellationFeeNft) {
       this.renterCancellationFeeType = CancellationFeeAction.NFT
-      this.renterCancellationFee = Number.parseInt(parsedRenterCancellationFee.NFT.toString())
+      this.renterCancellationFee = Number.parseInt(parsedRenterCancellationFee.nft.toString())
       this.renterCancellationFeeRounded = this.renterCancellationFee
     }
 
     if (isRenteeCancellationFeeFixed) {
       this.renteeCancellationFeeType = CancellationFeeAction.FixedTokens
-      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.FixedTokens).toString()
+      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.fixedTokens).toString()
       this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
     } else if (isRenteeCancellationFeeFlexible) {
       this.renteeCancellationFeeType = CancellationFeeAction.FlexibleTokens
-      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.FlexibleTokens).toString()
+      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.flexibleTokens).toString()
       this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
-    } else {
+    } else if (isRenteeCancellationFeeNft) {
       this.renteeCancellationFeeType = CancellationFeeAction.NFT
-      this.renteeCancellationFee = Number.parseInt(parsedRenteeCancellationFee.NFT.toString())
+      this.renteeCancellationFee = Number.parseInt(parsedRenteeCancellationFee.nft.toString())
       this.renteeCancellationFeeRounded = this.renteeCancellationFee
     }
   }
