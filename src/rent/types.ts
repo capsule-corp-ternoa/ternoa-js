@@ -2,12 +2,12 @@ import { BalanceType } from "blockchain"
 import BN from "bn.js"
 import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction, RevocationAction } from "./enum"
 
-type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
-  {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, undefined>>
-  }[Keys]
+// type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
+//   {
+//     [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, undefined>>
+//   }[Keys]
 
-export type DurationFixedType = { [DurationAction.Fixed]: RequireOnlyOne<number> }
+export type DurationFixedType = { [DurationAction.Fixed]: number }
 export type DurationSubscriptionType = { [DurationAction.Subscription]: number[] }
 export type DurationType = DurationAction.Infinite | DurationFixedType | DurationSubscriptionType
 
@@ -61,7 +61,7 @@ export type RentalContractChainRawDataType = {
   startBlock: number | null
   renter: string
   rentee: string | null
-  duration: any
+  duration: any // {[key:string]:string |number[] | null } when infinite log from chain data=> {infinite : null}
   acceptanceType: any
   revocationType: RevocationType
   rentFee: any

@@ -39,7 +39,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       renteeCancellationFee,
     } = data.toJSON() as RentalContractChainRawDataType
 
-    const startBlockDate = startBlock && (await blockNumberToDate(startBlock))
+    const startBlockDate = startBlock && typeof startBlock === "number" && (await blockNumberToDate(startBlock))
     const durationType = duration.fixed
       ? DurationAction.Fixed
       : duration.subscription
@@ -57,7 +57,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       durationType === DurationAction.Subscription && duration.subscription[1] ? duration.subscription[1] : null
 
     const acceptance =
-      typeof acceptanceType.manualAcceptance === null || acceptanceType.manualAcceptance
+      acceptanceType.manualAcceptance === null || acceptanceType.manualAcceptance
         ? AcceptanceAction.ManualAcceptance
         : AcceptanceAction.AutoAcceptance
 
@@ -65,7 +65,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       ? acceptanceType.manualAcceptance
       : acceptanceType.autoAcceptance
       ? acceptanceType.autoAcceptance
-      : null
+      : []
 
     const rentFeeType = rentFee.tokens ? RentFeeAction.Tokens : RentFeeAction.NFT
     const rentFeeAmount = rentFee.tokens ? bnToBn(rentFee.tokens).toString() : Number(rentFee.nft)
@@ -145,7 +145,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
 
 /**
  * @name getRentalContractNumber
- * @summary       Provides the data related to available for rent contract deadlines.
+ * @summary       Provides the current number of rental contracts.
  * @returns       Number.
  */
 export const getRentalContractNumber = async (): Promise<number> => {
