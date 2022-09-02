@@ -31,6 +31,15 @@ export enum txActions {
   burnCollection = "burnCollection",
   setNftMintFee = "setNftMintFee",
 
+  // rent
+  createContract = "createContract",
+  acceptRentOffer = "acceptRentOffer",
+  acceptSubscriptionTerms = "acceptSubscriptionTerms",
+  changeSubscriptionTerms = "changeSubscriptionTerms",
+  rent = "rent",
+  retractRentOffer = "retractRentOffer",
+  revokeContract = "revokeContract",
+
   // marketplace
   buyNft = "buyNft",
   createMarketplace = "createMarketplace",
@@ -115,4 +124,5 @@ export enum Errors {
   IPFS_FILE_UNDEFINED_ON_UPLOAD = "IPFS_FILE_UNDEFINED_ON_UPLOAD",
   BLOCK_NOT_FOUND_ON_CHAIN = "BLOCK_NOT_FOUND_ON_CHAIN",
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
+  RENT_CONTRACT_NOT_FOUND = "RENT_CONTRACT_NOT_FOUND",
 }
