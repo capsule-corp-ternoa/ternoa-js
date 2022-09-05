@@ -56,6 +56,15 @@ export enum EventType {
   NFTUnlisted = "marketplace.NFTUnlisted",
   NFTSold = "marketplace.NFTSold",
 
+  // Auctions
+  AuctionCreated = "auction.AuctionCreated",
+  AuctionCancelled = "auction.AuctionCancelled",
+  AuctionCompleted = "auction.AuctionCompleted",
+  BidAdded = "auction.BidAdded",
+  BidRemoved = "auction.BidRemoved",
+  BidUpdated = "auction.BidUpdated",
+  BalanceClaimed = "auction.BalanceClaimed",
+
   // Utility
   ItemFailed = "utility.ItemFailed",
   ItemCompleted = "utility.ItemCompleted",
@@ -162,6 +171,21 @@ export class BlockchainEvent {
         return new NFTUnlistedEvent(event)
       case EventType.NFTSold:
         return new NFTSoldEvent(event)
+      // Auctions
+      case EventType.AuctionCreated:
+        return new AuctionCreatedEvent(event)
+      case EventType.AuctionCancelled:
+        return new AuctionCancelledEvent(event)
+      case EventType.AuctionCompleted:
+        return new AuctionCompletedEvent(event)
+      case EventType.BidAdded:
+        return new BidAddedEvent(event)
+      case EventType.BidRemoved:
+        return new BidRemovedEvent(event)
+      case EventType.BidUpdated:
+        return new BidUpdatedEvent(event)
+      case EventType.BalanceClaimed:
+        return new BalanceClaimedEvent(event)
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
@@ -1122,6 +1146,184 @@ export class NFTSoldEvent extends BlockchainEvent {
     this.marketplaceCutRounded = roundBalance(this.marketplaceCut)
     this.royaltyCut = royaltyCut.toString()
     this.royaltyCutRounded = roundBalance(this.royaltyCut)
+  }
+}
+
+/**
+ * This class represents the on-chain AuctionCreatedEvent event.
+ */
+export class AuctionCreatedEvent extends BlockchainEvent {
+  nftId: number
+  marketplaceId: number
+  creator: string // AccountId32
+  startPrice: string // u128
+  startPriceRounded: number
+  buyItPrice: string // u128
+  buyItPriceRounded: number
+  startBlock: number
+  endBlock: number
+
+  /**
+   * Construct the data object from the AuctionCreatedEvent event
+   * @param event The AuctionCreatedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.AuctionCreated)
+    const [nftId, marketplaceId, creator, startPrice, buyItPrice, startBlockId, endBlockId] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.marketplaceId = Number.parseInt(marketplaceId.toString())
+    this.creator = creator.toString()
+    this.startPrice = startPrice.toString()
+    this.startPriceRounded = roundBalance(this.startPrice)
+    this.buyItPrice = buyItPrice.toString()
+    this.buyItPriceRounded = roundBalance(this.buyItPrice)
+    this.startBlock = Number.parseInt(startBlockId.toString())
+    this.endBlock = Number.parseInt(endBlockId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain AuctionCancelledEvent event.
+ */
+export class AuctionCancelledEvent extends BlockchainEvent {
+  nftId: number
+
+  /**
+   * Construct the data object from the AuctionCancelledEvent event
+   * @param event The AuctionCancelledEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.AuctionCancelled)
+    const [nftId] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain AuctionCompleted event.
+ */
+export class AuctionCompletedEvent extends BlockchainEvent {
+  nftId: number
+  newOwner: string // AccountId32
+  amount: string // u128
+  amountRounded: number
+  marketplaceCut: string // u128
+  marketplaceCutRounded: number
+  royaltyCut: string // u128
+  royaltyCutRounded: number
+
+  /**
+   * Construct the data object from the AuctionCompleted event
+   * @param event The AuctionCompleted event
+   */
+  constructor(event: Event) {
+    super(event, EventType.AuctionCompleted)
+    const [nftId, newOwner, amount, marketplaceCut, royaltyCut] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.newOwner = newOwner.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
+    this.marketplaceCut = marketplaceCut.toString()
+    this.marketplaceCutRounded = roundBalance(this.marketplaceCut)
+    this.royaltyCut = royaltyCut.toString()
+    this.royaltyCutRounded = roundBalance(this.royaltyCut)
+  }
+}
+
+/**
+ * This class represents the on-chain BidAdded event.
+ */
+export class BidAddedEvent extends BlockchainEvent {
+  nftId: number
+  bidder: string // AccountId32
+  amount: string // u128
+  amountRounded: number
+
+  /**
+   * Construct the data object from the BidAdded event
+   * @param event The BidAdded event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BidAdded)
+    const [nftId, bidder, amount] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.bidder = bidder.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
+  }
+}
+
+/**
+ * This class represents the on-chain BidRemoved event.
+ */
+export class BidRemovedEvent extends BlockchainEvent {
+  nftId: number
+  bidder: string // AccountId32
+  amount: string // u128
+  amountRounded: number
+
+  /**
+   * Construct the data object from the BidRemoved event
+   * @param event The BidRemoved event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BidRemoved)
+    const [nftId, bidder, amount] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.bidder = bidder.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
+  }
+}
+
+/**
+ * This class represents the on-chain BidUpdated event.
+ */
+export class BidUpdatedEvent extends BlockchainEvent {
+  nftId: number
+  bidder: string // AccountId32
+  amount: string // u128
+  amountRounded: number
+
+  /**
+   * Construct the data object from the BidUpdated event
+   * @param event The BidUpdated event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BidUpdated)
+    const [nftId, bidder, amount] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.bidder = bidder.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
+  }
+}
+
+/**
+ * This class represents the on-chain BalanceClaimed event.
+ */
+export class BalanceClaimedEvent extends BlockchainEvent {
+  account: string // AccountId32
+  amount: string // u128
+  amountRounded: number
+
+  /**
+   * Construct the data object from the BalanceClaimed event
+   * @param event The BalanceClaimed event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BalanceClaimed)
+    const [account, amount] = event.data
+
+    this.account = account.toString()
+    this.amount = amount.toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 
