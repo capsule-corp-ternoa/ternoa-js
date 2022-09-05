@@ -17,6 +17,7 @@ import {
   ContractSubscriptionTermsChangedEvent,
 } from "../events"
 import { AcceptanceAction } from "./enum"
+
 /**
  * @name createContractTx
  * @summary                         Creates an unsigned unsubmitted Create-Rent-Contract Transaction Hash for an NFT.
@@ -38,10 +39,9 @@ export const createContractTx = async (
   renterCancellationFee: CancellationFeeType | null = null,
   renteeCancellationFee: CancellationFeeType | null = null,
 ): Promise<TransactionHashType> => {
-  //blocks value in duration must be converted in date ??
-  // await formatRentContractFee(rentFee)
-  // await formatRentContractFee(renterCancellationFee)
-  // await formatRentContractFee(renteeCancellationFee)
+  await formatRentContractFee(rentFee)
+  renterCancellationFee && (await formatRentContractFee(renterCancellationFee))
+  renteeCancellationFee && (await formatRentContractFee(renteeCancellationFee))
   return await createTxHex(txPallets.rent, txActions.createContract, [
     nftId,
     duration,
@@ -225,7 +225,6 @@ export const changeSubscriptionTermsTx = async (
   duration: DurationType,
   amount: number | BN,
 ): Promise<TransactionHashType> => {
-  //blocks value in duration must be converted in blocks ??
   typeof amount === "number" && (await numberToBalance(amount))
   return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [nftId, duration, amount])
 }

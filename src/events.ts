@@ -586,8 +586,8 @@ export class ContractCreatedEvent extends BlockchainEvent {
     const isRenterCancellationFeeFlexible = parsedRenterCancellationFee && parsedRenterCancellationFee.flexibleTokens
     const isRenterCancellationFeeNft = parsedRenterCancellationFee && parsedRenterCancellationFee.nft
     const parsedRenteeCancellationFee = renteeCancellationFee.toString() && JSON.parse(renteeCancellationFee.toString())
-    const isRenteeCancellationFeeFixed = parsedRenterCancellationFee && parsedRenteeCancellationFee.fixedTokens
-    const isRenteeCancellationFeeFlexible = parsedRenterCancellationFee && parsedRenteeCancellationFee.flexibleTokens
+    const isRenteeCancellationFeeFixed = parsedRenteeCancellationFee && parsedRenteeCancellationFee.fixedTokens
+    const isRenteeCancellationFeeFlexible = parsedRenteeCancellationFee && parsedRenteeCancellationFee.flexibleTokens
     const isRenteeCancellationFeeNft = parsedRenteeCancellationFee && parsedRenteeCancellationFee.nft
 
     this.nftId = Number.parseInt(nftId.toString())
