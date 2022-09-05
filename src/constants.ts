@@ -49,6 +49,15 @@ export enum txActions {
   setMarketplaceKind = "setMarketplaceKind",
   setMarketplaceOwner = "setMarketplaceOwner",
   setMarketplaceMintFee = "setMarketplaceMintFee",
+
+  // auction
+  createAuction = "createAuction",
+  cancelAuction = "cancelAuction",
+  endAuction = "endAuction",
+  addBid = "addBid",
+  removeBid = "removeBid",
+  buyItNow = "buyItNow",
+  claim = "claim",
 }
 
 export enum txEvent {
@@ -74,6 +83,13 @@ export enum chainQuery {
   nextMarketplaceId = "nextMarketplaceId",
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
+
+  // auction
+  auctions = "auctions",
+  deadlines = "deadlines",
+  claims = "claims",
+
+  // rent
   contracts = "contracts",
   numberOfCurrentContracts = "numberOfCurrentContracts",
   availableQueue = "availableQueue",
@@ -132,6 +148,6 @@ export enum Errors {
   COLLECTION_CONVERSION_ERROR = "COLLECTION_CONVERSION_ERROR",
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
-  IPFS_FILE_UNDEFINED_ON_UPLOAD = "IPFS_FILE_UNDEFINED_ON_UPLOAD",
+  AUCTION_NFT_CONVERSION_ERROR = "AUCTION_NFT_CONVERSION_ERROR",
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
 }
