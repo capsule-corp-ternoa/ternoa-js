@@ -1,5 +1,4 @@
 import { numberToBalance } from "../blockchain"
-import { CancellationFeeType, RentFeeType } from "./types"
 /**
  * @name formatRentFee
  * @summary         Checks the type fee and format it accordingly. Numbers are formatted into BN.
@@ -10,8 +9,8 @@ export const formatRentContractFee = async (fee: any) => {
   //RentFeeType | CancellationFeeType instead of any in params
   if (typeof fee === "object") {
     if (typeof fee.tokens === "number") {
-      const TokensFee = await numberToBalance(fee.tokens)
-      fee.tokens = TokensFee
+      const tokensFee = await numberToBalance(fee.tokens)
+      fee.tokens = tokensFee
     }
     if (typeof fee.fixedTokens === "number") {
       const fixedTokensFee = await numberToBalance(fee.fixedTokens)
