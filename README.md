@@ -12,7 +12,7 @@ Lastly and most importantly, don’t forget to have fun, we (really) want you to
 
 ### [Node.js](https://nodejs.org/en/download/)
 
-Install the ternoa.js lirary by running this command :
+Install the ternoa.js library by running this command :
 
 ```bash
 npm install ternoa-js
@@ -25,7 +25,7 @@ npm install ternoa-js
 Before you can start calling any functions, you'll need to initialize an API Instance using the _initializeApi_ function located in **ternoa-js/blockchain**.
 You can set the chain endpoint by passing an endpoint parameter to the _initializeApi_ Function whereas the default chain endpoint is : `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
 
-All functions are organized by a specific theme, for example, the function _generateSeed_ allows us to create a new account and _getKeyringFromSeed_ allows us to retrieve its address, which can conveniently be found in **ternoa-js/account**.
+All functions are organized by a specific theme, for example, the function _generateSeed_ which allows us to create a new account and _getKeyringFromSeed_ which allows us to retrieve its address, can conveniently be found in **ternoa-js/account**.
 
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
@@ -93,6 +93,7 @@ You can locate the static website in the [docs/](https://github.com/capsule-corp
 
 The test suites rely upon testing pairs in the [testing pairs file](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/testingPairs.ts). In order to prepare these pairs, [test-setup.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-setup.ts) and [test-teardown.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-teardown.ts) are supplied and drained of `$CAPS` respectively. Environmental variables `SEED_TEST_FUNDS` and `SEED_TEST_FUNDS_PUBLIC_KEY` have to be defined in order to run these test suites.
 
+
 To initiate the test suites, run:
 
 ```bash
@@ -114,7 +115,7 @@ We’ve set up linters and formatters to help catch errors and enhance the overa
 
 ## Contribution
 
-Ternoa.js is an open-source SDK, feel free to interact and help us improve.
+Ternoa.js is an open-source SDK, feel free to interact and help us refine it.
 
 If you’re interested in contributing to the Ternoa SDK, we recommend you check out our [contribution guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
 
@@ -123,11 +124,11 @@ If you want to learn how to use the Ternoa SDK, the [test-dapp](https://github.c
 ## Build And Run With Podman
 
 ```bash
-  # Downloads the package lists and "updates" them.
+  # Downloads the package lists and "updates" them.S
   sudo apt update -y
   # Installing podman.
   sudo apt install podman
-  # Building the image using podman and the already available Dockerfile.
+  # Building the image using podman and Docker file.
   podman build -t tsdk .
   # Checking if everything is OK.
   podman images | grep tsdk
@@ -166,10 +167,10 @@ This way, you can develop Dapps without having to install all the required depen
 
 ### Run The Container And Access Its Shell
 
-The predefined operation of the container when executed is to compile and and initiate the Starter-project. To execute a different operation, additional commands can be passed at the end. For example: padding `bash` will run the bash shell session instead of the default operation.
+The predefined operation of the container when executed is to compile and and initiate the `starter-project`. To execute a different operation, additional commands can be passed at the end. For example: padding `bash` will run the bash shell session instead of the default operation.
 
 ```bash
-  # If no command arguments are given this will try to compile and run the starter-project project. By passing "bash" we make sure that we run a bash shell session once the container starts.
+  # If no command arguments are given this will try to compile and run the starter-project. By passing "bash" we make sure that we run a bash shell session once the container starts.
   podman run -it tsdk bash
 ```
 
