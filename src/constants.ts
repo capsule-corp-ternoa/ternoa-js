@@ -1,6 +1,7 @@
 export enum txPallets {
   marketplace = "marketplace",
   nft = "nft",
+  rent = "rent",
   utility = "utility",
   balances = "balances",
   associatedAccounts = "associatedAccounts",
@@ -12,8 +13,6 @@ export enum txActions {
   list = "list",
   unlist = "unlist",
   burn = "burn",
-
-  //TO DO : CLEAN list below
   create = "create",
   transfer = "transfer",
   transferAll = "transferAll",
@@ -44,6 +43,15 @@ export enum txActions {
   closeCollection = "closeCollection",
   burnCollection = "burnCollection",
   setNftMintFee = "setNftMintFee",
+
+  // rent
+  createContract = "createContract",
+  acceptRentOffer = "acceptRentOffer",
+  acceptSubscriptionTerms = "acceptSubscriptionTerms",
+  changeSubscriptionTerms = "changeSubscriptionTerms",
+  rent = "rent",
+  retractRentOffer = "retractRentOffer",
+  revokeContract = "revokeContract",
 
   // marketplace
   buyNft = "buyNft",
@@ -79,6 +87,12 @@ export enum chainQuery {
   nextMarketplaceId = "nextMarketplaceId",
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
+  contracts = "contracts",
+  numberOfCurrentContracts = "numberOfCurrentContracts",
+  availableQueue = "availableQueue",
+  fixedQueue = "fixedQueue",
+  subscriptionQueue = "subscriptionQueue",
+  offers = "offers",
 }
 
 export enum chainConstants {
@@ -89,6 +103,9 @@ export enum chainConstants {
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
   offchainDataLimit = "offchainDataLimit",
   accountSizeLimit = "accountSizeLimit",
+  actionsInBlockLimit = "actionsInBlockLimit",
+  contractExpirationDuration = "contractExpirationDuration",
+  simultaneousContractLimit = "simultaneousContractLimit",
 }
 
 export enum WaitUntil {
@@ -118,4 +135,5 @@ export enum Errors {
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
   IPFS_FILE_NULL_ON_UPLOAD = "IPFS_FILE_NULL_ON_UPLOAD",
+  RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
 }
