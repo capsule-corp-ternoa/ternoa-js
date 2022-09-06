@@ -2,7 +2,7 @@ import { BalanceType } from "../blockchain"
 
 export type Bidder = {
   bidder: string
-  amount: BalanceType
+  amount: string
   amountRounded: number
 }
 
@@ -21,9 +21,9 @@ export type AuctionDataType = {
   creator: string
   startBlock: number
   endBlock: number
-  startPrice: BalanceType
+  startPrice: string
   startPriceRounded: number
-  buyItPrice: BalanceType | null
+  buyItPrice: string | null
   buyItPriceRounded: number | null
   bidders: Bidder[]
   marketplaceId: number
@@ -31,6 +31,6 @@ export type AuctionDataType = {
 }
 
 export type ClaimableBidBalanceDataType = {
-  claimable: BalanceType
+  claimable: string
   claimableRounded: number
 }
