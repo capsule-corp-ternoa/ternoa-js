@@ -20,7 +20,7 @@ const TEST_DATA = {
   nftId: 0,
 }
 beforeAll(async () => {
-  const endpoint: string | undefined = "wss://dev-1.ternoa.network"
+  const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
   await initializeApi(endpoint)
   // Create some Test NFT
   const { test: testAccount } = await createTestPairs()

@@ -21,7 +21,7 @@ const TEST_DATA = {
 }
 
 beforeAll(async () => {
-  const endpoint: string | undefined = "wss://dev-1.ternoa.network"
+  const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
   await initializeApi(endpoint)
 
   // Create some Test NFT and a RentContract
@@ -46,7 +46,7 @@ beforeAll(async () => {
 describe("Testing global contracts data", (): void => {
   it("Should return the number of rental contracts available", async () => {
     const numberOfContracts = await getRentalContractNumber()
-    expect(numberOfContracts > 1).toBe(true)
+    expect(numberOfContracts >= 1).toBe(true)
   })
   it("Should return the id, blocknumber and date for an available contract", async () => {
     const data = await getAvailableRentalContracts()
