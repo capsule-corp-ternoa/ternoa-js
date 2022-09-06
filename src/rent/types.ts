@@ -1,4 +1,3 @@
-import { BalanceType } from "blockchain"
 import BN from "bn.js"
 import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction, RevocationAction } from "./enum"
 
@@ -45,13 +44,13 @@ export type RentalContractDataType = {
   acceptanceList: string[]
   revocationType: RevocationAction
   rentFeeType: RentFeeAction
-  rentFee: BalanceType | number
+  rentFee: string | number
   rentFeeRounded: number
   renterCancellationFeeType: CancellationFeeAction | null
-  renterCancellationFee: BalanceType | number | null
+  renterCancellationFee: string | number | null
   renterCancellationFeeRounded: number | null
   renteeCancellationFeeType: CancellationFeeAction | null
-  renteeCancellationFee: BalanceType | number | null
+  renteeCancellationFee: string | number | null
   renteeCancellationFeeRounded: number | null
   termsAccepted: boolean
 }

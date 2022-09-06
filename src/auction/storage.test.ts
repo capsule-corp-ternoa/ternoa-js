@@ -57,7 +57,7 @@ describe("Testing getting Auction data", (): void => {
     expect(
       auction?.creator === testAccount.address &&
         auction?.marketplaceId === TEST_DATA.marketplaceId &&
-        auction?.startPrice.toString() === startPrice &&
+        auction?.startPrice === startPrice &&
         auction?.startPriceRounded === 1 &&
         auction?.buyItPrice === null &&
         auction?.buyItPriceRounded === null &&
