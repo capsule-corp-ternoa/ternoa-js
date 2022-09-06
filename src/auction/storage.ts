@@ -19,14 +19,14 @@ export const getAuctionData = async (nftId: number): Promise<AuctionDataType | n
     const { creator, startBlock, endBlock, startPrice, buyItPrice, bidders, marketplaceId, isExtended } =
       data.toJSON() as any as AuctionChainRawDataType
 
-    const startPriceBN = bnToBn(startPrice)
-    const buyItPriceBN = buyItPrice && bnToBn(buyItPrice)
-    const startPriceRounded = roundBalance(startPriceBN.toString())
-    const buyItPriceRounded = buyItPriceBN && roundBalance(buyItPriceBN.toString())
+    const startPriceAmount = bnToBn(startPrice).toString()
+    const buyItPriceAmount = buyItPrice && bnToBn(buyItPrice).toString()
+    const startPriceRounded = roundBalance(startPriceAmount)
+    const buyItPriceRounded = buyItPriceAmount !== null ? roundBalance(buyItPriceAmount) : buyItPriceAmount
     const formattedBidders: Bidder[] = bidders.list.map((bidder) => {
       const [address, bid] = bidder
-      const amount = bnToBn(bid)
-      const amountRounded = roundBalance(amount.toString())
+      const amount = bnToBn(bid).toString()
+      const amountRounded = roundBalance(amount)
       return {
         bidder: address,
         amount,
@@ -38,9 +38,9 @@ export const getAuctionData = async (nftId: number): Promise<AuctionDataType | n
       creator,
       startBlock,
       endBlock,
-      startPrice,
+      startPrice: startPriceAmount,
       startPriceRounded,
-      buyItPrice,
+      buyItPrice: buyItPriceAmount,
       buyItPriceRounded,
       bidders: formattedBidders,
       marketplaceId,
@@ -78,8 +78,8 @@ export const getAuctionDeadline = async (nftId: number): Promise<number | null> 
 export const getClaimableBidBalance = async (address: string): Promise<ClaimableBidBalanceDataType> => {
   const data = await query(txPallets.auction, chainQuery.claims, [address])
   const parsedData = data.toJSON() as any as BalanceType
-  const claimable = bnToBn(parsedData)
-  const claimableRounded = roundBalance(claimable.toString())
+  const claimable = bnToBn(parsedData).toString()
+  const claimableRounded = roundBalance(claimable)
 
   return {
     claimable,
