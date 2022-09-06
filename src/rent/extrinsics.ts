@@ -3,10 +3,9 @@ import { IKeyringPair } from "@polkadot/types/types"
 
 import { AcceptanceType, CancellationFeeType, DurationType, RentFeeType, RevocationType } from "./types"
 import { formatRentContractFee } from "./utils"
-import { getRentalContractData } from "./storage"
 
 import { createTxHex, numberToBalance, submitTxBlocking, TransactionHashType } from "../blockchain"
-import { Errors, txActions, txPallets, WaitUntil } from "../constants"
+import { txActions, txPallets, WaitUntil } from "../constants"
 import {
   ContractCreatedEvent,
   ContractOfferCreatedEvent,
@@ -16,7 +15,6 @@ import {
   ContractSubscriptionTermsAcceptedEvent,
   ContractSubscriptionTermsChangedEvent,
 } from "../events"
-import { AcceptanceAction } from "./enum"
 
 /**
  * @name createContractTx
@@ -40,8 +38,8 @@ export const createContractTx = async (
   renteeCancellationFee: CancellationFeeType | null = null,
 ): Promise<TransactionHashType> => {
   await formatRentContractFee(rentFee)
-  renterCancellationFee && (await formatRentContractFee(renterCancellationFee))
-  renteeCancellationFee && (await formatRentContractFee(renteeCancellationFee))
+  if (renterCancellationFee) await formatRentContractFee(renterCancellationFee)
+  if (renteeCancellationFee) await formatRentContractFee(renteeCancellationFee)
   return await createTxHex(txPallets.rent, txActions.createContract, [
     nftId,
     duration,
@@ -142,14 +140,11 @@ export const rent = async (
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractStartedEvent | ContractOfferCreatedEvent> => {
-  const getData = await getRentalContractData(nftId)
-  if (getData === null) {
-    throw new Error(Errors.RENT_CONTRACT_NOT_FOUND)
-  }
-  const isAutoAcceptance = getData?.acceptanceType === AcceptanceAction.AutoAcceptance
   const tx = await rentTx(nftId)
   const events = await submitTxBlocking(tx, waitUntil, keyring)
-  return events.findEventOrThrow(isAutoAcceptance ? ContractStartedEvent : ContractOfferCreatedEvent)
+  const startedEvent = events.findEvent(ContractStartedEvent)
+  if (startedEvent) return startedEvent
+  return events.findEventOrThrow(ContractOfferCreatedEvent)
 }
 
 /**
@@ -225,7 +220,7 @@ export const changeSubscriptionTermsTx = async (
   duration: DurationType,
   amount: number | BN,
 ): Promise<TransactionHashType> => {
-  typeof amount === "number" && (await numberToBalance(amount))
+  if (typeof amount === "number") await numberToBalance(amount)
   return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [nftId, duration, amount])
 }
 
