@@ -8,7 +8,7 @@ import {
 import { initializeApi } from "../blockchain"
 
 beforeAll(() => {
-  const endpoint: string | undefined = "wss://dev-1.ternoa.network"
+  const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
   return initializeApi(endpoint)
 })
 
