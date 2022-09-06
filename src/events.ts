@@ -500,19 +500,19 @@ export class CollectionBurnedEvent extends BlockchainEvent {
 export class ContractCreatedEvent extends BlockchainEvent {
   nftId: number
   renter: string
-  durationType?: string
+  durationType: DurationAction
   blockDuration?: number | null
   blockSubscriptionRenewal?: number | null
-  acceptanceType?: string
-  acceptanceList?: string[]
-  revocationType?: string
-  rentFeeType?: string
-  rentFee?: string | number
-  rentFeeRounded?: number
-  renterCancellationFeeType?: string | null
+  acceptanceType: AcceptanceAction
+  acceptanceList: string[] | null
+  revocationType: RevocationAction
+  rentFeeType: RentFeeAction
+  rentFee: string | number
+  rentFeeRounded: number
+  renterCancellationFeeType?: CancellationFeeAction | null
   renterCancellationFee?: string | number | null
   renterCancellationFeeRounded?: number | null
-  renteeCancellationFeeType?: string | null
+  renteeCancellationFeeType?: CancellationFeeAction | null
   renteeCancellationFee?: string | number | null
   renteeCancellationFeeRounded?: number | null
 
@@ -534,34 +534,33 @@ export class ContractCreatedEvent extends BlockchainEvent {
     ] = event.data
 
     const parsedDuration = duration.toString() !== DurationAction.Infinite && JSON.parse(duration.toString())
-    const isDurationFixed = parsedDuration && parsedDuration.fixed
-    const isDurationSubscription = parsedDuration && parsedDuration.subscription
+    const isDurationFixed = parsedDuration && Boolean(parsedDuration.fixed)
+    const isDurationSubscription = parsedDuration && Boolean(parsedDuration.subscription)
     const parsedAcceptance = JSON.parse(acceptanceType.toString())
-    const isAutoAcceptance = parsedAcceptance.autoAcceptance === null || parsedAcceptance.autoAcceptance
-    const isrevocationTypeNoRevocation = revocationType.toString() === RevocationAction.NoRevocation
-    const isrevocationTypeOnSubscriptionChange = revocationType.toString() === RevocationAction.OnSubscriptionChange
+    const isAutoAcceptance = Boolean(parsedAcceptance.autoAcceptance === null || parsedAcceptance.autoAcceptance)
+    const isrevocationTypeNoRevocation = Boolean(revocationType.toString() === RevocationAction.NoRevocation)
+    const isrevocationTypeOnSubscriptionChange = Boolean(
+      revocationType.toString() === RevocationAction.OnSubscriptionChange,
+    )
     const parsedRentFee = JSON.parse(rentFee.toString())
-    const isRentFeeToken = parsedRentFee.tokens
+    const isRentFeeToken = Boolean(parsedRentFee.tokens)
     const parsedRenterCancellationFee = renterCancellationFee.toString() && JSON.parse(renterCancellationFee.toString())
-    const isRenterCancellationFeeFixed = parsedRenterCancellationFee && parsedRenterCancellationFee.fixedTokens
-    const isRenterCancellationFeeFlexible = parsedRenterCancellationFee && parsedRenterCancellationFee.flexibleTokens
-    const isRenterCancellationFeeNft = parsedRenterCancellationFee && parsedRenterCancellationFee.nft
+    const isRenterCancellationFeeFixed = Boolean(parsedRenterCancellationFee && parsedRenterCancellationFee.fixedTokens)
+    const isRenterCancellationFeeFlexible = Boolean(
+      parsedRenterCancellationFee && parsedRenterCancellationFee.flexibleTokens,
+    )
+    const isRenterCancellationFeeNft = Boolean(parsedRenterCancellationFee && parsedRenterCancellationFee.nft >= 0)
     const parsedRenteeCancellationFee = renteeCancellationFee.toString() && JSON.parse(renteeCancellationFee.toString())
-    const isRenteeCancellationFeeFixed = parsedRenteeCancellationFee && parsedRenteeCancellationFee.fixedTokens
-    const isRenteeCancellationFeeFlexible = parsedRenteeCancellationFee && parsedRenteeCancellationFee.flexibleTokens
-    const isRenteeCancellationFeeNft = parsedRenteeCancellationFee && parsedRenteeCancellationFee.nft
+    const isRenteeCancellationFeeFixed = Boolean(parsedRenteeCancellationFee && parsedRenteeCancellationFee.fixedTokens)
+    const isRenteeCancellationFeeFlexible = Boolean(
+      parsedRenteeCancellationFee && parsedRenteeCancellationFee.flexibleTokens,
+    )
+    const isRenteeCancellationFeeNft = Boolean(parsedRenteeCancellationFee && parsedRenteeCancellationFee.nft >= 0)
 
     this.nftId = Number.parseInt(nftId.toString())
     this.renter = renter.toString()
-    this.durationType = undefined
     this.blockDuration = undefined
     this.blockSubscriptionRenewal = undefined
-    this.acceptanceType = undefined
-    this.acceptanceList = undefined
-    this.revocationType = undefined
-    this.rentFeeType = undefined
-    this.rentFee = undefined
-    this.rentFeeRounded = undefined
     this.renterCancellationFeeType = undefined
     this.renterCancellationFee = undefined
     this.renterCancellationFeeRounded = undefined
@@ -583,14 +582,10 @@ export class ContractCreatedEvent extends BlockchainEvent {
 
     if (isAutoAcceptance) {
       this.acceptanceType = AcceptanceAction.AutoAcceptance
-      this.acceptanceList = []
-      parsedAcceptance.autoAcceptance &&
-        parsedAcceptance.autoAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
+      this.acceptanceList = parsedAcceptance.autoAcceptance?.map((account: string) => account) ?? []
     } else {
       this.acceptanceType = AcceptanceAction.ManualAcceptance
-      this.acceptanceList = []
-      parsedAcceptance.manualAcceptance &&
-        parsedAcceptance.manualAcceptance.map((account: string) => this.acceptanceList?.push(account.toString()))
+      this.acceptanceList = parsedAcceptance.manualAcceptance?.map((account: string) => account) ?? []
     }
 
     if (isrevocationTypeNoRevocation) {
@@ -603,7 +598,7 @@ export class ContractCreatedEvent extends BlockchainEvent {
 
     if (isRentFeeToken) {
       this.rentFeeType = RentFeeAction.Tokens
-      this.rentFee = bnToBn(isRentFeeToken).toString()
+      this.rentFee = bnToBn(parsedRentFee.tokens).toString()
       this.rentFeeRounded = roundBalance(this.rentFee)
     } else {
       this.rentFeeType = RentFeeAction.NFT
