@@ -4,6 +4,8 @@
 
 The easiest and fastest way to build on top of Ternoa Chain.
 
+If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
+
 ## Installation
 
 ### [Node.js](https://nodejs.org/en/download/)
@@ -104,7 +106,16 @@ We've setup linters and formatters to help catch errors and improve the developm
 
 > If you use Visual Studio Code editor we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
 
+## Contribution
+
+ternoa-js SDK is an open-source project, feel free to interact and move forward with us.
+
+If you are interested in contributing to the Ternoa SDK read our [contributing guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
+
+If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
+
 ## Build And Run With Podman
+
 ```bash
   # Downloads the package lists and "updates" them.
   sudo apt update -y
@@ -119,22 +130,25 @@ We've setup linters and formatters to help catch errors and improve the developm
 ```
 
 ## Run With Podman Tips
+
 In the next examples some useful Podman commands will be shown. It's important to note that most flags have been omitted in order to make the examples more concise. Before running anything make sure that the image was built from the the "Build And Run With Podman" step.
 
 If no command arguments are given by default it will try to build the starter-project project. To cancel this add `bash` at the end of the command. Example: `podman run tsdk bash`.
 
 ### Remove Container After Exit
+
 A container that was run and it's job has been finished or the user has exited will not automatically be removed instead it will enter the Exit state.
 To make sure that the container is deleted and removed after it's being used the flag `--rm` should be used.
 
 ```bash
   # The --rm flag removes the container after usage.
   podman run --rm tsdk
-  # Check if any container is running or stopped. 
+  # Check if any container is running or stopped.
   podman ps -a
 ```
 
 ### Persistent Storage
+
 Container uses a local copy of the repo in order to compile and run examples. This means that if code changes are made inside the container that they will not propagate and they will be lost. To change this the virtual container volume `/workdir` needs to be mapped to a directory on the host machine that contains the Ternoa-js repo. With the mapping done any change in the mapped directory will be visible to the container.
 
 This can be useful if you want to develop applications without installing all the dependencies for it. For the workflow check the [Create A Development Environment](#create-a-detached-instance-and-access-its-shell) segment.
@@ -145,6 +159,7 @@ This can be useful if you want to develop applications without installing all th
 ```
 
 ### Run The Container And Access Its Shell
+
 The predefined operation/command of the container when run is to compile and run the starter-project. To execute a different operation additional commands can be passed at the end of the run command. Example: passing `bash` will run the bash shell session instead the default operation.
 
 ```bash
@@ -153,16 +168,19 @@ The predefined operation/command of the container when run is to compile and run
 ```
 
 ### Create A Detached Instance And Access Its Shell
+
 ```bash
-  # Flag "-d" runs the container in detached mode. 
+  # Flag "-d" runs the container in detached mode.
   podman run -d tsdk bash
   # Access its shell.
   podman exec -itl bash
 ```
 
 ### Create A Development Environment
+
 The dockerfile is made in a way that it can be used to develope new applications with it.
 Example of a typical workflows:
+
 - The host installs git, clones the repo and install a code editor like VS Code.
 - The host runs the container in a interactive mode with /workdir pointing to a workdir on host machine (can be your own project or ternoa-js).
 - The host writes code via a code editor and uses the terminal (which is connected to the container) to run the `tsc` and `node` commands.
@@ -181,7 +199,6 @@ Example of a typical workflows:
   podman exec -it my_sdk_env /bin/bash
   [root@d4ad8ec11655:/workdir] nano -V
 ```
-
 
 ## License
 

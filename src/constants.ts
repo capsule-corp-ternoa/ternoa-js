@@ -1,4 +1,5 @@
 export enum txPallets {
+  auction = "auction",
   marketplace = "marketplace",
   nft = "nft",
   rent = "rent",
@@ -9,27 +10,12 @@ export enum txPallets {
 }
 
 export enum txActions {
-  buy = "buy",
-  list = "list",
-  unlist = "unlist",
-  burn = "burn",
   create = "create",
   transfer = "transfer",
   transferAll = "transferAll",
   transferKeepAlive = "transferKeepAlive",
-  finishSeries = "finishSeries",
   batch = "batch",
   batchAll = "batchAll",
-  createFromNft = "createFromNft",
-  remove = "remove",
-  setIpfsReference = "setIpfsReference",
-  setAltvrUsername = "setAltvrUsername",
-  setCommissionFee = "setCommissionFee",
-  setOwner = "setOwner",
-  setKind = "setMarketType",
-  setName = "setName",
-  setUri = "setUri",
-  setLogoUri = "setLogoUri",
 
   // nft
   createNft = "createNft",
@@ -62,6 +48,15 @@ export enum txActions {
   setMarketplaceKind = "setMarketplaceKind",
   setMarketplaceOwner = "setMarketplaceOwner",
   setMarketplaceMintFee = "setMarketplaceMintFee",
+
+  // auction
+  createAuction = "createAuction",
+  cancelAuction = "cancelAuction",
+  endAuction = "endAuction",
+  addBid = "addBid",
+  removeBid = "removeBid",
+  buyItNow = "buyItNow",
+  claim = "claim",
 }
 
 export enum txEvent {
@@ -87,6 +82,13 @@ export enum chainQuery {
   nextMarketplaceId = "nextMarketplaceId",
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
+
+  // auction
+  auctions = "auctions",
+  deadlines = "deadlines",
+  claims = "claims",
+
+  // rent
   contracts = "contracts",
   numberOfCurrentContracts = "numberOfCurrentContracts",
   availableQueue = "availableQueue",
@@ -103,6 +105,17 @@ export enum chainConstants {
   collectionOffchainDataLimit = "collectionOffchainDataLimit",
   offchainDataLimit = "offchainDataLimit",
   accountSizeLimit = "accountSizeLimit",
+
+  // auction
+  auctionEndingPeriod = "auctionEndingPeriod",
+  auctionGracePeriod = "auctionGracePeriod",
+  bidderListLengthLimit = "bidderListLengthLimit",
+  maxAuctionDelay = "maxAuctionDelay",
+  minAuctionDuration = "minAuctionDuration",
+  maxAuctionDuration = "maxAuctionDuration",
+  parallelAuctionLimit = "parallelAuctionLimit",
+
+  // rent
   actionsInBlockLimit = "actionsInBlockLimit",
   contractExpirationDuration = "contractExpirationDuration",
   simultaneousContractLimit = "simultaneousContractLimit",
@@ -135,5 +148,6 @@ export enum Errors {
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
   IPFS_FILE_NULL_ON_UPLOAD = "IPFS_FILE_NULL_ON_UPLOAD",
+  AUCTION_NFT_CONVERSION_ERROR = "AUCTION_NFT_CONVERSION_ERROR",
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
 }

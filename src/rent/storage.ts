@@ -21,7 +21,7 @@ import { roundBalance } from "../helpers/utils"
  */
 export const getRentalContractData = async (nftId: number): Promise<RentalContractDataType | null> => {
   const data = await query(txPallets.rent, chainQuery.contracts, [nftId])
-  if (data.isEmpty == true) {
+  if (data.isEmpty) {
     return null
   }
   try {
@@ -69,7 +69,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
 
     const rentFeeType = rentFee.tokens ? RentFeeAction.Tokens : RentFeeAction.NFT
     const rentFeeAmount = rentFee.tokens ? bnToBn(rentFee.tokens).toString() : Number(rentFee.nft)
-    const rentFeeRounded = typeof rentFeeAmount === "string" ? roundBalance(rentFeeAmount) : rentFeeAmount
+    const rentFeeRounded = typeof rentFeeAmount === "number" ? rentFeeAmount : roundBalance(rentFeeAmount)
 
     const renterCancellationFeeType =
       renterCancellationFee &&
@@ -89,9 +89,9 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
 
     const renterCancellationFeeRounded =
       renterCancellationFee &&
-      (typeof renterCancellationFeeAmount === "string"
-        ? roundBalance(renterCancellationFeeAmount)
-        : renterCancellationFeeAmount)
+      (typeof renterCancellationFeeAmount === "number"
+        ? renterCancellationFeeAmount
+        : roundBalance(renterCancellationFeeAmount))
 
     const renteeCancellationFeeType =
       renteeCancellationFee &&
@@ -111,9 +111,9 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
 
     const renteeCancellationFeeRounded =
       renteeCancellationFee &&
-      (typeof renteeCancellationFeeAmount === "string"
-        ? roundBalance(renteeCancellationFeeAmount)
-        : renteeCancellationFeeAmount)
+      (typeof renteeCancellationFeeAmount === "number"
+        ? renteeCancellationFeeAmount
+        : roundBalance(renteeCancellationFeeAmount))
 
     return {
       hasStarted,
@@ -172,7 +172,7 @@ export const getRentalOffers = async (nftId: number): Promise<string[]> => {
  */
 export const getAvailableRentalContracts = async (): Promise<AvailableRentalContractType[]> => {
   const data = await query(txPallets.rent, chainQuery.availableQueue)
-  if (data.isEmpty == true) {
+  if (data.isEmpty) {
     return []
   }
   try {
@@ -199,7 +199,7 @@ export const getAvailableRentalContracts = async (): Promise<AvailableRentalCont
  */
 export const getActiveFixedRentalContracts = async (): Promise<ActiveFixedContractType[]> => {
   const data = await query(txPallets.rent, chainQuery.fixedQueue)
-  if (data.isEmpty == true) {
+  if (data.isEmpty) {
     return []
   }
   try {
@@ -226,7 +226,7 @@ export const getActiveFixedRentalContracts = async (): Promise<ActiveFixedContra
  */
 export const getActiveSubscribedRentalContracts = async (): Promise<ActiveSubscribedContractType[]> => {
   const data = await query(txPallets.rent, chainQuery.subscriptionQueue)
-  if (data.isEmpty == true) {
+  if (data.isEmpty) {
     return []
   }
   try {
