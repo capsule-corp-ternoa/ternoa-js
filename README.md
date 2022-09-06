@@ -4,11 +4,15 @@
 
 The easiest and fastest way to build on top of Ternoa Chain.
 
-If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
+You can start by familiarizing yourself with the architecture and playing around with the ternoa.js [test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) to get a good grasp of the Ternoa SDK.
+
+Lastly and most importantly, don’t forget to have fun, we (really) want you to have a good time.
 
 ## Installation
 
 ### [Node.js](https://nodejs.org/en/download/)
+
+Install the ternoa.js lirary by running this command :
 
 ```bash
 npm install ternoa-js
@@ -18,9 +22,10 @@ npm install ternoa-js
 
 ## Quick Start
 
-An API instance must be initialize using the _initializeApi_ function in **ternoa-js/blockchain** before calling some SDK functions. The default chain endpoint is: `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`. It can be modified by passing a new endpoint as a parameter to the _initializeApi_ function.
+Before you can start calling any functions, you'll need to initialize an API Instance using the _initializeApi_ function located in **ternoa-js/blockchain**.
+You can set the chain endpoint by passing an endpoint parameter to the _initializeApi_ Function whereas the default chain endpoint is : `DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"`.
 
-Functions are organized by theme. In the example below, the import of _generateSeed_ and _getKeyringFromSeed_ from the subpath **ternoa-js/account** allows us to generate a new account and display its address.
+All functions are organized by a specific theme, for example, the function _generateSeed_ allows us to create a new account and _getKeyringFromSeed_ allows us to retrieve its address, which can conveniently be found in **ternoa-js/account**.
 
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
@@ -34,7 +39,7 @@ import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 })
 ```
 
-Among all the features provided by the Ternoa SDK, this short snippet of code allows you to create an NFT, submit and sign it at a glance. This single line _createNft_ function, require a few parameters : some `offchainData` metadatas, a `royalty`, a `collectionId` if you want this NFT to belong to a collection, a boolean to define its `isSoulbound` status, the `keyring` to sign and submit the transaction, and a `waitUntil` callback parameter, to define at which point we want to get the results of the transaction execution.
+Among all the features provided by the Ternoa SDK, this short snippet of code allows you to Create, Submit and Sign an NFT. This function  _createNft_ requires a few parameters like : `offchainData` aka metadata, the `royalty` percentage, its `collectionId` if you want it to belong to an existing collection, a Boolean value `isSoulBound` to determine its status, `keyring` parameter to sign and submit the transaction and a callback parameter `waitUntill`, to define when we get the results of that transaction execution.
 
 ```javascript
 import { createNft } from "ternoa-js/nft"
@@ -55,13 +60,14 @@ const createMyFirstNFT = async () => {
 
 ## Documentation
 
-The official SDK documentation is available: [ternoa-js sdk documentation](http://ternoa-js.ternoa.dev). Additional resources are available on the [ternoa official documentation](https://docs.ternoa.network/).
+The official SDK documentation is available @ https://ternoa-js.ternoa.dev/ and any additional resources can be found over @ https://docs.ternoa.network/,
 
-Discover our End-to-End Test dApp here to learn and test the Ternoa SDK : [ternoa-js-test-dapp](https://e2e.ternoa.network/).
+Discover our end-to-end test Dapp [here](https://e2e.ternoa.network/)
+to try out the Ternoa SDK.
 
 ### Cookbook example
 
-If you are looking for a quick overview about the basic-usage of the Ternoa SDK, some explications or the best-practices, and how to create your first NFT, we recommand you to look at the exemple section [cookbook/basic-usage](https://github.com/capsule-corp-ternoa/ternoa-js/tree/1.1.0-basicNFTs-collections/examples/cookbook/basic-usage)
+If you’re looking for a quick overview of the Ternoa SDK, its usage, explications, best practices, or just a simple how-to guide on how to create your first NFT, we recommend you take a look at the example section of [cookbook/basic-usage](https://github.com/capsule-corp-ternoa/ternoa-js/tree/1.1.0-basicNFTs-collections/examples/cookbook/basic-usage)
 
 ## SDK Development
 
@@ -81,13 +87,13 @@ To generate the documentation website, run:
 npm run docs
 ```
 
-The static website will be located in the [docs/](https://github.com/capsule-corp-ternoa/ternoa-js/tree/main/docs) directory.
+You can locate the static website in the [docs/](https://github.com/capsule-corp-ternoa/ternoa-js/tree/main/docs) directory.
 
 ### Testing
 
-The test suites relies on testing pairs located in the [testingPairs.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/testingPairs.ts) file. In order to prepare those pairs, the two scripts [test-setup.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-setup.ts) and [test-teardown.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-teardown.ts) respectively fulfilled and emptied them with CAPS. Environment variables `SEED_TEST_FUNDS` and `SEED_TEST_FUNDS_PUBLIC_KEY` have to be define to run the test suites.
+The test suites rely upon testing pairs in the [testing pairs file](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/testingPairs.ts). In order to prepare these pairs, [test-setup.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-setup.ts) and [test-teardown.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-teardown.ts) are supplied and drained of `$CAPS` respectively. Environmental variables `SEED_TEST_FUNDS` and `SEED_TEST_FUNDS_PUBLIC_KEY` have to be defined in order to run these test suites.
 
-To run the test suites, run:
+To initiate the test suites, run:
 
 ```bash
 npm run test
@@ -95,24 +101,24 @@ npm run test
 
 ### Code Style
 
-This project uses recommended ESLint and Typescript rules to ensure coding good practices.
+This project uses Industry standard ESLint and Typescript rules to ensure good coding practices and readability.
 
-We've setup linters and formatters to help catch errors and improve the development experience:
+We’ve set up linters and formatters to help catch errors and enhance the overall experience:
 
 - [Prettier](https://prettier.io/) – ensures that code is formatted in a readable way.
 - [ESLint](https://eslint.org/) — checks code for antipatterns as well as formatting.
 
-[Husky](https://typicode.github.io/husky) proceeds some checks before pushing a new commit. It ensures that: the project is building, there are no linter/formatting issues and the test suites are not broken.
+[Husky](https://typicode.github.io/husky) proceeds with checks before pushing a new commit. It verifies that the project is building, there are no formatting or linter issues, and the test suites aren’t broken.
 
-> If you use Visual Studio Code editor we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
+> If you use Visual Studio Code editor, we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
 
 ## Contribution
 
-ternoa-js SDK is an open-source project, feel free to interact and move forward with us.
+Ternoa.js is an open-source SDK, feel free to interact and help us improve.
 
-If you are interested in contributing to the Ternoa SDK read our [contributing guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
+If you’re interested in contributing to the Ternoa SDK, we recommend you check out our [contribution guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
 
-If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
+If you want to learn how to use the Ternoa SDK, the [test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect place for you to start, that way you can familiarize yourself with our architecture and contribute to the ecosystem's development.
 
 ## Build And Run With Podman
 
@@ -129,16 +135,16 @@ If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://gi
   podman run tsdk
 ```
 
-## Run With Podman Tips
+## Tips to Run with Podman 
 
-In the next examples some useful Podman commands will be shown. It's important to note that most flags have been omitted in order to make the examples more concise. Before running anything make sure that the image was built from the the "Build And Run With Podman" step.
+We’ll illustrate some useful podman commands and their use cases next. It’s important to note that we’ve omitted most of the flags to make them concise. Make sure to build the image as per the steps defined in the "Build and Run with Podman" section.
 
-If no command arguments are given by default it will try to build the starter-project project. To cancel this add `bash` at the end of the command. Example: `podman run tsdk bash`.
+In case no command arguments are specified, It’ll tyr to build the `starter-project` by default. To override this, simply add `bash` at the end of the command. It'll look something like: `podman run tsdk bash`.
 
 ### Remove Container After Exit
 
-A container that was run and it's job has been finished or the user has exited will not automatically be removed instead it will enter the Exit state.
-To make sure that the container is deleted and removed after it's being used the flag `--rm` should be used.
+A container that completed its execution or is no longer in use due to the user disconnecting will not be removed by default, it’ll switch to the exit state.
+Use the flag `--rm` to make sure it’s deleted and later removed.
 
 ```bash
   # The --rm flag removes the container after usage.
@@ -149,9 +155,9 @@ To make sure that the container is deleted and removed after it's being used the
 
 ### Persistent Storage
 
-Container uses a local copy of the repo in order to compile and run examples. This means that if code changes are made inside the container that they will not propagate and they will be lost. To change this the virtual container volume `/workdir` needs to be mapped to a directory on the host machine that contains the Ternoa-js repo. With the mapping done any change in the mapped directory will be visible to the container.
+The container uses a local copy of the repo in order to compile and run examples. This means that if changes are made inside the container, they’ll fail to propagate and will be lost. To mitigate this issue, the virtual container volume `/workdir` needs to be mapped to a directory on the host machine that contains the Ternoa.js repo. After the mapping is done, any changes made in the mapped directory will be reflected in the container.
 
-This can be useful if you want to develop applications without installing all the dependencies for it. For the workflow check the [Create A Development Environment](#create-a-detached-instance-and-access-its-shell) segment.
+This way, you can develop Dapps without having to install all the required dependencies. For the workflow check out the "Create A Development Environment" section.
 
 ```bash
   # Flag -v tells the host machine to map the physical "./." path with the virtual container one "/workdir". If no command arguments are given this will try to compile and run the starter-project project.
@@ -160,7 +166,7 @@ This can be useful if you want to develop applications without installing all th
 
 ### Run The Container And Access Its Shell
 
-The predefined operation/command of the container when run is to compile and run the starter-project. To execute a different operation additional commands can be passed at the end of the run command. Example: passing `bash` will run the bash shell session instead the default operation.
+The predefined operation of the container when executed is to compile and and initiate the Starter-project. To execute a different operation, additional commands can be passed at the end. For example: padding `bash` will run the bash shell session instead of the default operation.
 
 ```bash
   # If no command arguments are given this will try to compile and run the starter-project project. By passing "bash" we make sure that we run a bash shell session once the container starts.
@@ -178,12 +184,13 @@ The predefined operation/command of the container when run is to compile and run
 
 ### Create A Development Environment
 
-The dockerfile is made in a way that it can be used to develope new applications with it.
-Example of a typical workflows:
+The dockerfile is made in a way that it can be used to develop new applications with it.
+
+Example of a typical workflow:
 
 - The host installs git, clones the repo and install a code editor like VS Code.
-- The host runs the container in a interactive mode with /workdir pointing to a workdir on host machine (can be your own project or ternoa-js).
-- The host writes code via a code editor and uses the terminal (which is connected to the container) to run the `tsc` and `node` commands.
+- runs the container in interactive mode with `/workdir` pointing to a work directory on the host machine (can be your own project or ternoa-js).
+- writes code via a code editor and uses the terminal to run the `tsc` and `node` commands.
 - With that setup all the changes are done locally on the host machine while the container is only used to compile and run the app.
 
 ```bash
@@ -202,4 +209,4 @@ Example of a typical workflows:
 
 ## License
 
-ternoa-js uses an [Apache-2.0 License](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/LICENSE).
+Ternoa.js uses the [Apache-2.0 License](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/LICENSE).
