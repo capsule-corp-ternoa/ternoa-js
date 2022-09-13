@@ -1,4 +1,4 @@
- name: SDK CI integration
+name: SDK CI integration
 on:
   pull_request:
     branches:
@@ -23,8 +23,8 @@ jobs:
       - name: Commit doc changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'CI: Automated doc push'
-          commit_options: '--no-verify'
+          commit_message: "CI: Automated doc push"
+          commit_options: "--no-verify"
 
   ci:
     runs-on: ubuntu-latest
@@ -44,16 +44,16 @@ jobs:
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'CI: Linted files'
-          commit_options: '--no-verify'
+          commit_message: "CI: Linted files"
+          commit_options: "--no-verify"
       - name: Formatting using Prettier
         run: |
           npm run format
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: 'CI: Formatted files'
-          commit_options: '--no-verify'
+          commit_message: "CI: Formatted files"
+          commit_options: "--no-verify"
 
   test:
     runs-on: ubuntu-latest
