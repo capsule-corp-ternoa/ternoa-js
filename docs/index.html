@@ -4,6 +4,7 @@
 </a>
 <p><a href="https://badge.fury.io/js/ternoa-js"><img src="https://badge.fury.io/js/ternoa-js.svg" alt="npm version"></a></p>
 <p>The easiest and fastest way to build on top of Ternoa Chain.</p>
+<p>If you want to learn how to use Ternoa SDK, the <a href="https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp">ternoa-js-test-dapp</a> is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.</p>
 
 <a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
   <h2>Installation</h2>
@@ -76,10 +77,16 @@
 <li><a href="https://prettier.io/">Prettier</a> – ensures that code is formatted in a readable way.</li>
 <li><a href="https://eslint.org/">ESLint</a> — checks code for antipatterns as well as formatting.</li>
 </ul>
-<p><a href="https://typicode.github.io/husky">Husky</a> proceeds some checks before pushing a new commit. It ensures that: the project is building, there are no linter/formatting issues and the test suites are not broken.</p>
 <blockquote>
 <p>If you use Visual Studio Code editor we suggest you to install <a href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint">ESLint</a> and <a href="https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode">Prettier</a> extensions.</p>
 </blockquote>
+
+<a href="#contribution" id="contribution" style="color: inherit; text-decoration: none;">
+  <h2>Contribution</h2>
+</a>
+<p>ternoa-js SDK is an open-source project, feel free to interact and move forward with us.</p>
+<p>If you are interested in contributing to the Ternoa SDK read our <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md">contributing guidelines</a>.</p>
+<p>If you want to learn how to use Ternoa SDK, the <a href="https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp">ternoa-js-test-dapp</a> is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.</p>
 
 <a href="#build-and-run-with-podman" id="build-and-run-with-podman" style="color: inherit; text-decoration: none;">
   <h2>Build And Run With Podman</h2>
@@ -98,7 +105,7 @@
 </a>
 <p>A container that was run and it&#39;s job has been finished or the user has exited will not automatically be removed instead it will enter the Exit state.
 To make sure that the container is deleted and removed after it&#39;s being used the flag <code>--rm</code> should be used.</p>
-<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># The --rm flag removes the container after usage.</span><br/><span class="hl-1">  podman run --rm tsdk</span><br/><span class="hl-1">  </span><span class="hl-5"># Check if any container is running or stopped. </span><br/><span class="hl-1">  podman ps -a</span>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># The --rm flag removes the container after usage.</span><br/><span class="hl-1">  podman run --rm tsdk</span><br/><span class="hl-1">  </span><span class="hl-5"># Check if any container is running or stopped.</span><br/><span class="hl-1">  podman ps -a</span>
 </code></pre>
 
 <a href="#persistent-storage" id="persistent-storage" style="color: inherit; text-decoration: none;">
@@ -119,7 +126,7 @@ To make sure that the container is deleted and removed after it&#39;s being used
 <a href="#create-a-detached-instance-and-access-its-shell" id="create-a-detached-instance-and-access-its-shell" style="color: inherit; text-decoration: none;">
   <h3>Create A Detached Instance And Access Its Shell</h3>
 </a>
-<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Flag &quot;-d&quot; runs the container in detached mode. </span><br/><span class="hl-1">  podman run -d tsdk bash</span><br/><span class="hl-1">  </span><span class="hl-5"># Access its shell.</span><br/><span class="hl-1">  podman </span><span class="hl-2">exec</span><span class="hl-1"> -itl bash</span>
+<pre><code class="language-bash"><span class="hl-1">  </span><span class="hl-5"># Flag &quot;-d&quot; runs the container in detached mode.</span><br/><span class="hl-1">  podman run -d tsdk bash</span><br/><span class="hl-1">  </span><span class="hl-5"># Access its shell.</span><br/><span class="hl-1">  podman </span><span class="hl-2">exec</span><span class="hl-1"> -itl bash</span>
 </code></pre>
 
 <a href="#create-a-development-environment" id="create-a-development-environment" style="color: inherit; text-decoration: none;">
