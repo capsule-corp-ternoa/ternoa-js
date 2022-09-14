@@ -6,17 +6,30 @@ on:
       - main
 
 jobs:
-  pr:
+  test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        step: ["test", "lint", "format", "docs"]
+        node-version: [14.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci --ignore-scripts
+      - name: Unit Tests
+        run: |
+          BLOCKCHAIN_ENDPOINT=wss://alphanet.ternoa.com SEED_TEST_FUNDS=${{secrets.SEED_TEST_FUNDS}} SEED_TEST_FUNDS_PUBLIC=${{secrets.SEED_TEST_FUNDS_PUBLIC}} npm run test
+
+  pr:
+    needs: test
+    strategy:
+      matrix:
+        step: ["lint", "format", "docs"]
         node-version: [14.x]
     name: ${{ matrix.step }}
     runs-on: ubuntu-latest
-    env:
-      BLOCKCHAIN_ENDPOINT: wss://alphanet.ternoa.com
-      SEED_TEST_FUNDS: ${{secrets.SEED_TEST_FUNDS}}
-      SEED_TEST_FUNDS_PUBLIC: ${{secrets.SEED_TEST_FUNDS_PUBLIC}}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -28,3 +41,8 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run ${{ matrix.step }}
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "PR: ${{ matrix.step }} fixed"
+          commit_options: "--no-verify"
