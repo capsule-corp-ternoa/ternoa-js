@@ -1,11 +1,11 @@
-name: CI
+name: Documentation
 on:
   pull_request:
     branches:
       - dev
 
 jobs:
-  ci:
+  build-doc:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,19 +17,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci --ignore-scripts
-      - name: Linting using Eslint
+      - name: Generating doc
         run: |
-          npm run lint
-      - name: Commit changes
+          npm run docs
+      - name: Commit documentation changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "CI: Linted files"
-          commit_options: "--no-verify"
-      - name: Formatting using Prettier
-        run: |
-          npm run format
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "CI: Formatted files"
+          commit_message: "DOC: Automated documentation push"
           commit_options: "--no-verify"
