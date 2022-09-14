@@ -27,4 +27,4 @@ jobs:
         if: always()
         run: |
           npm ci --ignore-scripts
-          npm ${{ matrix.step }}
+          npm run ${{ matrix.step }}
