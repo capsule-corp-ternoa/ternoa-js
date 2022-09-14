@@ -45,4 +45,3 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "PR: ${{ matrix.step }} fixed"
-          commit_options: "--no-verify"
