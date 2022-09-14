@@ -22,3 +22,16 @@ export interface ICollectionData {
   limit: number
   isClosed: boolean
 }
+
+export interface INFTMetadata {
+  title: string
+  description: string
+  file: File | null
+}
+
+export interface ICollectionMetadata {
+  name: string
+  description: string
+  profileFile: File | null
+  bannerFile: File | null
+}

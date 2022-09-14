@@ -15,7 +15,7 @@ import {
   NFTTransferredEvent,
 } from "../events"
 
-import { formatPermill } from "./utils"
+import { formatPermill } from "../helpers/utils"
 
 // NFTs
 

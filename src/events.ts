@@ -3,7 +3,7 @@ import { bnToBn, hexToString } from "@polkadot/util"
 
 import { Errors } from "./constants"
 import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
-import { roundBalance } from "./utils"
+import { roundBalance } from "./helpers/utils"
 
 export enum EventType {
   // Balances

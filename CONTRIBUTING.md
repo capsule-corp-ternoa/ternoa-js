@@ -41,6 +41,4 @@ We've setup linters and formatters to help catch errors and improve the developm
 - [Prettier](https://prettier.io/) – ensures that code is formatted in a readable way.
 - [ESLint](https://eslint.org/) — checks code for antipatterns as well as formatting.
 
-[Husky](https://typicode.github.io/husky) proceeds some checks before pushing a new commit. It ensures that: the project is building, there are no linter/formatting issues and the test suites are not broken.
-
 > If you use Visual Studio Code editor we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
