@@ -433,9 +433,21 @@ We’ve set up linters and formatters to help catch errors and enhance the overa
 - [Prettier](https://prettier.io/) – ensures that code is formatted in a readable way.
 - [ESLint](https://eslint.org/) — checks code for antipatterns as well as formatting.
 
+<<<<<<< HEAD
 [Husky](https://typicode.github.io/husky) proceeds with checks before pushing a new commit. It verifies that the project is building, there are no formatting or linter issues, and the test suites aren’t broken.
 
 > If you use Visual Studio Code editor, we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
+=======
+> If you use Visual Studio Code editor we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
+
+## Contribution
+
+ternoa-js SDK is an open-source project, feel free to interact and move forward with us.
+
+If you are interested in contributing to the Ternoa SDK read our [contributing guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
+
+If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
+>>>>>>> f42088bc49987dc08e31cfb0b3e33def0e92bc57
 
 ## Build And Run With Podman
 

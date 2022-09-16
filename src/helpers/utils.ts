@@ -1,0 +1,31 @@
+import BN from "bn.js"
+
+import { balanceToNumber } from "../blockchain"
+import { Errors } from "../constants"
+
+/**
+ * @name formatPermill
+ * @summary         Checks that percent is in range 0 to 100 and format to permill.
+ * @param percent   Number in range from 0 to 100 with max 4 decimals.
+ * @returns         The formated percent in permill format.
+ */
+export const formatPermill = (percent: number): number => {
+  if (percent > 100 || percent < 0) {
+    throw new Error(Errors.MUST_BE_PERCENTAGE)
+  }
+
+  return parseFloat(percent.toFixed(4)) * 10000
+}
+
+export const roundBalance = (amount: string) =>
+  Number(balanceToNumber(new BN(amount), { forceUnit: "-", withUnit: false }).split(",").join(""))
+
+export const removeURLSlash = (url: string) => {
+  if (url.length === 0) return url
+  const lastChar = url.charAt(url.length - 1)
+  if (lastChar === "/") {
+    return url.slice(0, -1)
+  } else {
+    return url
+  }
+}
