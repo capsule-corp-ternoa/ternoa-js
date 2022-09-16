@@ -1,5 +1,4 @@
-# 🤔 Introduction
-
+# 🤔 Introduction :
 Ternoa is a Decentralised, Open source, NFT-centric Layer 1 blockchain that is multi-chain by design and aims to provide a technical stack to build scalable and secure NFTs with native support for advanced features.
 
 For Builders By Builders :
