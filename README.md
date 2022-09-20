@@ -1,9 +1,8 @@
 # 🤔 Introduction :
-Ternoa is a Decentralised, Open source, NFT-centric Layer 1 blockchain that is multi-chain by design and aims to provide a technical stack to build scalable and secure NFTs with native support for advanced features.
 
 For Builders By Builders :
 
-NFTs native to our chain can be deployed using High-level programming languages and does not require smart contract functionality.
+NFTs native to our chain can be minted using High-level programming languages and does not require smart contract functionality.
 
 Privacy, A Fundamental Right :
 
@@ -15,16 +14,14 @@ Our protocol relies upon Nominated Proof-Of-Stake ensuring state-of-the-art ener
 
 Multi Chain By Design :
 
-Using mirroring, bridges, and native Polkadot functionality, Ternoa allows users to merge NFTs from all ecosystems in a single place and enjoy the benefits of our tech stack.
+Using native Polkadot functionality, Ternoa allows its users to enjoy the benefits of our tech stack.
 
 Native support for Advanced Features :
 
-With native support for Secret NFTs, Mirroring, Delegating and Lending, Combination and Fractionalization of NFTs, and much more, you might want to give it a try.
+With native support for Secret NFTs, Delegating and Lending, Transaction Batching and much more, you might want to give it a try.
 
 ##### Ecosystem 
-Our ecosystem of NFT based dApps keep growing day after day. Our SDK relies upon the most popular high level languages, allowing us to tap into the world’s largest pool of developers so the Transition period for that is Minimized.
-
-The Labs helps entrepreneurs to start building on Ternoa network with zero code experience courtesy of Our leading Developers who gather the best dev, product and strategy teams.
+Our ecosystem of NFT based dApps keep growing day after day. Our SDK relies upon the most popular high level languages, allowing us to tap into the world’s largest pool of developers so the Transition period is Minimized.
 
 ### Contribution Guidelines :
 
@@ -37,7 +34,11 @@ If you want to learn how to use the Ternoa SDK, the [test-dapp](https://github.c
 ### Error Reporting :
 If you encounter any errors along the way, technical or otherwise. Let us know and we'll deal with it swiftly. It helps us to further improve the experience for our users. We sincerely appreciate each one of you for all of your contribution.
 
-You could reach out to us either via any of our social handles, in github comments or by email. Make sure to document the error properly and keep it concise. Keeping in mind, the better you descibe it, the easier it is to deal with.
+* Open a discussion of type `General` in the [discussions section](https://github.com/capsule-corp-ternoa/ternoa-js/discussions) if you encounter any unexpected behaviour and keep it descriptive.
+* Open a Bug report using the [bug template](https://github.com/capsule-corp-ternoa/ternoa-js/issues/new/choose) if the bug persists.
+* If you can, suggest a fix in a pull request to solve this issue.
+
+Make sure to document the error properly keeping in mind, the better you describe it, the easier it is to deal with.
 
 # ⚙️ Ternoa SDK
 
@@ -73,7 +74,7 @@ npm i ternoa-js@1.2.0-rc0
 
 ## Quick Start
 
-### OnChain Events
+### On Chain Events
 **What are chain events ?**
 Events are objects containing decoded values (data) provided by the chain in the result of any transaction executed using the `submitTxBlocking` function. At least one of these two `ExtrinsicSuccessEvent` or `ExtrinsicFailedEvent` events are provided for any transaction depending on its execution. While `submitTxBlocking` provides the SDK handlers with the list of main OnChain events **BlockchainEvents**, we also allow you to filter this list to get the ones you need.
 
@@ -84,7 +85,7 @@ const balanceTransfertEvents = BlockchainEvents.findEvents(BalancesTransferEvent
 ```
 **Note** : BlockchainEvents is the result of `submitTxBlocking` function. It can be stored in a constant for example.
 
-To get a better understanding of OnChain Events, we already discussed the option to get the extrinsic events list. In case, you doo't need to handle manual signing of transactions, each Ternoa extrinsic features comes with two functions to execute a transaction and an easy one to directly get the required events list. See the example below :
+To get a better understanding of OnChain Events, we already discussed the option to get the extrinsic events list. In case, you don't need to handle manual signing of transactions, each Ternoa extrinsic features comes with two functions to execute a transaction and an easy one to directly get the required events list. See the example below :
 
 When the `balancesTransferTx` function creates an unsigned unsubmitted transaction hash, the `balancesTransfer` function signs and submits the transaction to provide the events list.
 
@@ -165,16 +166,23 @@ The function  `createNft` requires a few parameters like : `offchainData` aka me
 
 ```javascript
 // The easiest way to Create your first NFT
+import { initializeApi } from "ternoa-js"
 import { createNft } from "ternoa-js/nft"
-import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 
 const createMyFirstNFT = async () => {
   try {
-    // We initialize an API instance connected to the Alphanet chain
+    // We initialize the API instance
     await initializeApi()
 
+    ... //we asume your keyring is already created and provided with CAPS to support transactions fees.  
+
     // Here we create, sign and submit the NFT transaction with your keyring
-    await createNft("My first NFT", 10, undefined, false, keyring, WaitUntil.BlockInclusion)
+    const newNFTEvent = await createNft("My first NFT", 10, undefined, false, keyring, WaitUntil.BlockInclusion)
+
+    // Do something with the NFTCreatedEvent response
+    console.log(newNFTEvent);
+    ...
+
   } catch (e) {
     console.log(e)
   }
@@ -185,7 +193,7 @@ const createMyFirstNFT = async () => {
 
 The Basic way automated the 3 steps (Create -> Sign => Send) assosiated with creating an NFT making it much easier to use while not allowing any customisation.
 
-The manual way provides much more versatility but is significantly more complex.Let's say for example you can batch transactions together instead of executing them one by one (covered in example section). It'll be useful if you want to simplify the process of creating a large amount of NFTs and minimize repetitive tasks like sending and signing each transaction.
+The manual way provides much more versatility but is significantly more complex. Let's say for example you can batch transactions together instead of executing them one by one (covered in example section). It'll be useful if you want to simplify the process of creating a large amount of NFTs and minimize repetitive tasks like sending and signing each transaction.
 
 ##### STEP 1 - Create an NFT transaction
 First of all, instead of using the `createNft()` function, you will use `createNftTx()`. And instead of creating, signing and submiting the transaction and getting the returned events, it will just create an unsigned and unsubmitted Create-NFT Transaction Hash which will be valid for the next 5 minutes.
@@ -209,7 +217,7 @@ const create createNFTManually = async () => {
 ```
 
 ##### STEP 2 - Sign a transaction hash
-Now we have the `txHash`, we can move to the signing step. But before detailing it, it's good to know that "signing" can be directely embed in the submit function. It means that depending on the submit function you are using (see the last step below), signing your tx hash before submit might not be necessary. In case you sign manually the tx hash, you will receive a hex value of the signed transaction ready to be send. The `signTxHex()` function expect **a keyring** that will sign the transaction and the **transaction hash to be signed**.
+Now we have the `txHash`, we can move to the signing step. But before detailing it, it's good to know that "signing" can be directly embed in the submit function. It means that depending on the submit function you are using (see the last step below), signing your tx hash before submit might not be necessary. In case you sign manually the tx hash, you will receive a hex value of the signed transaction ready to be send. The `signTxHex()` function expect **a keyring** that will sign the transaction and the **transaction hash to be signed**.
 
 ```javascript
 const create createNFTManually = async () => {
@@ -291,7 +299,7 @@ const create createNFTManually = async () => {
 
 **Ternoa Token Standardization** : Awaiting finalised TRC versions (Ternoa's Request for Comment)
 
-## API Architecture : 
+## Code Architecture : 
 
 Ternoa SDK handles the main features proposed by the Ternoa chain. It allows you to run every transaction from the chain pallet, make a query like asking for some constant's storage. We also provide you with a bunch of helpers and utility functions to help you enjoy the full experience.
 
@@ -312,7 +320,7 @@ For those who are familiar with Polkadot, you will quickly recognize the design 
 + _Utilities_ when available provides some additional usefull functions you can directly import in your project.
 
 #### Response format
-As it makes sense for us to provide you the easiest tools to build on the Ternoa chain, we also try to simplify the the response format of our functions as much as we can. Depending on if you want to get things done or if you go with the full customizable way and handle it yourself, we invite you to choose the right function : Events and features data will be provided directly on some function while only transaction hash hex will be returned on others.
+As it makes sense for us to provide you the easiest tools to build on the Ternoa chain, we also try to simplify the response format of our functions as much as we can. Depending on if you want to get things done or if you go with the full customizable way and handle it yourself, we invite you to choose the right function : Events and features data will be provided directly on some function while only transaction hash hex will be returned on others.
 
 ## Documentation :
 
@@ -322,72 +330,6 @@ Discover our end-to-end test Dapp [here](https://e2e.ternoa.network/) to test ou
 
 Here's the Github repository if anyones wondering -> https://github.com/capsule-corp-ternoa/ternoa-js.
 
-## Cookbook examples :
-
-If you’re looking for a quick overview of the Ternoa SDK, its usage, explications, best practices, or just a simple how-to guide on how to create your first NFT, we recommend you take a look at the example section of [cookbook/basic-usage](https://github.com/capsule-corp-ternoa/ternoa-js/tree/1.1.0-basicNFTs-collections/examples/cookbook/basic-usage)
-
-### Utility Batch/BatchAll :
-`batchTxHex` or `batchAllTxHex` functions can be implemented into the execution process of a transaction. Both transactions do the exact same and accpect the same parameters. The difference however is that with `batchTxHex()` our transactions are executed one by one until one fails and terminates that action mid-batch. With `batchAllTxHex` it'll first try to execute them all and if any one of them fail, it'll revert the successful ones and the state of the chain will not change.
-
-The general rule of thumb is to always use the **batchAll transaction**.
-
-`batchTx` or `batchAllTx` functions also exist and return both the tx hash but not in hex format. They both work exactly the same.
-
-As an example, this can be usefull if you want to create a large collection of NFTs and Instead of creating all of them one by one, it's recommended to group them all and execute them as one transaction. This allows you to save on transaction fees and most importantly to save your time.
-
-### Let's assume we are trying to batch a mint of NFT
-In this example we are going to run the `batchAllTxHex` because we want the process to stop and revert in case of error and an hex format as result, but `batchTxHex`, `batchTx` or `batchAllTx` could be used with the exact same code below.
-
-```javascript
-export const nftsBatchMintingHex = async (nftMetadata, quantity) => {
-  // nftMetaData represents here the offChain datas of the NFT. 
-  // quantity is the number of NFT to be minted
-  try{
-    // First we create the NFT
-    const nftTx = await createNftTx(nftMetadata, 0, undefined, false)
-    // Second we add all the NFT in an Array
-    const nftsTxs = new Array(Number(quantity)).fill(nftTx)
-    // We batch the transaction with the batchAllTxHex function
-    return await batchAllTxHex(nftsTxs)
-  }catch(error){
-    console.log(error)
-  }
-}
-```
-### IPFS Upload
-IPFS is one of the solutions we recommand to upload the NFT metadatas and to provide them as the offchainData of your feature. The full IPFS Upload will be soon added to the ternoa-js SDK. For now, we invite you to look at [this](https://github.com/capsule-corp-ternoa/ternoa-js/discussions/62) github discussions or to this [Dapp](https://github.com/capsule-corp-ternoa/ternoa-workshop/blob/main/helpers/ipfs.ts) we used for a workshop before.
-
-Expected Format syntax :
-
-**Ternoa basic NFT Off-Chain Metadata - object**
-```bash
-- title: Title of the NFT - string
-- description: Description of the NFT - string
-- image: IPFS hash of the NFT's asset - string
-- properties: An object containing NFT's properties and at least a Media object - object
-	- media: An object containing NFT's asset properties - object (see below)
-
-media - object:
-- hash : IPFS hash of the NFT asset - string
-- type: Type of media (file format) - string
-- size: size of the encrypted media - string
-```
-
-**Ternoa Collection Off-Chain Metadata - object**
-
-```bash
-- banner_image: IPFS hash of the collection's banner image - string
-- name: Name of the collection - string
-- description: Description of the collection - string
-- profile_image: IPFS hash of the avatar/profile image assigned to the collection - string
-```
-
-**Ternoa Marketplace Off-Chain Metadata - object**
-
-```bash
-- name: Name of the marketplace - string
-- logo_uri: Logo URI of the marketplace - string
-```
 
 ### Connect wallet
 
@@ -423,31 +365,6 @@ To initiate the test suites, run:
 ```bash
 npm run test
 ```
-
-### Code Style
-
-This project uses Industry standard ESLint and Typescript rules to ensure good coding practices and readability.
-
-We’ve set up linters and formatters to help catch errors and enhance the overall experience:
-
-- [Prettier](https://prettier.io/) – ensures that code is formatted in a readable way.
-- [ESLint](https://eslint.org/) — checks code for antipatterns as well as formatting.
-
-<<<<<<< HEAD
-[Husky](https://typicode.github.io/husky) proceeds with checks before pushing a new commit. It verifies that the project is building, there are no formatting or linter issues, and the test suites aren’t broken.
-
-> If you use Visual Studio Code editor, we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
-=======
-> If you use Visual Studio Code editor we suggest you to install [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
-
-## Contribution
-
-ternoa-js SDK is an open-source project, feel free to interact and move forward with us.
-
-If you are interested in contributing to the Ternoa SDK read our [contributing guidelines](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/CONTRIBUTING.md).
-
-If you want to learn how to use Ternoa SDK, the [ternoa-js-test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) is the perfect entry door. You can start by contributing there to familiarise yourself with our architecture.
->>>>>>> f42088bc49987dc08e31cfb0b3e33def0e92bc57
 
 ## Build And Run With Podman
 
