@@ -1,4 +1,5 @@
 export enum txPallets {
+  assets = "assets",
   auction = "auction",
   marketplace = "marketplace",
   nft = "nft",
