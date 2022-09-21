@@ -1,24 +1,18 @@
 # 🤔 Introduction :
 
+Ternoa is a Decentralised, Open source, NFT-centric Layer 1 blockchain that is multi-chain by design and aims to provide a technical stack to build scalable and secure NFTs with native support for advanced features.
+
 For Builders By Builders :
 
 NFTs native to our chain can be minted using High-level programming languages and doesn't require smart contract functionality.
 
-Privacy, A Fundamental Right :
-
-Ternoa combines the decentralization aspect with native encryption using a Trusted execution environment, turning NFTs into secure, private Data containers, allowing users to retain "True Ownership" of Digital Data.
-
-Sustainability is Key :
-
-Our protocol relies upon Nominated Proof-Of-Stake ensuring state-of-the-art energy consumption. Sustainability is one of the key aspects on which mass adoption of blockchain tech depends.
-
-Multi Chain By Design :
-
-Using native Polkadot functionality, Ternoa allows its users to enjoy the benefits of our tech stack.
-
 Native support for Advanced Features :
 
-With native support for Secret NFTs, Delegating and Lending, Transaction Batching and much more, you might want to try.
+With native support for Secret NFTs, Delegating and Lending, Transaction Batching and much more, you might want to give it a try.
+
+Ecosystem :
+
+Our ecosystem of NFT-based Dapps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
 
 ##### Ecosystem 
 Our ecosystem of NFT-based Dapps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
@@ -343,10 +337,6 @@ Discover our end-to-end test Dapp [here](https://e2e.ternoa.network/) to test ou
 
 Here's the Github repository -> https://github.com/capsule-corp-ternoa/ternoa-js.
 
-
-### Connect wallet
-
-Coming soon to a Ternoa chain near you 👀
 
 ## SDK Development :
 
