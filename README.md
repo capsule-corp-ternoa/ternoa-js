@@ -14,9 +14,6 @@ Ecosystem :
 
 Our ecosystem of NFT-based Dapps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
 
-##### Ecosystem 
-Our ecosystem of NFT-based Dapps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
-
 ### Contribution Guidelines :
 
 As Ternoa-js is an open-source SDK, feel free to interact with the tools and libraries, log issues, create pull requests or leave feedback. We welcome and greatly appreciate your contribution.
