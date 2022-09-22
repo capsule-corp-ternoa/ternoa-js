@@ -15,6 +15,7 @@ async function createPackageFile() {
     typesVersions: {
       "*": {
         account: ["./account/index.d.ts"],
+        assets: ["./assets/index.d.ts"],
         balance: ["./balance/index.d.ts"],
         blockchain: ["./blockchain/index.d.ts"],
         nft: ["./nft/index.d.ts"],

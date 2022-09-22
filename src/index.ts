@@ -1,4 +1,5 @@
 export * from "./account"
+export * from "./assets"
 export * from "./balance"
 export * from "./blockchain"
 export * from "./nft"
@@ -6,6 +7,7 @@ export * from "./marketplace"
 export * from "./events"
 
 export * as accountModule from "./account"
+export * as assetsModule from "./assets"
 export * as balanceModule from "./balance"
 export * as Blockchain from "./blockchain"
 export * as Nft from "./nft"
