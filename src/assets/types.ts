@@ -1,4 +1,4 @@
-export type AssetBalanceType = {
+export type AccountAssetDataType = {
   balance: string
   isFrozen: boolean
   reason: any

@@ -1,6 +1,6 @@
 import { bnToBn } from "@polkadot/util"
 
-import { AssetBalanceType } from "./types"
+import { AccountAssetDataType } from "./types"
 
 import { chainQuery, txPallets } from "../constants"
 import { BalanceType, query } from "../blockchain"
@@ -9,25 +9,25 @@ import { BalanceType, query } from "../blockchain"
  * @name getTotalAssetBalance
  * @summary           The holdings of a specific account for a specific asset.
  * @param assetId     The ID of the asset.
- * @param AccountId   Public address of the account to get balances.
+ * @param address   Public address of the account to get balances.
  * @returns           The holdings/balance information of the account : balance, isFrozen: boolean, reason, extra
  */
-export const getTotalAssetBalance = async (assetId: number, AccountId: string): Promise<AssetBalanceType> => {
-  const balances = (
-    await query(txPallets.assets, chainQuery.account, [assetId, AccountId])
-  ).toJSON() as AssetBalanceType
-  return balances
+export const getAccountAssetData = async (assetId: number, address: string): Promise<AccountAssetDataType | null> => {
+  const accountData = (
+    await query(txPallets.assets, chainQuery.account, [assetId, address])
+  ).toJSON() as AccountAssetDataType
+  return accountData
 }
 
 /**
  * @name getAssetBalance
  * @summary           Get the balance of an account for a specific asset.
  * @param assetId     The ID of the asset.
- * @param AccountId   Public address of the account to get balance.
+ * @param address   Public address of the account to get balance.
  * @returns           The balance of the account.
  */
-export const getAssetBalance = async (assetId: number, AccountId: string): Promise<BalanceType | null> => {
-  const data = await getTotalAssetBalance(assetId, AccountId)
+export const getAccountAssetBalance = async (assetId: number, address: string): Promise<BalanceType | null> => {
+  const data = await getAccountAssetData(assetId, address)
   const balance = data ? bnToBn(data.balance) : null
   return balance
 }
