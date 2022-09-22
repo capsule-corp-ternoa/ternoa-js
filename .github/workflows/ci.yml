@@ -1,4 +1,4 @@
-name: PR
+name: CI
 on:
   pull_request:
     branches:
@@ -6,24 +6,7 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm ci --ignore-scripts
-      - name: Unit Tests
-        run: |
-          BLOCKCHAIN_ENDPOINT=wss://alphanet.ternoa.com SEED_TEST_FUNDS=${{secrets.SEED_TEST_FUNDS}} SEED_TEST_FUNDS_PUBLIC=${{secrets.SEED_TEST_FUNDS_PUBLIC}} npm run test
-
-  pr:
-    needs: test
+  ci:
     strategy:
       matrix:
         step: ["lint", "format", "docs"]
