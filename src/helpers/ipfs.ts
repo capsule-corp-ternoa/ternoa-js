@@ -1,5 +1,6 @@
 import axios from "axios"
 import mime from "mime-types"
+import FormData from "form-data"
 
 export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
 
