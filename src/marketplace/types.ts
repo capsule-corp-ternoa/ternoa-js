@@ -43,5 +43,5 @@ export interface IListedNft {
 
 export interface IMarketplaceMetadata {
   name: string
-  logoFile: File | null
+  logoFile: File
 }

@@ -35,7 +35,7 @@ export const formatMarketplaceFee = async (fee: CommissionFeeType | ListingFeeTy
  */
 export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata, ipfsGateway?: string, apiKey?: string) => {
   const { name, logoFile } = data
-  if (logoFile === null) throw new Error(Errors.IPFS_FILE_NULL_ON_UPLOAD)
+  if (!logoFile) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
   const { hash: logoFileHash } = await ipfsFileUpload(logoFile, ipfsGateway, apiKey)
   const marketplaceMetadata = {
     name,

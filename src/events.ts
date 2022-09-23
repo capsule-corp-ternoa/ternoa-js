@@ -6,6 +6,9 @@ import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
 import { roundBalance } from "./helpers/utils"
 
 export enum EventType {
+  //Assets
+  AssetTransferred = "assets.Transferred",
+
   // Balances
   BalancesWithdraw = "balances.Withdraw",
   BalancesDeposit = "balances.Deposit",
@@ -69,6 +72,9 @@ export class BlockchainEvent {
   static fromEvent(event: Event): BlockchainEvent {
     const name = event.section + "." + event.method
     switch (name) {
+      // Assets
+      case EventType.AssetTransferred:
+        return new AssetTransferredEvent(event)
       // Balances
       case EventType.BalancesWithdraw:
         return new BalancesWithdrawEvent(event)
@@ -136,6 +142,32 @@ export class BlockchainEvent {
     }
 
     return new UnknownEvent(event)
+  }
+}
+
+/**
+ * This class represents the on-chain AssetTransferredEvent event.
+ */
+export class AssetTransferredEvent extends BlockchainEvent {
+  assetId: number
+  from: string // AccountId32
+  to: string // AccountId32
+  amount: string
+  amountRounded: number
+
+  /**
+   * Construct the data object from the AssetTransferredEvent event
+   * @param event The AssetTransferredEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.AssetTransferred)
+    const [assetId, from, to, amount] = event.data
+
+    this.assetId = Number.parseInt(assetId.toString())
+    this.from = from.toString()
+    this.to = to.toString()
+    this.amount = bnToBn(amount.toString()).toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 

@@ -15,11 +15,14 @@ async function createPackageFile() {
     typesVersions: {
       "*": {
         account: ["./account/index.d.ts"],
+        assets: ["./assets/index.d.ts"],
         balance: ["./balance/index.d.ts"],
         blockchain: ["./blockchain/index.d.ts"],
+        helpers: ["./helpers/index.d.ts"],
         nft: ["./nft/index.d.ts"],
         marketplace: ["./marketplace/index.d.ts"],
-        constants: ["./constants/index.d.ts"],
+        events: ["./events.d.ts"],
+        constants: ["./constants.d.ts"],
       },
     },
   }
