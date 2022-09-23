@@ -146,6 +146,7 @@ In order to make the returned event data useful, we provide both the native and 
 
 The events below are the Events handled in the Ternoa SDK sorted by categories
 
+- [Assets](https://github.com/capsule-corp-ternoa/ternoa-js/wiki/4-Events#assets)
 - [Balances](https://github.com/capsule-corp-ternoa/ternoa-js/wiki/4-Events#balances)
 - [Treasury](https://github.com/capsule-corp-ternoa/ternoa-js/wiki/4-Events#treasury)
 - [NFT](https://github.com/capsule-corp-ternoa/ternoa-js/wiki/4-Events#nft)
@@ -162,6 +163,7 @@ The main handlers are as follows:
 
 - blockchain: Handles the Core blockchain functions and the API brain initializes the API, execute transactions, query datas, batch transactions and much more.
 - account: the functions that allows you to generate a new seed and a keyring.
+- assets: the functions to deal with fungible assets that are meant for use within a dApp.
 - balance: the Balance pallet with its extrinsics, query and storage.
 - nft: the NFT pallet with its extrinsics, query and storage.
 - marketplace: the Marketplace pallet with its extrinsics, query and storage.
