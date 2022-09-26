@@ -1,3 +1,4 @@
+import BN from "bn.js"
 import { Event } from "@polkadot/types/interfaces/system"
 import { bnToBn, hexToString } from "@polkadot/util"
 
@@ -831,8 +832,8 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
       error: string
     }
   }
-  errorType?: string
-  details?: string
+  errorType: string
+  details: string
   dispatchInfo: {
     weigth: string
     class: string
@@ -844,7 +845,7 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.ExtrinsicFailed)
-    const [dispatchError, errorType, details, dispatchInfo] = event.data
+    const [dispatchError, dispatchInfo] = event.data
 
     this.dispatchError = dispatchError.toJSON() as {
       module: {
@@ -852,8 +853,13 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
         error: string
       }
     }
-    this.errorType = errorType?.toString()
-    this.details = details?.toString()
+    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const { docs, name } = dispatchError.registry.findMetaError({
+      index: new BN(this.dispatchError.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.details = docs.join(" ")
     this.dispatchInfo = dispatchInfo?.toJSON() as {
       weigth: string
       class: string
@@ -940,11 +946,11 @@ export class BlockchainEvents {
   }
 
   findEventOrThrow<T extends BlockchainEvent>(ctor: new (...args: any[]) => T): T {
-    const failed_event = this.inner.find((event) => event.type == EventType.ExtrinsicFailed)
+    const failed_event = this.inner.find((event) => event.type == EventType.ExtrinsicFailed) as ExtrinsicFailedEvent
     const target_event = this.inner.find((event) => event instanceof ctor)
 
     if (failed_event) {
-      throw new Error(Errors.EXTRINSIC_FAILED)
+      throw new Error(`${Errors.EXTRINSIC_FAILED} : ${failed_event.errorType} - ${failed_event.details}`)
     }
 
     if (target_event == undefined) {
