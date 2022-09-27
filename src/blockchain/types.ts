@@ -1,5 +1,8 @@
 import BN from "bn.js"
 
+import { BlockchainEvents } from "../events"
+import { BlockInfo } from "./utils"
+
 export interface IFormatBalanceOptions {
   /**
    * @description The number of decimals.
@@ -25,6 +28,11 @@ export interface IFormatBalanceOptions {
    * @description Token Unit.
    */
   unit?: string
+}
+
+export type SubmitTxBlockingType = {
+  blockInfo: BlockInfo
+  events: BlockchainEvents
 }
 
 export type TransactionHashType = `0x${string}`

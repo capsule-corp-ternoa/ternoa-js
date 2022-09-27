@@ -67,7 +67,7 @@ export const createAuction = async (
   waitUntil: WaitUntil,
 ): Promise<AuctionCreatedEvent> => {
   const tx = await createAuctionTx(nftId, marketplaceId, startBlock, endBlock, startPrice, buyItPrice)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AuctionCreatedEvent)
 }
 
@@ -95,7 +95,7 @@ export const cancelAuction = async (
   waitUntil: WaitUntil,
 ): Promise<AuctionCancelledEvent> => {
   const tx = await cancelAuctionTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AuctionCancelledEvent)
 }
 
@@ -123,7 +123,7 @@ export const endAuction = async (
   waitUntil: WaitUntil,
 ): Promise<AuctionCompletedEvent> => {
   const tx = await endAuctionTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AuctionCompletedEvent)
 }
 
@@ -155,7 +155,7 @@ export const addBid = async (
   waitUntil: WaitUntil,
 ): Promise<BidAddedEvent> => {
   const tx = await addBidTx(nftId, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BidAddedEvent)
 }
 
@@ -183,7 +183,7 @@ export const removeBid = async (
   waitUntil: WaitUntil,
 ): Promise<BidRemovedEvent> => {
   const tx = await removeBidTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BidRemovedEvent)
 }
 
@@ -211,7 +211,7 @@ export const buyItNow = async (
   waitUntil: WaitUntil,
 ): Promise<AuctionCompletedEvent> => {
   const tx = await buyItNowTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AuctionCompletedEvent)
 }
 
@@ -233,6 +233,6 @@ export const claimTx = async (): Promise<TransactionHashType> => {
  */
 export const claim = async (keyring: IKeyringPair, waitUntil: WaitUntil): Promise<BalanceClaimedEvent> => {
   const tx = await claimTx()
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalanceClaimedEvent)
 }
