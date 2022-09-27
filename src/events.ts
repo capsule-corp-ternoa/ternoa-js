@@ -1342,14 +1342,14 @@ export class ItemCompletedEvent extends BlockchainEvent {
  */
 export class BatchInterruptedEvent extends BlockchainEvent {
   index: number
-  error: {
+  dispatchError: {
     module: {
       index: number
       error: string
     }
   }
-  errorType?: string
-  details?: string
+  errorType: string
+  details: string
 
   /**
    * Construct the data object from the BatchInterruptedEvent event
@@ -1357,17 +1357,22 @@ export class BatchInterruptedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BatchInterrupted)
-    const [index, error, errorType, details] = event.data
+    const [index, dispatchError] = event.data
 
     this.index = Number.parseInt(index.toString())
-    this.error = error.toJSON() as {
+    this.dispatchError = dispatchError.toJSON() as {
       module: {
         index: number
         error: string
       }
     }
-    this.errorType = errorType?.toString()
-    this.details = details?.toString()
+    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const { docs, name } = dispatchError.registry.findMetaError({
+      index: new BN(this.dispatchError.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.details = docs.join(" ")
   }
 }
 
