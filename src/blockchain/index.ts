@@ -13,8 +13,8 @@ import { BlockchainEvent, BlockchainEvents } from "../events"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getNftMintFee } from "../nft"
 
-import { IFormatBalanceOptions, TransactionHashType } from "./types"
-import { ConditionalVariable } from "./utils"
+import { IFormatBalanceOptions, SubmitTxBlockingType, TransactionHashType } from "./types"
+import { BlockInfo, ConditionalVariable } from "./utils"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
@@ -426,11 +426,14 @@ export const submitTxBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
-): Promise<BlockchainEvents> => {
-  const [conVar, events] = await submitTxNonBlocking(tx, waitUntil, keyring)
+): Promise<SubmitTxBlockingType> => {
+  const [conVar, events, blockInfo] = await submitTxNonBlocking(tx, waitUntil, keyring)
   await conVar.wait()
 
-  return events
+  return {
+    blockInfo,
+    events,
+  }
 }
 
 /**
@@ -445,27 +448,32 @@ export const submitTxNonBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
-): Promise<[ConditionalVariable, BlockchainEvents]> => {
+): Promise<[ConditionalVariable, BlockchainEvents, BlockInfo]> => {
   const conVar = new ConditionalVariable(500)
-  const events: BlockchainEvents = new BlockchainEvents([])
+  const chainEvents: BlockchainEvents = new BlockchainEvents([])
+  const blockInfo = new BlockInfo()
 
   if (keyring) {
     tx = await signTxHex(keyring, tx)
   }
 
-  const callback = (result: ISubmittableResult) => {
-    if (
-      (result.status.isFinalized && waitUntil == WaitUntil.BlockFinalization) ||
-      (result.status.isInBlock && waitUntil == WaitUntil.BlockInclusion)
-    ) {
-      events.inner = result.events.map((eventRecord) => BlockchainEvent.fromEvent(eventRecord.event))
+  const callback = async ({ events, status }: ISubmittableResult) => {
+    const isWaitingFinalization = status.isFinalized && waitUntil == WaitUntil.BlockFinalization
+    const isWaitingInclusion = status.isInBlock && waitUntil == WaitUntil.BlockInclusion
+
+    if (isWaitingInclusion || isWaitingFinalization) {
+      chainEvents.inner = events.map((eventRecord) => BlockchainEvent.fromEvent(eventRecord.event))
+      const blockHash = isWaitingFinalization ? status.asFinalized.toString() : status.asInBlock.toString()
+      const blockData = await api.rpc.chain.getBlock(blockHash)
+      blockInfo.blockHash = blockHash
+      blockInfo.block = blockData.block
       conVar.notify()
     }
   }
 
   await submitTxHex(tx, callback)
 
-  return [conVar, events]
+  return [conVar, chainEvents, blockInfo]
 }
 
 export * from "./types"

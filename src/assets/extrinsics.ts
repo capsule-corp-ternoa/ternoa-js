@@ -36,6 +36,6 @@ export const assetTransfer = async (
   waitUntil: WaitUntil,
 ): Promise<AssetTransferredEvent> => {
   const tx = await assetTransferTx(id, to, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AssetTransferredEvent)
 }

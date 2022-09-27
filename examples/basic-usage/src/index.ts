@@ -1,4 +1,12 @@
-import { NFTCreatedEvent, NFTListedEvent, batchAllTxHex, initializeApi, signTxHex, submitTxBlocking, safeDisconnect } from "ternoa-js"
+import {
+  NFTCreatedEvent,
+  NFTListedEvent,
+  batchAllTxHex,
+  initializeApi,
+  signTxHex,
+  submitTxBlocking,
+  safeDisconnect,
+} from "ternoa-js"
 
 import { createCollection, createNftTx } from "ternoa-js/nft/index.js"
 import { buyNft, createMarketplace, listNftTx } from "ternoa-js/marketplace/index.js"
@@ -131,7 +139,7 @@ async function main() {
   // how our API is quite convenient. Instead of manually searching our events of interest we can just
   // call the findEvents call and pass the type of the event that we are looking for. The result of this
   // function will be a list of those events and they will have the same type that we are expecting.
-  const dogs = allEvents.findEvents(NFTCreatedEvent)
+  const dogs = allEvents.events.findEvents(NFTCreatedEvent)
 
   // Here we print out the events that we got from creating our dog NFTs. This is just for debug purposes.
   dogs.forEach((dog) => console.log(dog))
@@ -209,7 +217,7 @@ async function main() {
   //
   // If not event is found it would mean that either we are looking for the wrong event or
   // something went wrong.
-  const listedDogs = allEvents2.findEvents(NFTListedEvent)
+  const listedDogs = allEvents2.events.findEvents(NFTListedEvent)
 
   // Here we print out the events that we got from listing our dog NFTs for sale. This is just for debug purposes.
   listedDogs.forEach((listedDog) => console.log(listedDog))
@@ -245,7 +253,7 @@ async function main() {
   // but this is explored in other exercises.
   //
 
-  await safeDisconnect();
+  await safeDisconnect()
 
   process.exit()
 }

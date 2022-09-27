@@ -113,7 +113,7 @@ Events are objects containing decoded values (data) provided by the chain in the
 An example to filter only the events list of a balance transfer transaction:
 
 ```javascript
-const balanceTransfertEvents = BlockchainEvents.findEvents(BalancesTransferEvent)
+const balanceTransfertEvents = BlockchainEvents.events.findEvents(BalancesTransferEvent)
 ```
 
 **Note**: BlockchainEvents is the result of `submitTxBlocking` function. It can be stored in a constant for example.
@@ -357,7 +357,7 @@ const create createNFTManually = async () => {
     const submitTxHash = await submitTxBlocking(signTxHash, WaitUntil.BlockInclusion)
 
     // Do something with the events recieved.
-    console.log(submitTxHash.findEvents(NFTCreatedEvent));
+    console.log(submitTxHash.events.findEvents(NFTCreatedEvent));
     ...
   } catch (e) {
     console.log(e)

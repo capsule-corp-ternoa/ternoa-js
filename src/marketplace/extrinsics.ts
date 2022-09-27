@@ -42,7 +42,7 @@ export const createMarketplace = async (
   waitUntil: WaitUntil,
 ): Promise<MarketplaceCreatedEvent> => {
   const tx = await createMarketplaceTx(kind)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceCreatedEvent)
 }
 
@@ -114,7 +114,7 @@ export const setMarketplaceConfiguration = async (
   waitUntil: WaitUntil,
 ): Promise<MarketplaceConfigSetEvent> => {
   const tx = await setMarketplaceConfigurationTx(id, commissionFee, listingFee, accountList, offchainData)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceConfigSetEvent)
 }
 
@@ -145,7 +145,7 @@ export const setMarketplaceOwner = async (
   waitUntil: WaitUntil,
 ): Promise<MarketplaceOwnerSetEvent> => {
   const tx = await setMarketplaceOwnerTx(id, recipient)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceOwnerSetEvent)
 }
 
@@ -174,7 +174,7 @@ export const setMarketplaceKind = async (
   waitUntil: WaitUntil,
 ): Promise<MarketplaceKindSetEvent> => {
   const tx = await setMarketplaceKindTx(id, kind)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceKindSetEvent)
 }
 
@@ -213,7 +213,7 @@ export const listNft = async (
   waitUntil: WaitUntil,
 ): Promise<NFTListedEvent> => {
   const tx = await listNftTx(nft_id, marketplace_id, price)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTListedEvent)
 }
 
@@ -241,7 +241,7 @@ export const unlistNft = async (
   waitUntil: WaitUntil,
 ): Promise<NFTUnlistedEvent> => {
   const tx = await unlistNftTx(nft_id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTUnlistedEvent)
 }
 
@@ -265,7 +265,7 @@ export const buyNftTx = async (nft_id: number): Promise<TransactionHashType> => 
  */
 export const buyNft = async (nft_id: number, keyring: IKeyringPair, waitUntil: WaitUntil): Promise<NFTSoldEvent> => {
   const tx = await buyNftTx(nft_id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTSoldEvent)
 }
 
@@ -294,6 +294,6 @@ export const setMarketplaceMintFee = async (
   waitUntil: WaitUntil,
 ): Promise<MarketplaceMintFeeSetEvent> => {
   const tx = await setMarketplaceMintFeeTx(fee)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceMintFeeSetEvent)
 }
