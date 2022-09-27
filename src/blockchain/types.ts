@@ -2,6 +2,9 @@ import { BatchInterruptedEvent, BlockchainEvents, ExtrinsicFailedEvent, ItemFail
 
 import { BlockInfo } from "./utils"
 
+import { BlockchainEvents } from "../events"
+import { BlockInfo } from "./utils"
+
 export interface IFormatBalanceOptions {
   /**
    * @description The number of decimals.

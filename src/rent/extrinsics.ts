@@ -85,7 +85,7 @@ export const createContract = async (
     renterCancellationFee,
     renteeCancellationFee,
   )
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractCreatedEvent)
 }
 
@@ -113,7 +113,7 @@ export const revokeContract = async (
   waitUntil: WaitUntil,
 ): Promise<ContractRevokedEvent> => {
   const tx = await revokeContractTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractRevokedEvent)
 }
 
@@ -141,7 +141,7 @@ export const rent = async (
   waitUntil: WaitUntil,
 ): Promise<ContractStartedEvent | ContractOfferCreatedEvent> => {
   const tx = await rentTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   const startedEvent = events.findEvent(ContractStartedEvent)
   if (startedEvent) return startedEvent
   return events.findEventOrThrow(ContractOfferCreatedEvent)
@@ -171,7 +171,7 @@ export const retractRentOffer = async (
   waitUntil: WaitUntil,
 ): Promise<ContractOfferRetractedEvent> => {
   const tx = await retractRentOfferTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractOfferRetractedEvent)
 }
 
@@ -202,7 +202,7 @@ export const acceptRentOffer = async (
   waitUntil: WaitUntil,
 ): Promise<ContractStartedEvent> => {
   const tx = await acceptRentOfferTx(nftId, rentee)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractStartedEvent)
 }
 
@@ -242,7 +242,7 @@ export const changeSubscriptionTerms = async (
   waitUntil: WaitUntil,
 ): Promise<ContractSubscriptionTermsChangedEvent> => {
   const tx = await changeSubscriptionTermsTx(nftId, duration, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractSubscriptionTermsChangedEvent)
 }
 
@@ -270,6 +270,6 @@ export const acceptSubscriptionTerms = async (
   waitUntil: WaitUntil,
 ): Promise<ContractSubscriptionTermsAcceptedEvent> => {
   const tx = await acceptSubscriptionTermsTx(nftId)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractSubscriptionTermsAcceptedEvent)
 }
