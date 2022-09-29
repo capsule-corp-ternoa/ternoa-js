@@ -19,6 +19,7 @@ import {
   getTxAdditionalFee,
   getTxFees,
   signTxHex,
+  forceBatchTxHex,
 } from "."
 import { generateSeed, getKeyringFromSeed } from "../account"
 import { chainConstants, chainQuery, Errors, txActions, txPallets, WaitUntil } from "../constants"
@@ -66,6 +67,14 @@ it("batchAllTxHex should return a correct batchAll transaction hash hex", async 
   const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [destAccount.address, "2000000000000000"])
   const batchAllTx = await batchAllTxHex([txHex1, txHex2])
   expect(isHex(batchAllTx)).toBe(true)
+})
+
+it("forceBatchTxHex should return a correct batch transaction hash hex", async () => {
+  const { dest: destAccount } = await createTestPairs()
+  const txHex1 = await createTxHex(txPallets.balances, txActions.transfer, [destAccount.address, "1000000000000000"])
+  const txHex2 = await createTxHex(txPallets.balances, txActions.transfer, [destAccount.address, "2000000000000000"])
+  const forceBatchTx = await forceBatchTxHex([txHex1, txHex2])
+  expect(isHex(forceBatchTx)).toBe(true)
 })
 
 it("submitTxBlocking should contain BalancesTransfer and ExtrinsicSuccess events on a succesful balance transfer transaction", async () => {
