@@ -66,8 +66,10 @@ export enum EventType {
   BalanceClaimed = "auction.BalanceClaimed",
 
   // Utility
+  ItemFailed = "utility.ItemFailed",
   ItemCompleted = "utility.ItemCompleted",
   BatchInterrupted = "utility.BatchInterrupted",
+  BatchCompletedWithErrors = "utility.BatchCompletedWithErrors",
   BatchCompleted = "utility.BatchCompleted",
 
   // System
@@ -187,8 +189,12 @@ export class BlockchainEvent {
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
+      case EventType.ItemFailed:
+        return new ItemFailedEvent(event)
       case EventType.BatchInterrupted:
         return new BatchInterruptedEvent(event)
+      case EventType.BatchCompletedWithErrors:
+        return new BatchCompletedWithErrorsEvent(event)
       case EventType.BatchCompleted:
         return new BatchCompletedEvent(event)
       // System
@@ -1337,6 +1343,42 @@ export class ItemCompletedEvent extends BlockchainEvent {
 }
 
 /**
+ * This class represents the on-chain ItemFailedEvent event,
+ * when a single item within a Batch of dispatches has completed with error. .
+ */
+export class ItemFailedEvent extends BlockchainEvent {
+  error: {
+    module: {
+      index: number
+      error: string
+    }
+  }
+  errorType: string
+  errorDetails: string
+  /**
+   * Construct the data object from the ItemFailedEvent event
+   * @param event The ItemFailedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ItemFailed)
+    const [error] = event.data
+    this.error = error.toJSON() as {
+      module: {
+        index: number
+        error: string
+      }
+    }
+    const errorNumber = parseInt(this.error.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const { docs, name } = error.registry.findMetaError({
+      index: new BN(this.error.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.errorDetails = docs.join(" ")
+  }
+}
+
+/**
  * This class represents the on-chain BatchInterruptedEvent event,
  * when a batch of dispatches did not complete fully.
  */
@@ -1368,6 +1410,21 @@ export class BatchInterruptedEvent extends BlockchainEvent {
     }
     this.errorType = errorType?.toString()
     this.details = details?.toString()
+  }
+}
+
+/**
+ * This class represents the on-chain BatchCompletedWithErrorsEvent event,
+ * when a batch of dispatches completed but has errors.
+ */
+export class BatchCompletedWithErrorsEvent extends BlockchainEvent {
+  /**
+   * Construct the data object from the BatchCompletedWithErrorsEvent event
+   * @param event The BatchCompletedWithErrorsEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BatchCompletedWithErrors)
+    // This is an empty event.
   }
 }
 

@@ -17,6 +17,7 @@ export enum txActions {
   transferKeepAlive = "transferKeepAlive",
   batch = "batch",
   batchAll = "batchAll",
+  forceBatch = "forceBatch",
 
   // nft
   createNft = "createNft",

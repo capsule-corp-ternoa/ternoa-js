@@ -344,6 +344,31 @@ export const batchAllTxHex = async (txHexes: TransactionHashType[]): Promise<Tra
 }
 
 /**
+ * @name forceBatchTx
+ * @summary         Create a forceBatch transaction of dispatch calls.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Submittable extrinsic unsigned
+ */
+export const forceBatchTx = async (
+  txHexes: TransactionHashType[],
+): Promise<SubmittableExtrinsic<"promise", ISubmittableResult>> => {
+  const api = getRawApi()
+  const tx = createTx(txPallets.utility, txActions.forceBatch, [txHexes.map((x) => api.tx(x))])
+  return tx
+}
+
+/**
+ * @name forceBatchTxHex
+ * @summary         Create a forceBatch transaction of dispatch calls in hex format.
+ * @param txHexes   Transactions to execute in the batch call
+ * @returns         Hex of the submittable extrinsic unsigned
+ */
+export const forceBatchTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
+  const tx = await forceBatchTx(txHexes)
+  return tx.toHex()
+}
+
+/**
  * @name isValidAddress
  * @summary   Check if an address is a valid Ternoa address.
  * @param address
