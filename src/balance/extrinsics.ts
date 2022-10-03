@@ -33,7 +33,7 @@ export const balancesTransfer = async (
   waitUntil: WaitUntil,
 ): Promise<BalancesTransferEvent> => {
   const tx = await balancesTransferTx(to, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalancesTransferEvent)
 }
 
@@ -64,7 +64,7 @@ export const balancesTransferAll = async (
   waitUntil: WaitUntil,
 ): Promise<BalancesTransferEvent> => {
   const tx = await balancesTransferAllTx(to, keepAlive)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalancesTransferEvent)
 }
 
@@ -96,6 +96,6 @@ export const balancesTransferKeepAlive = async (
   waitUntil: WaitUntil,
 ): Promise<BalancesTransferEvent> => {
   const tx = await balancesTransferKeepAliveTx(to, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalancesTransferEvent)
 }

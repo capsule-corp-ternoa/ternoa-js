@@ -63,7 +63,7 @@ export const createNft = async (
   waitUntil: WaitUntil,
 ): Promise<NFTCreatedEvent> => {
   const tx = await createNftTx(offchainData, royalty, collectionId, isSoulbound)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTCreatedEvent)
 }
 
@@ -87,7 +87,7 @@ export const burnNftTx = async (id: number): Promise<TransactionHashType> => {
  */
 export const burnNft = async (id: number, keyring: IKeyringPair, waitUntil: WaitUntil): Promise<NFTBurnedEvent> => {
   const tx = await burnNftTx(id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTBurnedEvent)
 }
 
@@ -121,7 +121,7 @@ export const delegateNft = async (
   waitUntil: WaitUntil,
 ): Promise<NFTDelegatedEvent> => {
   const tx = await delegateNftTx(id, recipient)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTDelegatedEvent)
 }
 
@@ -153,7 +153,7 @@ export const setRoyalty = async (
   waitUntil: WaitUntil,
 ): Promise<NFTRoyaltySetEvent> => {
   const tx = await setRoyaltyTx(id, amount)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTRoyaltySetEvent)
 }
 
@@ -184,7 +184,7 @@ export const transferNft = async (
   waitUntil: WaitUntil,
 ): Promise<NFTTransferredEvent> => {
   const tx = await transferNftTx(id, recipient)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTTransferredEvent)
 }
 
@@ -215,7 +215,7 @@ export const addNftToCollection = async (
   waitUntil: WaitUntil,
 ): Promise<NFTAddedToCollectionEvent> => {
   const tx = await addNftToCollectionTx(nft_id, collection_id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTAddedToCollectionEvent)
 }
 
@@ -251,7 +251,7 @@ export const createCollection = async (
   waitUntil: WaitUntil,
 ): Promise<CollectionCreatedEvent> => {
   const tx = await createCollectionTx(offchainData, limit)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionCreatedEvent)
 }
 
@@ -282,7 +282,7 @@ export const limitCollection = async (
   waitUntil: WaitUntil,
 ): Promise<CollectionLimitedEvent> => {
   const tx = await limitCollectionTx(id, limit)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionLimitedEvent)
 }
 
@@ -310,7 +310,7 @@ export const closeCollection = async (
   waitUntil: WaitUntil,
 ): Promise<CollectionClosedEvent> => {
   const tx = await closeCollectionTx(id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionClosedEvent)
 }
 
@@ -338,6 +338,6 @@ export const burnCollection = async (
   waitUntil: WaitUntil,
 ): Promise<CollectionBurnedEvent> => {
   const tx = await burnCollectionTx(id)
-  const events = await submitTxBlocking(tx, waitUntil, keyring)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionBurnedEvent)
 }

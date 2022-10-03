@@ -1,4 +1,12 @@
-import { NFTCreatedEvent, NFTListedEvent, batchAllTxHex, initializeApi, signTxHex, submitTxBlocking, safeDisconnect } from "ternoa-js"
+import {
+  NFTCreatedEvent,
+  NFTListedEvent,
+  batchAllTxHex,
+  initializeApi,
+  signTxHex,
+  submitTxBlocking,
+  safeDisconnect,
+} from "ternoa-js"
 
 import { createCollection, createNftTx } from "ternoa-js/nft/index.js"
 import { buyNft, createMarketplace, listNftTx } from "ternoa-js/marketplace/index.js"
@@ -120,8 +128,8 @@ async function main() {
   // we provide three different submitting functions. Here, we use the most convenient one but it's the least
   // flexible. This function will sign the transaction for us if we pass a keyring (one less thing to worry about)
   // and it's blocking the execution flow until the transaction is either in a block or in a finalized block.
-  // Since submitting needs to work will all kinds of transactions, the result is an object that contains all
-  // the events that have happen (instead of only specific ones).
+  // Since submitting needs to work will all kinds of transactions, the result is an object that contains the block information
+  // (the block hash, the block header and block extrinsics) and all the events that have happened (instead of only specific ones).
   const allEvents = await submitTxBlocking(signableNFTBatchTx, WaitUntil.BlockInclusion, keyring)
 
   // Here we get only the events that we are interested in.
@@ -131,7 +139,7 @@ async function main() {
   // how our API is quite convenient. Instead of manually searching our events of interest we can just
   // call the findEvents call and pass the type of the event that we are looking for. The result of this
   // function will be a list of those events and they will have the same type that we are expecting.
-  const dogs = allEvents.findEvents(NFTCreatedEvent)
+  const dogs = allEvents.events.findEvents(NFTCreatedEvent)
 
   // Here we print out the events that we got from creating our dog NFTs. This is just for debug purposes.
   dogs.forEach((dog) => console.log(dog))
@@ -209,7 +217,7 @@ async function main() {
   //
   // If not event is found it would mean that either we are looking for the wrong event or
   // something went wrong.
-  const listedDogs = allEvents2.findEvents(NFTListedEvent)
+  const listedDogs = allEvents2.events.findEvents(NFTListedEvent)
 
   // Here we print out the events that we got from listing our dog NFTs for sale. This is just for debug purposes.
   listedDogs.forEach((listedDog) => console.log(listedDog))
@@ -245,7 +253,7 @@ async function main() {
   // but this is explored in other exercises.
   //
 
-  await safeDisconnect();
+  await safeDisconnect()
 
   process.exit()
 }

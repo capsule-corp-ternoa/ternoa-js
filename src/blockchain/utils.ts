@@ -1,3 +1,5 @@
+import type { Block } from "@polkadot/types/interfaces/runtime"
+
 import { getRawApi } from "../blockchain"
 import { Errors } from "../constants"
 
@@ -40,6 +42,16 @@ export class ConditionalVariable {
 
   clear() {
     this.done = false
+  }
+}
+
+export class BlockInfo {
+  block?: Block
+  blockHash?: string
+
+  constructor(block?: Block, blockHash?: string) {
+    this.block = block
+    this.blockHash = blockHash
   }
 }
 

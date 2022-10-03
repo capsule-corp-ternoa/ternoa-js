@@ -7,6 +7,16 @@ import { decodeAddress, encodeAddress } from "@polkadot/keyring"
 import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, BN_TEN } from "@polkadot/util"
 import type { Balance } from "@polkadot/types/interfaces/runtime"
 
+import {
+  IFormatBalanceOptions,
+  SubmitTxBlockingType,
+  TransactionHashType,
+  CheckTransactionType,
+  ICheckBatch,
+  ICheckForceBatch,
+} from "./types"
+import { BlockInfo, ConditionalVariable } from "./utils"
+
 import { getTransferrableBalance } from "../balance"
 import { Errors, txActions, txPallets, WaitUntil } from "../constants"
 import {
@@ -19,15 +29,6 @@ import {
 } from "../events"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getNftMintFee } from "../nft"
-
-import {
-  IFormatBalanceOptions,
-  TransactionHashType,
-  CheckTransactionType,
-  ICheckBatch,
-  ICheckForceBatch,
-} from "./types"
-import { ConditionalVariable } from "./utils"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
 
@@ -510,17 +511,22 @@ export const numberToBalance = async (_input: number): Promise<BN> => {
  * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @param keyring       Account that will sign the transaction if provided
- * @returns             A list of blockchain events related to an extrinsics execution.
+ * @returns             Returns a pair of objects :
+ *                      - The first returned object contains some block information as the block hash, the block header and block extrinsics.
+ *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
  */
 export const submitTxBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
-): Promise<BlockchainEvents> => {
-  const [conVar, events] = await submitTxNonBlocking(tx, waitUntil, keyring)
+): Promise<SubmitTxBlockingType> => {
+  const [conVar, events, blockInfo] = await submitTxNonBlocking(tx, waitUntil, keyring)
   await conVar.wait()
 
-  return events
+  return {
+    blockInfo,
+    events,
+  }
 }
 
 /**
@@ -529,33 +535,41 @@ export const submitTxBlocking = async (
  * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @param keyring       Account that will sign the transaction if provided
- * @returns             Returns a pair objects that are used to track the progress of the transaction execution. The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned objects is an array of events which gets populated automatically once the operation is finished.
+ * @returns             Returns a group objects that are used to track the progress of the transaction execution:
+ *                      - The first returned object is a conditional variable which can yield the information if the operation is finished.
+ *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
+ *                      - The third returned object contains the block information as the block hash, the block header and block extrinsics.
  */
 export const submitTxNonBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
-): Promise<[ConditionalVariable, BlockchainEvents]> => {
+): Promise<[ConditionalVariable, BlockchainEvents, BlockInfo]> => {
   const conVar = new ConditionalVariable(500)
-  const events: BlockchainEvents = new BlockchainEvents([])
+  const chainEvents: BlockchainEvents = new BlockchainEvents([])
+  const blockInfo = new BlockInfo()
 
   if (keyring) {
     tx = await signTxHex(keyring, tx)
   }
 
-  const callback = (result: ISubmittableResult) => {
-    if (
-      (result.status.isFinalized && waitUntil == WaitUntil.BlockFinalization) ||
-      (result.status.isInBlock && waitUntil == WaitUntil.BlockInclusion)
-    ) {
-      events.inner = result.events.map((eventRecord) => BlockchainEvent.fromEvent(eventRecord.event))
+  const callback = async ({ events, status }: ISubmittableResult) => {
+    const isWaitingFinalization = status.isFinalized && waitUntil == WaitUntil.BlockFinalization
+    const isWaitingInclusion = status.isInBlock && waitUntil == WaitUntil.BlockInclusion
+
+    if (isWaitingInclusion || isWaitingFinalization) {
+      chainEvents.inner = events.map((eventRecord) => BlockchainEvent.fromEvent(eventRecord.event))
+      const blockHash = isWaitingFinalization ? status.asFinalized.toString() : status.asInBlock.toString()
+      const blockData = await api.rpc.chain.getBlock(blockHash)
+      blockInfo.blockHash = blockHash
+      blockInfo.block = blockData.block
       conVar.notify()
     }
   }
 
   await submitTxHex(tx, callback)
 
-  return [conVar, events]
+  return [conVar, chainEvents, blockInfo]
 }
 
 export * from "./types"

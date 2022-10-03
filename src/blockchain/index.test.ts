@@ -80,7 +80,7 @@ it("forceBatchTxHex should return a correct batch transaction hash hex", async (
 it("submitTxBlocking should contain BalancesTransfer and ExtrinsicSuccess events on a succesful balance transfer transaction", async () => {
   const { test: testAccount, dest: destAccount } = await createTestPairs()
   const txHex = await createTxHex(txPallets.balances, txActions.transfer, [destAccount.address, "1000000000000000"])
-  const events = await submitTxBlocking(txHex, WaitUntil.BlockInclusion, testAccount)
+  const { events } = await submitTxBlocking(txHex, WaitUntil.BlockInclusion, testAccount)
   const isSuccess =
     Boolean(events.findEvent(BalancesWithdrawEvent)) &&
     Boolean(events.findEvent(BalancesTransferEvent)) &&
