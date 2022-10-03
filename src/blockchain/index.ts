@@ -8,12 +8,26 @@ import { formatBalance as formatBalancePolkadotUtil, hexToU8a, isHex, u8aToHex, 
 import type { Balance } from "@polkadot/types/interfaces/runtime"
 
 import { getTransferrableBalance } from "../balance"
-import { Errors, txActions, txEvent, txPallets, WaitUntil } from "../constants"
-import { BlockchainEvent, BlockchainEvents } from "../events"
+import { Errors, txActions, txPallets, WaitUntil } from "../constants"
+import {
+  BatchCompletedWithErrorsEvent,
+  BatchInterruptedEvent,
+  BlockchainEvent,
+  BlockchainEvents,
+  ExtrinsicFailedEvent,
+  ItemFailedEvent,
+} from "../events"
 import { getMarketplaceMintFee } from "../marketplace"
 import { getNftMintFee } from "../nft"
 
-import { IFormatBalanceOptions, SubmitTxBlockingType, TransactionHashType } from "./types"
+import {
+  IFormatBalanceOptions,
+  SubmitTxBlockingType,
+  TransactionHashType,
+  CheckTransactionType,
+  ICheckBatch,
+  ICheckForceBatch,
+} from "./types"
 import { BlockInfo, ConditionalVariable } from "./utils"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
@@ -189,27 +203,73 @@ export const checkFundsForTxFees = async (tx: SubmittableExtrinsic<"promise", IS
 }
 
 /**
- * @name isTransactionSuccess
- * @summary       Check if a transaction result is successful.
- * @param result  Generic result passed as a parameter in a transaction callback
+ * @name checkTransactionSuccess
+ * @summary       Check if a transaction is successful.
+ * @param events  Result from a submitTxBlocking function: An events list.
  * @returns       Object containing a boolean success field indicating if transaction is successful
- * and a indexInterrupted field to indicate where the transaction stopped in case of a batch
+ *                and a the list of events in case of success or the Failed Event in case of transaction failure.
  */
-export const isTransactionSuccess = (result: ISubmittableResult): { success: boolean; indexInterrupted?: number } => {
-  if (!(result.status.isInBlock || result.status.isFinalized)) throw new Error(Errors.TRANSACTION_NOT_IN_BLOCK)
-
-  const isFailed =
-    result.events.findIndex(
-      (item) => item.event.section === txPallets.system && item.event.method === txEvent.ExtrinsicFailed,
-    ) !== -1
-  const indexInterrupted = result.events.findIndex(
-    (item) => item.event.section === txPallets.utility && item.event.method === txEvent.BatchInterrupted,
-  )
-  const isInterrupted = indexInterrupted !== -1
-  return {
-    success: !isFailed && !isInterrupted,
-    indexInterrupted: isInterrupted ? indexInterrupted : undefined,
+export const checkTransactionSuccess = (events: BlockchainEvents): CheckTransactionType => {
+  const failedEvent = events.findEvent(ExtrinsicFailedEvent)
+  if (failedEvent) {
+    return {
+      isTxSuccess: false,
+      failedEvent,
+    }
   }
+  return {
+    isTxSuccess: true,
+    events,
+  }
+}
+
+/**
+ * @name checkBatch
+ * @summary                          Check if a classic batch of transactions is successful without being interrupted. For BatchAll or ForceBatch tx, use the corresponding helper.
+ * @param batchedTransactionsEvents  Result from a submitTxBlocking function triggered after a batch transaction: An events list.
+ * @returns                          Object containing an isBatchInterrupted boolean, the succeeded or interrupted events and a isTxSuccess boolean to check the batch transaction status.
+ */
+export const checkBatch = (batchedTransactionsEvents: BlockchainEvents): ICheckBatch => {
+  const batchInterruptedEvent = batchedTransactionsEvents.findEvent(BatchInterruptedEvent)
+  const checkTx = checkTransactionSuccess(batchedTransactionsEvents)
+  if (batchInterruptedEvent) {
+    return {
+      isBatchInterrupted: true,
+      batchInterruptedEvent,
+      indexInterrupted: batchInterruptedEvent.index,
+      isTxSuccess: true,
+    }
+  }
+  return { ...checkTx, isBatchInterrupted: false }
+}
+
+/**
+ * @name checkForceBatch
+ * @summary                          Check if a forceBatch of transactions is completed without errors. For BatchAll or Batch tx, use the corresponding helper.
+ * @param batchedTransactionsEvents  Result from a submitTxBlocking function triggered after a forceBatch transaction: An events list.
+ * @returns                          Object containing an isBatchCompleteWithoutErrors boolean, the succeeded or interrupted events and a isTxSuccess boolean to check the forceBatch transaction status.
+ */
+export const checkForceBatch = (batchedTransactionsEvents: BlockchainEvents): ICheckForceBatch => {
+  const batchIncompletedEvent = batchedTransactionsEvents.findEvent(BatchCompletedWithErrorsEvent)
+  const checkTx = checkTransactionSuccess(batchedTransactionsEvents)
+  if (batchIncompletedEvent) {
+    return {
+      isBatchCompleteWithoutErrors: false,
+      failedItems: batchedTransactionsEvents.findEvents(ItemFailedEvent),
+      isTxSuccess: true,
+    }
+  }
+  return { ...checkTx, isBatchCompleteWithoutErrors: true }
+}
+
+/**
+ * @name checkBatchAll
+ * @summary                          Check if a batchAll of transactions is succeeded or failed. For forceBatch or Batch tx, use the corresponding helper.
+ * @param batchedTransactionsEvents  Result from a submitTxBlocking function triggered after a batchAll transaction: An events list.
+ * @returns                          Object containing the succeeded or interrupted events and a isTxSuccess boolean to check the batchAll transaction status.
+ */
+export const checkBatchAll = (batchedTransactionsEvents: BlockchainEvents): CheckTransactionType => {
+  return checkTransactionSuccess(batchedTransactionsEvents)
 }
 
 /**
@@ -298,6 +358,7 @@ export const submitTxHex = async (
  * @summary         Create a batch transaction of dispatch calls.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const batchTx = async (
   txHexes: TransactionHashType[],
@@ -312,6 +373,7 @@ export const batchTx = async (
  * @summary         Create a batch transaction of dispatch calls in hex format.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Hex of the submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const batchTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
   const tx = await batchTx(txHexes)
@@ -323,6 +385,7 @@ export const batchTxHex = async (txHexes: TransactionHashType[]): Promise<Transa
  * @summary         Create a batchAll transaction of dispatch calls.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const batchAllTx = async (
   txHexes: TransactionHashType[],
@@ -337,6 +400,7 @@ export const batchAllTx = async (
  * @summary         Create a batchAll transaction of dispatch calls in hex format.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Hex of the submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const batchAllTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
   const tx = await batchAllTx(txHexes)
@@ -348,6 +412,7 @@ export const batchAllTxHex = async (txHexes: TransactionHashType[]): Promise<Tra
  * @summary         Create a forceBatch transaction of dispatch calls.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const forceBatchTx = async (
   txHexes: TransactionHashType[],
@@ -362,6 +427,7 @@ export const forceBatchTx = async (
  * @summary         Create a forceBatch transaction of dispatch calls in hex format.
  * @param txHexes   Transactions to execute in the batch call
  * @returns         Hex of the submittable extrinsic unsigned
+ * @see             Learn more about Batch best practices {@link https://github.com/capsule-corp-ternoa/ternoa-js/wiki/5-Work-In-Progress-:-Cookbook#utility-batchbatchall here}.
  */
 export const forceBatchTxHex = async (txHexes: TransactionHashType[]): Promise<TransactionHashType> => {
   const tx = await forceBatchTx(txHexes)

@@ -1,6 +1,7 @@
 import BN from "bn.js"
 
-import { BlockchainEvents } from "../events"
+import { BatchInterruptedEvent, BlockchainEvents, ExtrinsicFailedEvent, ItemFailedEvent } from "../events"
+
 import { BlockInfo } from "./utils"
 
 export interface IFormatBalanceOptions {
@@ -37,3 +38,19 @@ export type SubmitTxBlockingType = {
 
 export type TransactionHashType = `0x${string}`
 export type BalanceType = BN
+
+export type CheckTransactionType = {
+  isTxSuccess: boolean
+  events?: BlockchainEvents
+  failedEvent?: ExtrinsicFailedEvent
+}
+export interface ICheckBatch extends CheckTransactionType {
+  isBatchInterrupted: boolean
+  indexInterrupted?: number
+  batchInterruptedEvent?: BatchInterruptedEvent
+}
+
+export interface ICheckForceBatch extends CheckTransactionType {
+  isBatchCompleteWithoutErrors?: boolean
+  failedItems?: ItemFailedEvent[]
+}
