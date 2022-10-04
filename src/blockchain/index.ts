@@ -27,6 +27,7 @@ import {
   CheckTransactionType,
   ICheckBatch,
   ICheckForceBatch,
+  BalanceType,
 } from "./types"
 import { BlockInfo, ConditionalVariable } from "./utils"
 
@@ -162,7 +163,7 @@ export const getTxInitialFee = async (txHex: TransactionHashType, address: strin
  * @param txHex   Transaction hex
  * @returns       Fee estimation
  */
-export const getTxAdditionalFee = async (txHex: TransactionHashType): Promise<BN> => {
+export const getTxAdditionalFee = async (txHex: TransactionHashType): Promise<BalanceType> => {
   const api = getRawApi()
   const tx = api.tx(txHex)
   switch (`${tx.method.section}_${tx.method.method}`) {
@@ -185,7 +186,7 @@ export const getTxAdditionalFee = async (txHex: TransactionHashType): Promise<BN
  * @param address   Public address of the sender
  * @returns         Total estimated fee which is the sum of the chain initial fee and the optional additional fee
  */
-export const getTxFees = async (txHex: TransactionHashType, address: string): Promise<BN> => {
+export const getTxFees = async (txHex: TransactionHashType, address: string): Promise<BalanceType> => {
   const extrinsicFee = await getTxInitialFee(txHex, address)
   const additionalFee = await getTxAdditionalFee(txHex)
   return extrinsicFee.add(additionalFee)
@@ -466,12 +467,12 @@ export const isValidSignature = (signedMessage: string, signature: TransactionHa
 
 /**
  * @name balanceToNumber
- * @summary         Format balance from BN to number.
+ * @summary         Format balance from BN(BalanceType) to number.
  * @param input     BN input.
  * @param options   Formatting options from IFormatBalanceOptions.
  * @returns         Formatted balance with SI and unit notation.
  */
-export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): string => {
+export const balanceToNumber = (input: BalanceType, options?: IFormatBalanceOptions): string => {
   formatBalancePolkadotUtil.setDefaults({ decimals: 18, unit: options?.unit ?? "CAPS" })
   return formatBalancePolkadotUtil(input, options)
 }
@@ -482,7 +483,7 @@ export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): str
  * @param _input  Number input
  * @returns       BN output
  */
-export const numberToBalance = async (_input: number): Promise<BN> => {
+export const numberToBalance = async (_input: number): Promise<BalanceType> => {
   const input = String(_input)
   const api = getRawApi()
   const siPower = new BN(api.registry.chainDecimals[0])

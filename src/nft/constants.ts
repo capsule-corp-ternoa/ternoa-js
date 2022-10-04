@@ -1,5 +1,3 @@
-import BN from "bn.js"
-
 import { consts, BalanceType } from "../blockchain"
 import { chainConstants, txPallets } from "../constants"
 
@@ -20,7 +18,7 @@ export const getInitialMintFee = async (): Promise<BalanceType> => {
  */
 export const getCollectionSizeLimit = async (): Promise<number> => {
   const limit = consts(txPallets.nft, chainConstants.collectionSizeLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }
 
 /**
@@ -30,7 +28,7 @@ export const getCollectionSizeLimit = async (): Promise<number> => {
  */
 export const getNftOffchainDataLimit = async (): Promise<number> => {
   const limit = consts(txPallets.nft, chainConstants.nftOffchainDataLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }
 
 /**
@@ -40,5 +38,5 @@ export const getNftOffchainDataLimit = async (): Promise<number> => {
  */
 export const getCollectionOffchainDataLimit = async (): Promise<number> => {
   const limit = consts(txPallets.nft, chainConstants.collectionOffchainDataLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }

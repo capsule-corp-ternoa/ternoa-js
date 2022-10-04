@@ -1003,22 +1003,22 @@ export class BlockchainEvents {
   }
 
   findEvent<T extends BlockchainEvent>(ctor: new (...args: any[]) => T): T | undefined {
-    const maybe_event = this.inner.find((event) => event instanceof ctor)
-    return maybe_event ? (maybe_event as T) : undefined
+    const maybeEvent = this.inner.find((event) => event instanceof ctor)
+    return maybeEvent ? (maybeEvent as T) : undefined
   }
 
   findEventOrThrow<T extends BlockchainEvent>(ctor: new (...args: any[]) => T): T {
-    const failed_event = this.inner.find((event) => event.type == EventType.ExtrinsicFailed) as ExtrinsicFailedEvent
-    const target_event = this.inner.find((event) => event instanceof ctor)
+    const failedEvent = this.inner.find((event) => event.type == EventType.ExtrinsicFailed) as ExtrinsicFailedEvent
+    const targetEvent = this.inner.find((event) => event instanceof ctor)
 
-    if (failed_event) {
-      throw new Error(`${Errors.EXTRINSIC_FAILED} : ${failed_event.errorType} - ${failed_event.details}`)
+    if (failedEvent) {
+      throw new Error(`${Errors.EXTRINSIC_FAILED} : ${failedEvent.errorType} - ${failedEvent.details}`)
     }
 
-    if (target_event == undefined) {
+    if (targetEvent == undefined) {
       throw new Error(Errors.EVENT_NOT_FOUND)
     }
 
-    return target_event as T
+    return targetEvent as T
   }
 }

@@ -6,7 +6,7 @@ export type INftState = {
   isSoulbound: boolean
 }
 
-export type INftData = {
+export type NftData = {
   owner: string
   creator: string
   offchainData: string
@@ -15,7 +15,7 @@ export type INftData = {
   state: INftState
 }
 
-export interface ICollectionData {
+export type CollectionData = {
   owner: string
   offchainData: string
   nfts: number[]
