@@ -1,8 +1,8 @@
-import { hexToString } from "@polkadot/util"
+import { bnToBn, hexToString } from "@polkadot/util"
 
 import { IListedNft, MarketplaceDataType } from "./types"
 
-import { query, BalanceType } from "../blockchain"
+import { query, BalanceType, balanceToNumber } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
 
 /**
@@ -39,6 +39,16 @@ export const getMarketplaceData = async (marketplaceId: number): Promise<Marketp
 
   try {
     const result = data.toJSON() as MarketplaceDataType
+    if (result.commissionFee) {
+      result.commissionFee.flat
+        ? (result.commissionFee.flat = balanceToNumber(bnToBn(result.commissionFee.flat)))
+        : (result.commissionFee.percentage = result.commissionFee.percentage / 10000)
+    }
+    if (result.listingFee) {
+      result.listingFee.flat
+        ? (result.listingFee.flat = balanceToNumber(bnToBn(result.listingFee.flat)))
+        : (result.listingFee.percentage = result.listingFee.percentage / 10000)
+    }
     // The offchainData is an hexadecimal string, we convert it to a human readable string.
     if (result.offchainData) result.offchainData = hexToString(result.offchainData)
     return result
