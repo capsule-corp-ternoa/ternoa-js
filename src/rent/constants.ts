@@ -1,7 +1,5 @@
-import BN from "bn.js"
-
 import { chainConstants, txPallets } from "../constants"
-import { consts } from "../blockchain"
+import { BalanceType, consts } from "../blockchain"
 
 /**
  * @name getAccountSizeLimit
@@ -10,7 +8,7 @@ import { consts } from "../blockchain"
  */
 export const getAccountSizeLimit = (): number => {
   const limit = consts(txPallets.rent, chainConstants.accountSizeLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }
 
 /**
@@ -20,7 +18,7 @@ export const getAccountSizeLimit = (): number => {
  */
 export const getActionsInBlockLimit = (): number => {
   const limit = consts(txPallets.rent, chainConstants.actionsInBlockLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }
 
 /**
@@ -30,7 +28,7 @@ export const getActionsInBlockLimit = (): number => {
  */
 export const getContractExpirationDuration = (): number => {
   const expiration = consts(txPallets.rent, chainConstants.contractExpirationDuration)
-  return (expiration as any as BN).toNumber()
+  return (expiration as any as BalanceType).toNumber()
 }
 
 /**
@@ -40,5 +38,5 @@ export const getContractExpirationDuration = (): number => {
  */
 export const getSimultaneousContractLimit = (): number => {
   const limit = consts(txPallets.rent, chainConstants.simultaneousContractLimit)
-  return (limit as any as BN).toNumber()
+  return (limit as any as BalanceType).toNumber()
 }

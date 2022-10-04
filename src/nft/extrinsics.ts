@@ -191,30 +191,30 @@ export const transferNft = async (
 /**
  * @name addNftToCollectionTx
  * @summary               Creates an unsigned unsubmitted Add-NFT-To-Collection Transaction Hash.
- * @param nft_id          The ID of the NFT.
- * @param collection_id   The ID of the Collection.
+ * @param nftId          The ID of the NFT.
+ * @param collectionId   The ID of the Collection.
  * @returns               Unsigned unsubmitted Add-NFT-To-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const addNftToCollectionTx = async (nft_id: number, collection_id: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.nft, txActions.addNftToCollection, [nft_id, collection_id])
+export const addNftToCollectionTx = async (nftId: number, collectionId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.addNftToCollection, [nftId, collectionId])
 }
 
 /**
  * @name addNftToCollection
  * @summary               Adds an NFT to an existing collection.
- * @param nft_id          The ID of the NFT.
- * @param collection_id   The ID of the Collection.
+ * @param nftId          The ID of the NFT.
+ * @param collectionId   The ID of the Collection.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTAddedToCollectionEvent Blockchain event.
  */
 export const addNftToCollection = async (
-  nft_id: number,
-  collection_id: number,
+  nftId: number,
+  collectionId: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<NFTAddedToCollectionEvent> => {
-  const tx = await addNftToCollectionTx(nft_id, collection_id)
+  const tx = await addNftToCollectionTx(nftId, collectionId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTAddedToCollectionEvent)
 }

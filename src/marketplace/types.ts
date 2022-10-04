@@ -9,7 +9,7 @@ type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T
 
 export interface IFeeType {
   percentage: number
-  flat: BN | number
+  flat: BN | number | string
 }
 
 export type SetFeeType = { [MarketplaceConfigAction.Set]: RequireOnlyOne<IFeeType> }

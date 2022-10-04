@@ -66,14 +66,14 @@ it("Should return the address of the offer made on an NFT", async () => {
 
 describe("Testing Rental Contract data", (): void => {
   it("Should return the Rent Contract Data when an NFT ID with a Rent contract exists", async () => {
-    const maybe_Rent_Contract = await getRentalContractData(TEST_DATA.nftId)
-    expect(maybe_Rent_Contract != null).toBe(true)
+    const maybeRentContract = await getRentalContractData(TEST_DATA.nftId)
+    expect(maybeRentContract != null).toBe(true)
   })
   it("Should return null if an invalid Rental Contract ID (the nftID) is passed", async () => {
     const { test: testAccount } = await createTestPairs()
     await revokeContract(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
-    const maybe_Rent_Contract = await getRentalContractData(TEST_DATA.nftId)
-    expect(maybe_Rent_Contract).toBeNull()
+    const maybeRentContract = await getRentalContractData(TEST_DATA.nftId)
+    expect(maybeRentContract).toBeNull()
   })
 })
 
