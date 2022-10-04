@@ -1,8 +1,7 @@
-import BN from "bn.js"
 import { hexToString } from "@polkadot/util"
 import { query, BalanceType } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
-import { ICollectionData, INftData } from "./types"
+import { CollectionData, NftData } from "./types"
 
 /**
  * @name nftMintFee
@@ -21,7 +20,7 @@ export const getNftMintFee = async (): Promise<BalanceType> => {
  */
 export const getNextNftId = async (): Promise<number> => {
   const id = await query(txPallets.nft, chainQuery.nextNFTId)
-  return (id as any as BN).toNumber()
+  return (id as any as BalanceType).toNumber()
 }
 
 /**
@@ -31,7 +30,7 @@ export const getNextNftId = async (): Promise<number> => {
  */
 export const getNextCollectionId = async (): Promise<number> => {
   const id = await query(txPallets.nft, chainQuery.nextCollectionId)
-  return (id as any as BN).toNumber()
+  return (id as any as BalanceType).toNumber()
 }
 
 /**
@@ -40,14 +39,14 @@ export const getNextCollectionId = async (): Promise<number> => {
  * @param nftId   The NFT id.
  * @returns       A JSON object with the NFT data. ex:{owner, creator, offchainData, (...)}
  */
-export const getNftData = async (nftId: number): Promise<INftData | null> => {
+export const getNftData = async (nftId: number): Promise<NftData | null> => {
   const data = await query(txPallets.nft, chainQuery.nfts, [nftId])
   if (data.isEmpty == true) {
     return null
   }
 
   try {
-    const result = data.toJSON() as INftData
+    const result = data.toJSON() as NftData
     // The offchainData is an hexadecimal string, we convert it to a human readable string.
     if (result.offchainData) result.offchainData = hexToString(result.offchainData)
     return result
@@ -62,14 +61,14 @@ export const getNftData = async (nftId: number): Promise<INftData | null> => {
  * @param collectionId  The collection id.
  * @returns             A JSON object with data of a single NFT collection.
  */
-export const getCollectionData = async (collectionId: number): Promise<ICollectionData | null> => {
+export const getCollectionData = async (collectionId: number): Promise<CollectionData | null> => {
   const data = await query(txPallets.nft, chainQuery.collections, [collectionId])
   if (data.isEmpty == true) {
     return null
   }
 
   try {
-    return data.toJSON() as any as ICollectionData
+    return data.toJSON() as any as CollectionData
   } catch (error) {
     throw new Error(`${Errors.COLLECTION_CONVERSION_ERROR}`)
   }

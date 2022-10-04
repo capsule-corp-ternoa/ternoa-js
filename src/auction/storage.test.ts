@@ -46,8 +46,8 @@ beforeAll(async () => {
 
 describe("Testing getting Auction data", (): void => {
   it("Should return null if an Invalid NFT ID is passed", async () => {
-    const maybe_auction = await getAuctionData(1000000)
-    expect(maybe_auction).toBeNull()
+    const maybeAuction = await getAuctionData(1000000)
+    expect(maybeAuction).toBeNull()
   })
   it("Should return the Auction Data when the NFT ID exists", async () => {
     const { test: testAccount } = await createTestPairs()

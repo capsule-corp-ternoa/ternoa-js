@@ -181,38 +181,38 @@ export const setMarketplaceKind = async (
 /**
  * @name listNftTx
  * @summary               Creates an unsigned unsubmitted List-NFT Transaction Hash.
- * @param nft_id          NFT Id of the NFT to be listed for sale.
- * @param marketplace_id  Marketplace Id of the marketplace to list the NFT on.
+ * @param nftId          NFT Id of the NFT to be listed for sale.
+ * @param marketplaceId  Marketplace Id of the marketplace to list the NFT on.
  * @param price           Price of the NFT.
  * @returns               Unsigned unsubmitted List-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const listNftTx = async (
-  nft_id: number,
-  marketplace_id: number,
+  nftId: number,
+  marketplaceId: number,
   price: number | BN,
 ): Promise<TransactionHashType> => {
-  const formatted_price = typeof price === "number" ? await numberToBalance(price) : price
-  return await createTxHex(txPallets.marketplace, txActions.listNft, [nft_id, marketplace_id, formatted_price])
+  const formattedPrice = typeof price === "number" ? await numberToBalance(price) : price
+  return await createTxHex(txPallets.marketplace, txActions.listNft, [nftId, marketplaceId, formattedPrice])
 }
 
 /**
  * @name listNft
  * @summary               Lists an NFT on a marketplace.
- * @param nft_id          NFT Id of the NFT to be listed for sale.
- * @param marketplace_id  Marketplace Id of the marketplace to list the NFT on.
+ * @param nftId          NFT Id of the NFT to be listed for sale.
+ * @param marketplaceId  Marketplace Id of the marketplace to list the NFT on.
  * @param price           Price of the NFT.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTListedEvent Blockchain event.
  */
 export const listNft = async (
-  nft_id: number,
-  marketplace_id: number,
+  nftId: number,
+  marketplaceId: number,
   price: number | BN,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<NFTListedEvent> => {
-  const tx = await listNftTx(nft_id, marketplace_id, price)
+  const tx = await listNftTx(nftId, marketplaceId, price)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTListedEvent)
 }
@@ -220,27 +220,27 @@ export const listNft = async (
 /**
  * @name unlistNftTx
  * @summary               Creates an unsigned unsubmitted Unlist-NFT Transaction Hash.
- * @param nft_id          NFT Id of the NFT to be unlisted from sale.
+ * @param nftId          NFT Id of the NFT to be unlisted from sale.
  * @returns               Unsigned unsubmitted Unlist-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const unlistNftTx = async (nft_id: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.marketplace, txActions.unlistNft, [nft_id])
+export const unlistNftTx = async (nftId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.marketplace, txActions.unlistNft, [nftId])
 }
 
 /**
  * @name unlistNft
  * @summary               Unlists an NFT from a marketplace.
- * @param nft_id          NFT Id of the NFT to be unlisted from sale.
+ * @param nftId          NFT Id of the NFT to be unlisted from sale.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTUnlistedEvent Blockchain event.
  */
 export const unlistNft = async (
-  nft_id: number,
+  nftId: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<NFTUnlistedEvent> => {
-  const tx = await unlistNftTx(nft_id)
+  const tx = await unlistNftTx(nftId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTUnlistedEvent)
 }
@@ -248,23 +248,23 @@ export const unlistNft = async (
 /**
  * @name buyNftTx
  * @summary               Creates an unsigned unsubmitted Buy-NFT Transaction Hash.
- * @param nft_id          NFT Id of the NFT for sale.
+ * @param nftId          NFT Id of the NFT for sale.
  * @returns               Unsigned unsubmitted Buy-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const buyNftTx = async (nft_id: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.marketplace, txActions.buyNft, [nft_id])
+export const buyNftTx = async (nftId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.marketplace, txActions.buyNft, [nftId])
 }
 
 /**
  * @name buyNft
  * @summary               Buys an NFT on a marketplace.
- * @param nft_id          NFT Id of the NFT for sale.
+ * @param nftId          NFT Id of the NFT for sale.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTSoldEvent Blockchain event.
  */
-export const buyNft = async (nft_id: number, keyring: IKeyringPair, waitUntil: WaitUntil): Promise<NFTSoldEvent> => {
-  const tx = await buyNftTx(nft_id)
+export const buyNft = async (nftId: number, keyring: IKeyringPair, waitUntil: WaitUntil): Promise<NFTSoldEvent> => {
+  const tx = await buyNftTx(nftId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTSoldEvent)
 }
@@ -276,8 +276,8 @@ export const buyNft = async (nft_id: number, keyring: IKeyringPair, waitUntil: W
  * @returns               Unsigned unsubmitted Set-Marketplace-Mint-Fee Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<TransactionHashType> => {
-  const formatted_price = typeof fee === "number" ? await numberToBalance(fee) : fee
-  return await createTxHex(txPallets.marketplace, txActions.setMarketplaceMintFee, [formatted_price])
+  const formattedPrice = typeof fee === "number" ? await numberToBalance(fee) : fee
+  return await createTxHex(txPallets.marketplace, txActions.setMarketplaceMintFee, [formattedPrice])
 }
 
 /**
