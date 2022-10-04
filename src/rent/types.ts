@@ -1,11 +1,6 @@
 import BN from "bn.js"
 import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction, RevocationAction } from "./enum"
 
-// type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
-//   {
-//     [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, undefined>>
-//   }[Keys]
-
 export type DurationFixedType = { [DurationAction.Fixed]: number }
 export type DurationSubscriptionType = { [DurationAction.Subscription]: number[] }
 export type DurationType = DurationAction.Infinite | DurationFixedType | DurationSubscriptionType

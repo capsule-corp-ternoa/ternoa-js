@@ -23,7 +23,7 @@ export const getMarketplaceMintFee = async (): Promise<BN> => {
  */
 export const getNextMarketplaceId = async (): Promise<number> => {
   const id = await query(txPallets.marketplace, chainQuery.nextMarketplaceId)
-  return (id as any as BN).toNumber()
+  return (id as any as BalanceType).toNumber()
 }
 
 /**
