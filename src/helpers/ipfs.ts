@@ -12,7 +12,7 @@ export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
  * @param apiKey        API Key to validate the upload on the IPFS gateway.
  * @returns             A formatted object datas with name, hash, size and type.
  */
-export const ipfsFileUpload = async (file: File, ipfsGateway?: string, apiKey?: string) => {
+export const ipfsFileUpload = async (file: File | Buffer, ipfsGateway?: string, apiKey?: string) => {
   const formData = new FormData()
   formData.append(`file`, file)
   const headers = apiKey ? { apiKey: apiKey } : undefined
