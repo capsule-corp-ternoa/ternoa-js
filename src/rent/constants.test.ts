@@ -1,7 +1,8 @@
 import {
   getAccountSizeLimit,
   getActionsInBlockLimit,
-  getContractExpirationDuration,
+  getMaximumContractAvailabilityLimit,
+  getMaximumContractDurationLimit,
   getSimultaneousContractLimit,
 } from "./constants"
 
@@ -22,8 +23,13 @@ it("Tests the maximum rent actions in block to be defined", () => {
   expect(actual).toBeDefined()
 })
 
-it("Tests the maximum number of blocks of contract availablility to be defined", () => {
-  const actual = getContractExpirationDuration()
+it("Tests the maximum of blocks during which a rent contract is available  to be defined", () => {
+  const actual = getMaximumContractAvailabilityLimit()
+  expect(actual).toBeDefined()
+})
+
+it("Tests the maximum of blocks that a contract can last for.", () => {
+  const actual = getMaximumContractDurationLimit()
   expect(actual).toBeDefined()
 })
 

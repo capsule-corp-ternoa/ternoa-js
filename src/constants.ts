@@ -119,7 +119,8 @@ export enum chainConstants {
 
   // rent
   actionsInBlockLimit = "actionsInBlockLimit",
-  contractExpirationDuration = "contractExpirationDuration",
+  maximumContractAvailabilityLimit = "maximumContractAvailabilityLimit",
+  maximumContractDurationLimit = "maximumContractDurationLimit",
   simultaneousContractLimit = "simultaneousContractLimit",
 }
 
