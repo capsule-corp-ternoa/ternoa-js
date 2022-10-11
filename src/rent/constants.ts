@@ -22,13 +22,23 @@ export const getActionsInBlockLimit = (): number => {
 }
 
 /**
- * @name getContractExpirationDuration
- * @summary Maximum number of blocks during which a rent contract is available for renting.
+ * @name getMaximumContractAvailabilityLimit
+ * @summary Maximum number of blocks during which a rent contract is available.
  * @returns Number.
  */
-export const getContractExpirationDuration = (): number => {
-  const expiration = consts(txPallets.rent, chainConstants.contractExpirationDuration)
-  return (expiration as any as BalanceType).toNumber()
+export const getMaximumContractAvailabilityLimit = (): number => {
+  const limit = consts(txPallets.rent, chainConstants.maximumContractAvailabilityLimit)
+  return (limit as any as BalanceType).toNumber()
+}
+
+/**
+ * @name getMaximumContractDurationLimit
+ * @summary Maximum number of blocks that a contract can last for.
+ * @returns Number.
+ */
+export const getMaximumContractDurationLimit = (): number => {
+  const limit = consts(txPallets.rent, chainConstants.maximumContractDurationLimit)
+  return (limit as any as BalanceType).toNumber()
 }
 
 /**
