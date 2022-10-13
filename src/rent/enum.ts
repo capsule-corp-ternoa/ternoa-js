@@ -1,7 +1,13 @@
 export enum DurationAction {
   Fixed = "fixed",
   Subscription = "subscription",
-  Infinite = "Infinite",
+}
+
+export enum SubscriptionActionDetails {
+  PeriodLength = "periodLength",
+  MaxDuration = "maxDuration",
+  IsChangeable = "isChangeable",
+  NewTerms = "newTerms",
 }
 
 export enum AcceptanceAction {
@@ -24,4 +30,5 @@ export enum CancellationFeeAction {
   FixedTokens = "fixedTokens",
   FlexibleTokens = "flexibleTokens",
   NFT = "NFT",
+  None = "None",
 }

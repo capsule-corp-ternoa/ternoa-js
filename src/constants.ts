@@ -34,10 +34,12 @@ export enum txActions {
 
   // rent
   createContract = "createContract",
+  cancelContract = "cancelContract",
   acceptRentOffer = "acceptRentOffer",
   acceptSubscriptionTerms = "acceptSubscriptionTerms",
   changeSubscriptionTerms = "changeSubscriptionTerms",
   rent = "rent",
+  makeRentOffer = "makeRentOffer",
   retractRentOffer = "retractRentOffer",
   revokeContract = "revokeContract",
 
@@ -92,10 +94,7 @@ export enum chainQuery {
 
   // rent
   contracts = "contracts",
-  numberOfCurrentContracts = "numberOfCurrentContracts",
-  availableQueue = "availableQueue",
-  fixedQueue = "fixedQueue",
-  subscriptionQueue = "subscriptionQueue",
+  queues = "queues",
   offers = "offers",
 }
 
