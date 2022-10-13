@@ -1,16 +1,15 @@
 import { bnToBn } from "@polkadot/util"
 
 import {
-  ActiveFixedContractType,
-  ActiveSubscribedContractType,
-  AvailableRentalContractType,
   RentalContractChainRawDataType,
   RentalContractDataType,
+  RentingQueuesRawType,
+  RentingQueuesType,
 } from "./types"
 
-import { BalanceType, blockNumberToDate, query } from "../blockchain"
+import { blockNumberToDate, query } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
-import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction } from "./enum"
+import { AcceptanceAction, CancellationFeeAction, RentFeeAction } from "./enum"
 import { roundBalance } from "../helpers/utils"
 
 /**
@@ -26,35 +25,18 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
   }
   try {
     const {
-      hasStarted,
       startBlock,
       renter,
       rentee,
       duration,
       acceptanceType,
-      revocationType,
+      renterCanRevoke,
       rentFee,
-      termsAccepted,
       renterCancellationFee,
       renteeCancellationFee,
     } = data.toJSON() as RentalContractChainRawDataType
 
     const startBlockDate = startBlock && typeof startBlock === "number" && (await blockNumberToDate(startBlock))
-    const durationType = duration.fixed
-      ? DurationAction.Fixed
-      : duration.subscription
-      ? DurationAction.Subscription
-      : DurationAction.Infinite
-
-    const blockDuration =
-      durationType === DurationAction.Fixed
-        ? duration.fixed
-        : durationType === DurationAction.Subscription
-        ? duration.subscription[0]
-        : null
-
-    const blockSubscriptionRenewal =
-      durationType === DurationAction.Subscription && duration.subscription[1] ? duration.subscription[1] : null
 
     const acceptance =
       acceptanceType.manualAcceptance === null || acceptanceType.manualAcceptance
@@ -67,8 +49,8 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       ? acceptanceType.autoAcceptance
       : []
 
-    const rentFeeType = rentFee.tokens ? RentFeeAction.Tokens : RentFeeAction.NFT
-    const rentFeeAmount = rentFee.tokens ? bnToBn(rentFee.tokens).toString() : Number(rentFee.nft)
+    const rentFeeType = rentFee.tokens >= 0 ? RentFeeAction.Tokens : RentFeeAction.NFT
+    const rentFeeAmount = rentFee.tokens >= 0 ? bnToBn(rentFee.tokens).toString() : Number(rentFee.nft)
     const rentFeeRounded = typeof rentFeeAmount === "number" ? rentFeeAmount : roundBalance(rentFeeAmount)
 
     const renterCancellationFeeType =
@@ -77,7 +59,9 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
         ? CancellationFeeAction.FixedTokens
         : renterCancellationFee.flexibleTokens
         ? CancellationFeeAction.FlexibleTokens
-        : CancellationFeeAction.NFT)
+        : renterCancellationFee.nft
+        ? CancellationFeeAction.NFT
+        : CancellationFeeAction.None)
 
     const renterCancellationFeeAmount =
       renterCancellationFee &&
@@ -85,12 +69,16 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
         ? bnToBn(renterCancellationFee.fixedTokens).toString()
         : renterCancellationFeeType === CancellationFeeAction.FlexibleTokens
         ? bnToBn(renterCancellationFee.flexibleTokens).toString()
-        : Number(renterCancellationFee.nft))
+        : renterCancellationFeeType === CancellationFeeAction.NFT
+        ? Number(renterCancellationFee.nft)
+        : null)
 
     const renterCancellationFeeRounded =
       renterCancellationFee &&
       (typeof renterCancellationFeeAmount === "number"
         ? renterCancellationFeeAmount
+        : renterCancellationFeeAmount === null
+        ? null
         : roundBalance(renterCancellationFeeAmount))
 
     const renteeCancellationFeeType =
@@ -99,7 +87,9 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
         ? CancellationFeeAction.FixedTokens
         : renteeCancellationFee.flexibleTokens
         ? CancellationFeeAction.FlexibleTokens
-        : CancellationFeeAction.NFT)
+        : renteeCancellationFee.nft
+        ? CancellationFeeAction.NFT
+        : CancellationFeeAction.None)
 
     const renteeCancellationFeeAmount =
       renteeCancellationFee &&
@@ -107,26 +97,27 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
         ? bnToBn(renteeCancellationFee.fixedTokens).toString()
         : renteeCancellationFeeType === CancellationFeeAction.FlexibleTokens
         ? bnToBn(renteeCancellationFee.flexibleTokens).toString()
-        : Number(renteeCancellationFee.nft))
+        : renteeCancellationFeeType === CancellationFeeAction.NFT
+        ? Number(renteeCancellationFee.nft)
+        : null)
 
     const renteeCancellationFeeRounded =
       renteeCancellationFee &&
       (typeof renteeCancellationFeeAmount === "number"
         ? renteeCancellationFeeAmount
+        : renteeCancellationFeeAmount === null
+        ? null
         : roundBalance(renteeCancellationFeeAmount))
 
     return {
-      hasStarted,
       startBlock,
       startBlockDate,
       renter,
       rentee,
-      durationType,
-      blockDuration,
-      blockSubscriptionRenewal,
+      duration,
       acceptanceType: acceptance,
       acceptanceList,
-      revocationType,
+      renterCanRevoke,
       rentFeeType,
       rentFee: rentFeeAmount,
       rentFeeRounded,
@@ -136,7 +127,6 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       renteeCancellationFeeType,
       renteeCancellationFee: renteeCancellationFeeAmount,
       renteeCancellationFeeRounded,
-      termsAccepted,
     } as RentalContractDataType
   } catch (error) {
     throw new Error(`${Errors.RENT_NFT_CONVERSION_ERROR}`)
@@ -144,20 +134,10 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
 }
 
 /**
- * @name getRentalContractNumber
- * @summary       Provides the current number of rental contracts.
- * @returns       Number.
- */
-export const getRentalContractNumber = async (): Promise<number> => {
-  const data = await query(txPallets.rent, chainQuery.numberOfCurrentContracts)
-  return (data as any as BalanceType).toNumber()
-}
-
-/**
  * @name getRentalOffers
  * @summary       Provides the data related to rent contracts offers.
  * @param nftId   The ID of the contracted NFT.
- * @returns       An Array of adresses (string).
+ * @returns       An Array of adresse(s) (string) or null if no offer are available.
  */
 export const getRentalOffers = async (nftId: number): Promise<string[]> => {
   const data = await query(txPallets.rent, chainQuery.offers, [nftId])
@@ -166,81 +146,35 @@ export const getRentalOffers = async (nftId: number): Promise<string[]> => {
 }
 
 /**
- * @name getAvailableRentalContracts
- * @summary       Provides the data related to available contracts deadlines.
- * @returns       An Array of object with the NFT ID, the block expriation ID, a date of expiration.
+ * @name getRentingQueues
+ * @summary       Provides the deadlines related to contracts in queues for available contracts, running fixed contract and running subscribed contract.
+ * @returns       An object containing an array with NFT ID, the block expriation ID for each fixedQueue, subscriptionQueue or availableQueue. See the RentingQueuesType type.
  */
-export const getAvailableRentalContracts = async (): Promise<AvailableRentalContractType[]> => {
-  const data = await query(txPallets.rent, chainQuery.availableQueue)
-  if (data.isEmpty) {
-    return []
-  }
+export const getRentingQueues = async (): Promise<RentingQueuesType> => {
+  const data = await query(txPallets.rent, chainQuery.queues)
   try {
-    const result = data.toJSON() as [number[]]
-    const AvailableRentalContractList = await Promise.all(
-      result.map(async (contract: number[]) => {
-        const list = {} as AvailableRentalContractType
-        list.nftId = contract[0]
-        list.contractExpirationBlockId = contract[1]
-        list.contractExpirationDate = await blockNumberToDate(contract[1])
-        return list
-      }),
-    )
-    return AvailableRentalContractList as AvailableRentalContractType[]
-  } catch (error) {
-    throw new Error(`${Errors.RENT_NFT_CONVERSION_ERROR}`)
-  }
-}
+    const { fixedQueue, subscriptionQueue, availableQueue } = data.toJSON() as RentingQueuesRawType
 
-/**
- * @name getActiveFixedRentalContracts
- * @summary       Provides the data related to activated fixed contract deadlines.
- * @returns       An Array of object with the NFT ID, the block expriation ID, a date of expiration.
- */
-export const getActiveFixedRentalContracts = async (): Promise<ActiveFixedContractType[]> => {
-  const data = await query(txPallets.rent, chainQuery.fixedQueue)
-  if (data.isEmpty) {
-    return []
-  }
-  try {
-    const result = data.toJSON() as [number[]]
-    const ActiveFixedRentalContractList = await Promise.all(
-      result.map(async (contract: number[]) => {
-        const list = {} as ActiveFixedContractType
-        list.nftId = contract[0]
-        list.contractEndingBlockId = contract[1]
-        list.contractEndingDate = await blockNumberToDate(contract[1])
-        return list
+    return {
+      fixedQueue: fixedQueue.map((queue) => {
+        return {
+          nftId: queue[0],
+          endingBlockId: queue[1],
+        }
       }),
-    )
-    return ActiveFixedRentalContractList as ActiveFixedContractType[]
-  } catch (error) {
-    throw new Error(`${Errors.RENT_NFT_CONVERSION_ERROR}`)
-  }
-}
-
-/**
- * @name getActiveSubscribedRentalContracts
- * @summary       Provides the data related to activated subscribed contract deadlines.
- * @returns       An Array of object with the NFT ID, the block expriation ID, a date of expiration.
- */
-export const getActiveSubscribedRentalContracts = async (): Promise<ActiveSubscribedContractType[]> => {
-  const data = await query(txPallets.rent, chainQuery.subscriptionQueue)
-  if (data.isEmpty) {
-    return []
-  }
-  try {
-    const result = data.toJSON() as [number[]]
-    const ActiveSubscribedContractList = await Promise.all(
-      result.map(async (contract: number[]) => {
-        const list = {} as ActiveSubscribedContractType
-        list.nftId = contract[0]
-        list.contractRenewalOrEndBlockId = contract[1]
-        list.contractRenewalOrEndDate = await blockNumberToDate(contract[1])
-        return list
+      subscriptionQueue: subscriptionQueue.map((queue) => {
+        return {
+          nftId: queue[0],
+          renewalOrEndBlockId: queue[1],
+        }
       }),
-    )
-    return ActiveSubscribedContractList as ActiveSubscribedContractType[]
+      availableQueue: availableQueue.map((queue) => {
+        return {
+          nftId: queue[0],
+          expirationBlockId: queue[1],
+        }
+      }),
+    } as RentingQueuesType
   } catch (error) {
     throw new Error(`${Errors.RENT_NFT_CONVERSION_ERROR}`)
   }

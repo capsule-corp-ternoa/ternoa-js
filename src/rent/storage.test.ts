@@ -1,15 +1,14 @@
 import BN from "bn.js"
 
-import { createContract, rent, revokeContract } from "./extrinsics"
-import { AcceptanceAction, DurationAction, RentFeeAction, RevocationAction } from "./enum"
+import { acceptRentOffer, createContract, makeRentOffer, rent, revokeContract } from "./extrinsics"
 import {
-  getActiveFixedRentalContracts,
-  getActiveSubscribedRentalContracts,
-  getAvailableRentalContracts,
-  getRentalContractData,
-  getRentalContractNumber,
-  getRentalOffers,
-} from "./storage"
+  AcceptanceAction,
+  CancellationFeeAction,
+  DurationAction,
+  RentFeeAction,
+  SubscriptionActionDetails,
+} from "./enum"
+import { getRentalContractData, getRentalOffers, getRentingQueues } from "./storage"
 
 import { initializeApi } from "../blockchain"
 import { WaitUntil } from "../constants"
@@ -30,38 +29,42 @@ beforeAll(async () => {
   TEST_DATA.nftId = nEvent.nftId
   await createContract(
     TEST_DATA.nftId,
-    DurationAction.Infinite,
+    {
+      [DurationAction.Fixed]: 1000,
+    },
     {
       [AcceptanceAction.ManualAcceptance]: null,
     },
-    RevocationAction.Anytime,
+    false,
     { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-    null,
-    null,
+    { [CancellationFeeAction.FlexibleTokens]: 1 },
+    CancellationFeeAction.None,
     testAccount,
     WaitUntil.BlockInclusion,
   )
 })
 
-describe("Testing global contracts data", (): void => {
-  it("Should return the number of rental contracts available", async () => {
-    const numberOfContracts = await getRentalContractNumber()
-    expect(numberOfContracts >= 1).toBe(true)
+describe("Testing Contracts in Queue", (): void => {
+  it("Should return nftId and ExpriationBlockId of the first available queue", async () => {
+    const { availableQueue } = await getRentingQueues()
+    const filteredContract = availableQueue.filter((x) => x.nftId === TEST_DATA.nftId)
+    expect(filteredContract[0].nftId >= TEST_DATA.nftId && filteredContract[0].expirationBlockId >= 0).toBe(true)
   })
-  it("Should return the id, blocknumber and date for an available contract", async () => {
-    const data = await getAvailableRentalContracts()
-    const today = new Date()
-    expect(data[0].nftId > 0 && data[0].contractExpirationBlockId > 0 && data[0].contractExpirationDate > today).toBe(
-      true,
-    )
-  })
-})
 
-it("Should return the address of the offer made on an NFT", async () => {
-  const { dest: destAccount } = await createTestPairs()
-  const { rentee } = await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
-  const offer = await getRentalOffers(TEST_DATA.nftId)
-  expect(rentee === destAccount.address && offer[0] === rentee).toBe(true)
+  it("Should return the address of the offer made on an NFT", async () => {
+    const { dest: destAccount } = await createTestPairs()
+    const { rentee } = await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const offer = await getRentalOffers(TEST_DATA.nftId)
+    expect(rentee === destAccount.address && offer[0] === rentee).toBe(true)
+  })
+
+  it("Should return the nftId and endingBlockId of the first fixed queue running contract", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    await acceptRentOffer(TEST_DATA.nftId, destAccount.address, testAccount, WaitUntil.BlockInclusion)
+    const { fixedQueue } = await getRentingQueues()
+    const filteredContract = fixedQueue.filter((x) => x.nftId === TEST_DATA.nftId)
+    expect(filteredContract[0].nftId >= TEST_DATA.nftId && filteredContract[0].endingBlockId >= 0).toBe(true)
+  })
 })
 
 describe("Testing Rental Contract data", (): void => {
@@ -70,55 +73,39 @@ describe("Testing Rental Contract data", (): void => {
     expect(maybeRentContract != null).toBe(true)
   })
   it("Should return null if an invalid Rental Contract ID (the nftID) is passed", async () => {
-    const { test: testAccount } = await createTestPairs()
-    await revokeContract(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
+    const { dest: destAccount } = await createTestPairs()
+    await revokeContract(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
     const maybeRentContract = await getRentalContractData(TEST_DATA.nftId)
     expect(maybeRentContract).toBeNull()
   })
 })
 
-describe("Testing Active Rental Contracts data", (): void => {
-  it("Should return the id, blocknumber and date for an active fixed contract", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    await createContract(
-      TEST_DATA.nftId,
-      { [DurationAction.Fixed]: 30 },
-      {
-        [AcceptanceAction.AutoAcceptance]: null,
+it("Should return the nftId and renewalOrEndBlockId of the first subscription queue running contract", async () => {
+  const { test: testAccount, dest: destAccount } = await createTestPairs()
+  const { duration } = await createContract(
+    TEST_DATA.nftId,
+    {
+      [DurationAction.Subscription]: {
+        [SubscriptionActionDetails.PeriodLength]: 5,
+        [SubscriptionActionDetails.MaxDuration]: 10,
+        [SubscriptionActionDetails.IsChangeable]: false,
       },
-      RevocationAction.Anytime,
-      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-      null,
-      null,
-      testAccount,
-      WaitUntil.BlockInclusion,
-    )
-    await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
-    const data = await getActiveFixedRentalContracts()
-    const today = new Date()
-    expect(data[0].nftId > 0 && data[0].contractEndingBlockId > 0 && data[0].contractEndingDate > today).toBe(true)
-  })
-  it("Should return the id, blocknumber and date for an active subscription contract", async () => {
-    const { test: testAccount, dest: destAccount } = await createTestPairs()
-    await revokeContract(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
-    await createContract(
-      TEST_DATA.nftId,
-      { [DurationAction.Subscription]: [10, 20] },
-      {
-        [AcceptanceAction.AutoAcceptance]: null,
-      },
-      RevocationAction.Anytime,
-      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-      null,
-      null,
-      testAccount,
-      WaitUntil.BlockInclusion,
-    )
-    await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
-    const data = await getActiveSubscribedRentalContracts()
-    const today = new Date()
-    expect(
-      data[0].nftId > 0 && data[0].contractRenewalOrEndBlockId > 0 && data[0].contractRenewalOrEndDate > today,
-    ).toBe(true)
-  })
+    },
+    {
+      [AcceptanceAction.AutoAcceptance]: null,
+    },
+    false,
+    { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
+    CancellationFeeAction.None,
+    CancellationFeeAction.None,
+    testAccount,
+    WaitUntil.BlockInclusion,
+  )
+  await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+  const { subscriptionQueue } = await getRentingQueues()
+  const filteredContract = subscriptionQueue.filter((x) => x.nftId === TEST_DATA.nftId)
+  expect(
+    filteredContract[0].nftId >= TEST_DATA.nftId &&
+      filteredContract[0].renewalOrEndBlockId >= duration[DurationAction.Subscription].periodLength,
+  ).toBe(true)
 })
