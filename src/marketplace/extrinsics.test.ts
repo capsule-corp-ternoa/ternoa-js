@@ -1,7 +1,7 @@
 import { createTestPairs } from "../_misc/testingPairs"
 import { initializeApi, numberToBalance } from "../blockchain"
 import { WaitUntil } from "../constants"
-import { createNft, getNftData } from "../nft"
+import { createCollection, createNft, getNftData } from "../nft"
 
 import { MarketplaceConfigAction, MarketplaceConfigFeeType, MarketplaceKind } from "./enum"
 import {
@@ -36,12 +36,19 @@ describe("Testing Marketplace extrinsics", (): void => {
 
   it("Testing to set all marketplace parameters configuration", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const { collectionId } = await createCollection(
+      "SDK_COLLECTION_TESTING",
+      undefined,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     const mpEvent = await setMarketplaceConfiguration(
       TEST_DATA.marketplaceId,
       { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Percentage]: 10 } },
       { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Flat]: 100 } },
       { [MarketplaceConfigAction.Set]: [destAccount.address] },
-      { [MarketplaceConfigAction.Set]: "Hello" },
+      { [MarketplaceConfigAction.Set]: "SDK_MARKETPLACE_CONFIG_TEST" },
+      { [MarketplaceConfigAction.Set]: [collectionId] },
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -56,7 +63,8 @@ describe("Testing Marketplace extrinsics", (): void => {
         mpEvent.listingFeeType === MarketplaceConfigFeeType.Flat &&
         mpEvent.accountList?.length === 1 &&
         mpEvent.accountList?.includes(destAccount.address) &&
-        mpEvent.offchainData === "Hello",
+        mpEvent.offchainData === "SDK_MARKETPLACE_CONFIG_TEST" &&
+        mpEvent.collectionList?.includes(collectionId),
     ).toBe(true)
   })
   it("Testing to Remove and keep(Noop) the marketplace parameters configuration", async (): Promise<void> => {
@@ -67,6 +75,7 @@ describe("Testing Marketplace extrinsics", (): void => {
       MarketplaceConfigAction.Remove,
       MarketplaceConfigAction.Remove,
       MarketplaceConfigAction.Noop,
+      MarketplaceConfigAction.Remove,
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -78,7 +87,8 @@ describe("Testing Marketplace extrinsics", (): void => {
         mpEvent.listingFeeRounded === null &&
         mpEvent.listingFeeType === null &&
         mpEvent.accountList?.length === 0 &&
-        mpEvent.offchainData === undefined,
+        mpEvent.offchainData === undefined &&
+        mpEvent.collectionList?.length === 0,
     ).toBe(true)
   })
 
