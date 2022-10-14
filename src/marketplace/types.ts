@@ -24,6 +24,10 @@ export type OffchainDataType =
   | MarketplaceConfigAction.Noop
   | MarketplaceConfigAction.Remove
   | { [MarketplaceConfigAction.Set]: string }
+export type CollectionListType =
+  | MarketplaceConfigAction.Noop
+  | MarketplaceConfigAction.Remove
+  | { [MarketplaceConfigAction.Set]: number[] }
 
 export type MarketplaceDataType = {
   owner: string
@@ -32,6 +36,7 @@ export type MarketplaceDataType = {
   listingFee: IFeeType | undefined
   accountList: string[] | undefined
   offchainData: string | undefined
+  collectionList: number[] | undefined
 }
 
 export interface IListedNft {

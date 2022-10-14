@@ -102,7 +102,7 @@ export const cancelContractTx = async (nftId: number): Promise<TransactionHashTy
 
 /**
  * @name cancelContract
- * @summary               Cancel a contract that is not running.
+ * @summary               Cancels a contract that is not running.
  * @param nftId           The NFT Id of the contract to cancel.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -130,7 +130,7 @@ export const revokeContractTx = async (nftId: number): Promise<TransactionHashTy
 
 /**
  * @name revokeContract
- * @summary               Revoke a running contract.
+ * @summary               Revokes a running contract.
  * @param nftId           The NFT Id of the contract to revoke.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -158,7 +158,7 @@ export const rentTx = async (nftId: number): Promise<TransactionHashType> => {
 
 /**
  * @name rent
- * @summary               Rent an nft.
+ * @summary               Rents an nft.
  * @param nftId           The NFT Id of the contract to rent.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -186,7 +186,7 @@ export const makeRentOfferTx = async (nftId: number): Promise<TransactionHashTyp
 
 /**
  * @name makeRentOffer
- * @summary               Make an offer for an available contract.
+ * @summary               Makes an offer for an available contract.
  * @param nftId           The NFT Id of the contract to make the offer.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -214,7 +214,7 @@ export const retractRentOfferTx = async (nftId: number): Promise<TransactionHash
 
 /**
  * @name retractRentOffer
- * @summary               Retract a rent offer for manual acceptance contract.
+ * @summary               Retracts a rent offer for manual acceptance contract.
  * @param nftId           The NFT Id of the contract to retract the offer.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -243,7 +243,7 @@ export const acceptRentOfferTx = async (nftId: number, rentee: string): Promise<
 
 /**
  * @name acceptRentOffer
- * @summary               Accept a rent offer for manual acceptance contract.
+ * @summary               Accepts a rent offer for manual acceptance contract.
  * @param nftId           The NFT Id of the contract to retract the offer.
  * @param rentee          The adresse of the rentee who made the offer.
  * @param keyring         Account that will sign the transaction.
@@ -291,7 +291,7 @@ export const changeSubscriptionTermsTx = async (
 
 /**
  * @name changeSubscriptionTerms
- * @summary               Change the subscription terms for subscription contracts.
+ * @summary               Changes the subscription terms for subscription contracts.
  * @param nftId           The NFT Id of the contract to change the subscription terms.
  * @param rentFee         The fee to rent the contract: a token amount
  * @param period          The period of subscription before renewal
@@ -327,7 +327,7 @@ export const acceptSubscriptionTermsTx = async (nftId: number): Promise<Transact
 
 /**
  * @name acceptSubscriptionTerms
- * @summary               Change the subscription terms for subscription contracts.
+ * @summary               Accepts the subscription terms for subscription contracts.
  * @param nftId           The NFT Id of the contract to change the subscription terms.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.

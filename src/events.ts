@@ -917,6 +917,7 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
   listingFeeRounded?: number | null
   accountList?: string[]
   offchainData?: string | null
+  collectionList?: number[] | null
 
   /**
    * Construct the data object from MarketplaceConfigSetEvent event
@@ -924,7 +925,7 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.MarketplaceConfigSet)
-    const [marketplaceId, commissionFee, listingFee, accountList, offchainData] = event.data
+    const [marketplaceId, commissionFee, listingFee, accountList, offchainData, collectionList] = event.data
 
     const isCommissionFeeSet = commissionFee.toString() !== "Noop" && commissionFee.toString() !== "Remove"
     const isCommissionFeeRemoved = commissionFee.toString() === "Remove"
@@ -934,6 +935,8 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
     const isAccountListRemoved = accountList.toString() === "Remove"
     const isOffchainDataSet = offchainData.toString() !== "Noop" && offchainData.toString() !== "Remove"
     const isOffchainDataRemoved = offchainData.toString() === "Remove"
+    const isCollectionListSet = collectionList.toString() !== "Noop" && collectionList.toString() !== "Remove"
+    const isCollectionListRemoved = collectionList.toString() === "Remove"
 
     this.marketplaceId = Number.parseInt(marketplaceId.toString())
     this.commissionFeeType = undefined
@@ -944,6 +947,7 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
     this.listingFeeRounded = undefined
     this.accountList = undefined
     this.offchainData = undefined
+    this.collectionList = undefined
 
     if (isCommissionFeeSet) {
       const parsedDatas = JSON.parse(commissionFee.toString())
@@ -988,6 +992,14 @@ export class MarketplaceConfigSetEvent extends BlockchainEvent {
       this.offchainData = hexToString(parsedDatas.set.toString())
     } else if (isOffchainDataRemoved) {
       this.offchainData = null
+    }
+
+    if (isCollectionListSet) {
+      this.collectionList = []
+      const parsedDatas = JSON.parse(collectionList.toString())
+      parsedDatas.set.map((collection: number) => this.collectionList?.push(collection))
+    } else if (isCollectionListRemoved) {
+      this.collectionList = []
     }
   }
 }
