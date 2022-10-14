@@ -1,12 +1,13 @@
 import BN from "bn.js"
 import { IKeyringPair } from "@polkadot/types/types"
 
-import { AcceptanceType, CancellationFeeType, DurationType, RentFeeType, RevocationType } from "./types"
+import { AcceptanceType, CancellationFeeType, DurationType, RentFeeType } from "./types"
 import { formatRentContractFee } from "./utils"
 
 import { createTxHex, numberToBalance, submitTxBlocking, TransactionHashType } from "../blockchain"
 import { txActions, txPallets, WaitUntil } from "../constants"
 import {
+  ContractCanceledEvent,
   ContractCreatedEvent,
   ContractOfferCreatedEvent,
   ContractOfferRetractedEvent,
@@ -20,22 +21,22 @@ import {
  * @name createContractTx
  * @summary                         Creates an unsigned unsubmitted Create-Rent-Contract Transaction Hash for an NFT.
  * @param nftId                     The NFT Id of the contract.
- * @param duration                  The contract duration : Fixed, Subscription or Infinite
- * @param acceptanceType            The type of acceptance: automatic or manuall
- * @param revocationType            The type/periode of revocation: NoRevocation, OnSubscriptionChange, Anytime
+ * @param duration                  The contract duration : Fixed(EndBlock (a block number)) or Subscription(Period (a block number), MaxDuration (a block number), IsChangeable (a boolean))
+ * @param acceptanceType            The type of acceptance: automatic or manuall (with or without whitelist)
+ * @param renterCanRevoke           A boolean to allow renter to cancel the contract once started
  * @param rentFee                   The fee to rent the contract: a token amount or an NFT
- * @param renterCancellationFee     The fee to cancel the contract (due by the renter): FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
- * @param renteeCancellationFee     The fee to cancel the contract (due by the rentee): FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
+ * @param renterCancellationFee     The fee to cancel the contract (due by the renter): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
+ * @param renteeCancellationFee     The fee to cancel the contract (due by the rentee): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
  * @returns                         Unsigned unsubmitted Create-Rent-Contract Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const createContractTx = async (
   nftId: number,
   duration: DurationType,
   acceptanceType: AcceptanceType,
-  revocationType: RevocationType,
+  renterCanRevoke: boolean,
   rentFee: RentFeeType,
-  renterCancellationFee: CancellationFeeType | null = null,
-  renteeCancellationFee: CancellationFeeType | null = null,
+  renterCancellationFee: CancellationFeeType,
+  renteeCancellationFee: CancellationFeeType,
 ): Promise<TransactionHashType> => {
   await formatRentContractFee(rentFee)
   if (renterCancellationFee) await formatRentContractFee(renterCancellationFee)
@@ -44,7 +45,7 @@ export const createContractTx = async (
     nftId,
     duration,
     acceptanceType,
-    revocationType,
+    renterCanRevoke,
     rentFee,
     renterCancellationFee,
     renteeCancellationFee,
@@ -55,12 +56,12 @@ export const createContractTx = async (
  * @name createContract
  * @summary                         Creates a rental contract on the chain for an NFT.
  * @param nftId                     The NFT Id of the contract.
- * @param duration                  The contract duration : Fixed, Subscription or Infinite
- * @param acceptanceType            The type of acceptance: automatic or manuall
- * @param revocationType            The type/periode of revocation: NoRevocation, OnSubscriptionChange, Anytime
+ * @param duration                  The contract duration : Fixed(EndBlock (a block number)) or Subscription(Period (a block number), MaxDuration (a block number), IsChangeable (a boolean))
+ * @param acceptanceType            The type of acceptance: automatic or manuall (with or without whitelist)
+ * @param renterCanRevoke           A boolean to allow renter to cancel the contract once started
  * @param rentFee                   The fee to rent the contract: a token amount or an NFT
- * @param renterCancellationFee     The fee to cancel the contract (due by the renter): FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
- * @param renteeCancellationFee     The fee to cancel the contract (due by the rentee): FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
+ * @param renterCancellationFee     The fee to cancel the contract (due by the renter): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
+ * @param renteeCancellationFee     The fee to cancel the contract (due by the rentee): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
  * @param keyring                   Account that will sign the transaction.
  * @param waitUntil                 Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns                         ContractCreatedEvent Blockchain event.
@@ -69,10 +70,10 @@ export const createContract = async (
   nftId: number,
   duration: DurationType,
   acceptanceType: AcceptanceType,
-  revocationType: RevocationType,
+  renterCanRevoke: boolean,
   rentFee: RentFeeType,
-  renterCancellationFee: CancellationFeeType | null = null,
-  renteeCancellationFee: CancellationFeeType | null = null,
+  renterCancellationFee: CancellationFeeType,
+  renteeCancellationFee: CancellationFeeType,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractCreatedEvent> => {
@@ -80,13 +81,41 @@ export const createContract = async (
     nftId,
     duration,
     acceptanceType,
-    revocationType,
+    renterCanRevoke,
     rentFee,
     renterCancellationFee,
     renteeCancellationFee,
   )
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractCreatedEvent)
+}
+
+/**
+ * @name cancelContractTx
+ * @summary               Creates an unsigned unsubmitted Cancel-Rent-Contract Transaction Hash for an NFT.
+ * @param nftId           The NFT Id of the contract to cancel.
+ * @returns               Unsigned unsubmitted Cancel-Rent-Contract Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const cancelContractTx = async (nftId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.rent, txActions.cancelContract, [nftId])
+}
+
+/**
+ * @name cancelContract
+ * @summary               Cancel a contract that is not running.
+ * @param nftId           The NFT Id of the contract to cancel.
+ * @param keyring         Account that will sign the transaction.
+ * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns               ContractCanceledEvent Blockchain event.
+ */
+export const cancelContract = async (
+  nftId: number,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<ContractCanceledEvent> => {
+  const tx = await cancelContractTx(nftId)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(ContractCanceledEvent)
 }
 
 /**
@@ -101,7 +130,7 @@ export const revokeContractTx = async (nftId: number): Promise<TransactionHashTy
 
 /**
  * @name revokeContract
- * @summary               Revoke a rent contract, cancel it if it has not started.
+ * @summary               Revoke a running contract.
  * @param nftId           The NFT Id of the contract to revoke.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -129,7 +158,7 @@ export const rentTx = async (nftId: number): Promise<TransactionHashType> => {
 
 /**
  * @name rent
- * @summary               Rent an nft if contract exist, makes an offer if contract acceptance is manual acceptance.
+ * @summary               Rent an nft.
  * @param nftId           The NFT Id of the contract to rent.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -139,11 +168,37 @@ export const rent = async (
   nftId: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
-): Promise<ContractStartedEvent | ContractOfferCreatedEvent> => {
+): Promise<ContractStartedEvent> => {
   const tx = await rentTx(nftId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
-  const startedEvent = events.findEvent(ContractStartedEvent)
-  if (startedEvent) return startedEvent
+  return events.findEventOrThrow(ContractStartedEvent)
+}
+
+/**
+ * @name makeRentOfferTx
+ * @summary               Creates an unsigned unsubmitted Make-Rent-Offer Transaction Hash for an NFT.
+ * @param nftId           The NFT Id of the contract to make the offer.
+ * @returns               Unsigned unsubmitted Make-Rent-Offer Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const makeRentOfferTx = async (nftId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.rent, txActions.makeRentOffer, [nftId])
+}
+
+/**
+ * @name makeRentOffer
+ * @summary               Make an offer for an available contract.
+ * @param nftId           The NFT Id of the contract to make the offer.
+ * @param keyring         Account that will sign the transaction.
+ * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns               ContractOfferCreated Blockchain event
+ */
+export const makeRentOffer = async (
+  nftId: number,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<ContractOfferCreatedEvent> => {
+  const tx = await makeRentOfferTx(nftId)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractOfferCreatedEvent)
 }
 
@@ -210,38 +265,52 @@ export const acceptRentOffer = async (
  * @name changeSubscriptionTermsTx
  * @summary               Creates an unsigned unsubmitted Change-Contract-Subscription-Terms Transaction Hash for an NFT.
  * @param nftId           The NFT Id of the contract to change the subscription terms.
- * @param duration        The contract duration : Fixed, Subscription or Infinite
- * @param amount          The fee to rent the contract: a token amount
+ * @param rentFee         The fee to rent the contract: a token amount
+ * @param period          The period of subscription before renewal
+ * @param maxDuration     The contract duration (in block). Optional, default is null.
+ * @param isChangeable    A boolean to make the contract updatable.
  * @returns               Unsigned unsubmitted Change-Contract-Subscription-Terms Transaction Hash. The Hash is only valid for 5 minutes.
  */
 
 export const changeSubscriptionTermsTx = async (
   nftId: number,
-  duration: DurationType,
-  amount: number | BN,
+  rentFee: BN | number,
+  period: number,
+  maxDuration: number | null = null,
+  isChangeable: boolean,
 ): Promise<TransactionHashType> => {
-  if (typeof amount === "number") await numberToBalance(amount)
-  return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [nftId, duration, amount])
+  const formattedFee = typeof rentFee === "number" ? await numberToBalance(rentFee) : rentFee
+  return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [
+    nftId,
+    formattedFee,
+    period,
+    maxDuration,
+    isChangeable,
+  ])
 }
 
 /**
  * @name changeSubscriptionTerms
  * @summary               Change the subscription terms for subscription contracts.
  * @param nftId           The NFT Id of the contract to change the subscription terms.
- * @param duration        The contract duration : Fixed, Subscription or Infinite
- * @param amount          The fee to rent the contract: a token amount
+ * @param rentFee         The fee to rent the contract: a token amount
+ * @param period          The period of subscription before renewal
+ * @param maxDuration     The contract duration (in block). Optional, default is null.
+ * @param isChangeable    A boolean to make the contract updatable.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               ContractSubscriptionTermsChangedEvent Blockchain event
  */
 export const changeSubscriptionTerms = async (
   nftId: number,
-  duration: DurationType,
-  amount: number | BN,
+  rentFee: BN | number,
+  period: number,
+  maxDuration: number | null = null,
+  isChangeable: boolean,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractSubscriptionTermsChangedEvent> => {
-  const tx = await changeSubscriptionTermsTx(nftId, duration, amount)
+  const tx = await changeSubscriptionTermsTx(nftId, rentFee, period, maxDuration, isChangeable)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractSubscriptionTermsChangedEvent)
 }

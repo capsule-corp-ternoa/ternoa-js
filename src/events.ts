@@ -784,12 +784,12 @@ export class ContractOfferRetractedEvent extends BlockchainEvent {
  */
 export class ContractSubscriptionTermsChangedEvent extends BlockchainEvent {
   nftId: number
-  durationType?: string
-  blockDuration?: number | null
-  blockSubscriptionRenewal?: number | null
-  rentFeeType?: string
-  rentFee?: string | number
-  rentFeeRounded?: number
+  period: number
+  maxDuration: number
+  isChangeable: boolean
+  rentFeeType: string
+  rentFee: string | number
+  rentFeeRounded: number
 
   /**
    * Construct the data object from the ContractSubscriptionTermsChangedEvent event
@@ -797,16 +797,14 @@ export class ContractSubscriptionTermsChangedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.ContractSubscriptionTermsChanged)
-    const [nftId, duration, rentFee] = event.data
-    const parsedDuration = JSON.parse(duration.toString())
-    const parsedRentFee = JSON.parse(rentFee.toString())
+    const [nftId, period, maxDuration, isChangeable, rentFee] = event.data
+
     this.nftId = Number.parseInt(nftId.toString())
-    this.durationType = DurationAction.Subscription
-    this.blockDuration = Number.parseInt(parsedDuration.subscription[0].toString())
-    this.blockSubscriptionRenewal =
-      parsedDuration.subscription[1] && Number.parseInt(parsedDuration.subscription[1].toString())
+    this.period = Number.parseInt(period.toString())
+    this.maxDuration = Number.parseInt(maxDuration.toString())
+    this.isChangeable = Boolean(isChangeable.toString() === "true")
     this.rentFeeType = RentFeeAction.Tokens
-    this.rentFee = bnToBn(parsedRentFee.tokens).toString()
+    this.rentFee = bnToBn(rentFee.toString()).toString()
     this.rentFeeRounded = roundBalance(this.rentFee)
   }
 }
