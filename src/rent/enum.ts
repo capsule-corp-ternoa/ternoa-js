@@ -15,12 +15,6 @@ export enum AcceptanceAction {
   ManualAcceptance = "manualAcceptance",
 }
 
-export enum RevocationAction {
-  NoRevocation = "NoRevocation",
-  OnSubscriptionChange = "OnSubscriptionChange",
-  Anytime = "Anytime",
-}
-
 export enum RentFeeAction {
   Tokens = "tokens",
   NFT = "NFT",

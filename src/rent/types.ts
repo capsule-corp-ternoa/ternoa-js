@@ -4,7 +4,6 @@ import {
   CancellationFeeAction,
   DurationAction,
   RentFeeAction,
-  RevocationAction,
   SubscriptionActionDetails,
 } from "./enum"
 
@@ -43,7 +42,6 @@ export type RentalContractDataType = {
   duration: DurationType
   acceptanceType: AcceptanceAction
   acceptanceList: string[]
-  revocationType: RevocationAction
   rentFeeType: RentFeeAction
   rentFee: string | number
   rentFeeRounded: number
