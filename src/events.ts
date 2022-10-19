@@ -64,7 +64,6 @@ export enum EventType {
   AuctionCompleted = "auction.AuctionCompleted",
   BidAdded = "auction.BidAdded",
   BidRemoved = "auction.BidRemoved",
-  BidUpdated = "auction.BidUpdated",
   BalanceClaimed = "auction.BalanceClaimed",
 
   // Utility
@@ -186,8 +185,6 @@ export class BlockchainEvent {
         return new BidAddedEvent(event)
       case EventType.BidRemoved:
         return new BidRemovedEvent(event)
-      case EventType.BidUpdated:
-        return new BidUpdatedEvent(event)
       case EventType.BalanceClaimed:
         return new BalanceClaimedEvent(event)
       // Utility
@@ -1279,30 +1276,6 @@ export class BidRemovedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BidRemoved)
-    const [nftId, bidder, amount] = event.data
-
-    this.nftId = Number.parseInt(nftId.toString())
-    this.bidder = bidder.toString()
-    this.amount = amount.toString()
-    this.amountRounded = roundBalance(this.amount)
-  }
-}
-
-/**
- * This class represents the on-chain BidUpdated event.
- */
-export class BidUpdatedEvent extends BlockchainEvent {
-  nftId: number
-  bidder: string // AccountId32
-  amount: string // u128
-  amountRounded: number
-
-  /**
-   * Construct the data object from the BidUpdated event
-   * @param event The BidUpdated event
-   */
-  constructor(event: Event) {
-    super(event, EventType.BidUpdated)
     const [nftId, bidder, amount] = event.data
 
     this.nftId = Number.parseInt(nftId.toString())

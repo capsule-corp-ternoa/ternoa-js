@@ -143,21 +143,6 @@ describe("Testing to create an auction & add/update/remove bids", (): void => {
     ).toBe(true)
   })
 
-  // it("Testing to update a bid", async (): Promise<void> => {
-  //   const { dest: destAccount } = await createTestPairs()
-  //   const bidAmount = 20
-  //   const bidAmountBN = await numberToBalance(bidAmount)
-  //   const aEvent = await addBid(TEST_DATA.nftId, bidAmount, destAccount, WaitUntil.BlockInclusion)
-
-  //   expect(
-  //     aEvent.method === "BidUpdated" &&
-  //       aEvent.nftId === TEST_DATA.nftId &&
-  //       aEvent.amount === bidAmountBN.toString() &&
-  //       aEvent.amountRounded === bidAmount &&
-  //       aEvent.bidder === destAccount.address,
-  //   ).toBe(true)
-  // })
-
   it("Testing to remove a bid", async (): Promise<void> => {
     const { dest: destAccount } = await createTestPairs()
     const bidAmount = 10
