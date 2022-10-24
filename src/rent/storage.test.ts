@@ -10,7 +10,7 @@ import {
 } from "./enum"
 import { getRentalContractData, getRentalOffers, getRentingQueues } from "./storage"
 
-import { initializeApi } from "../blockchain"
+import { initializeApi, numberToBalance } from "../blockchain"
 import { WaitUntil } from "../constants"
 import { createNft } from "../nft"
 import { createTestPairs } from "../_misc/testingPairs"
@@ -25,7 +25,7 @@ beforeAll(async () => {
 
   // Create some Test NFT and a RentContract
   const { test: testAccount } = await createTestPairs()
-  const nEvent = await createNft("Test NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+  const nEvent = await createNft("TEST_NFT_DATA", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
   TEST_DATA.nftId = nEvent.nftId
   await createContract(
     TEST_DATA.nftId,
@@ -44,8 +44,34 @@ beforeAll(async () => {
   )
 })
 
-describe("Testing Contracts in Queue", (): void => {
-  it("Should return nftId and ExpriationBlockId of the first available queue", async () => {
+describe("Testing contracts in queue and getting contract datas", (): void => {
+  it("Should return the rent contract data when an NFT ID with a rent contract exists", async () => {
+    const { test: testAccount } = await createTestPairs()
+    const contract = await getRentalContractData(TEST_DATA.nftId)
+    const rentFee = (await numberToBalance(1)).toString()
+    const cancellationFee = (await numberToBalance(1)).toString()
+    expect(
+      contract?.startBlock == null &&
+        contract?.startBlockDate == null &&
+        contract?.renter == testAccount.address &&
+        contract.rentee == null &&
+        contract.duration[DurationAction.Fixed] == 1000 &&
+        contract.acceptance === AcceptanceAction.ManualAcceptance &&
+        contract.acceptanceList.length == 0 &&
+        contract.rentFee === RentFeeAction.Tokens &&
+        contract.rentFeeValue === rentFee &&
+        contract.rentFeeValueRounded === 1 &&
+        contract.renterCanRevoke == false &&
+        contract.renterCancellationFee === CancellationFeeAction.FlexibleTokens &&
+        contract.renterCancellationFeeValue === cancellationFee &&
+        contract.renterCancellationFeeValueRounded === 1 &&
+        contract.renteeCancellationFee === CancellationFeeAction.None &&
+        contract.renteeCancellationFeeValue === null &&
+        contract.renteeCancellationFeeValueRounded === null,
+    ).toBe(true)
+  })
+
+  it("Should return nftId and expriationBlockId of the first available queue", async () => {
     const { availableQueue } = await getRentingQueues()
     const filteredContract = availableQueue.filter((x) => x.nftId === TEST_DATA.nftId)
     expect(filteredContract[0].nftId >= TEST_DATA.nftId && filteredContract[0].expirationBlockId >= 0).toBe(true)
@@ -65,47 +91,41 @@ describe("Testing Contracts in Queue", (): void => {
     const filteredContract = fixedQueue.filter((x) => x.nftId === TEST_DATA.nftId)
     expect(filteredContract[0].nftId >= TEST_DATA.nftId && filteredContract[0].endingBlockId >= 0).toBe(true)
   })
-})
 
-describe("Testing Rental Contract data", (): void => {
-  it("Should return the Rent Contract Data when an NFT ID with a Rent contract exists", async () => {
-    const maybeRentContract = await getRentalContractData(TEST_DATA.nftId)
-    expect(maybeRentContract != null).toBe(true)
-  })
-  it("Should return null if an invalid Rental Contract ID (the nftID) is passed", async () => {
+  it("Should return null if an invalid rental contract ID (the nftID) is passed", async () => {
     const { dest: destAccount } = await createTestPairs()
     await revokeContract(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
     const maybeRentContract = await getRentalContractData(TEST_DATA.nftId)
     expect(maybeRentContract).toBeNull()
   })
-})
 
-it("Should return the nftId and renewalOrEndBlockId of the first subscription queue running contract", async () => {
-  const { test: testAccount, dest: destAccount } = await createTestPairs()
-  const { duration } = await createContract(
-    TEST_DATA.nftId,
-    {
-      [DurationAction.Subscription]: {
-        [SubscriptionActionDetails.PeriodLength]: 5,
-        [SubscriptionActionDetails.MaxDuration]: 10,
-        [SubscriptionActionDetails.IsChangeable]: false,
+  it("Should return the nftId and renewalOrEndBlockId of the first subscription queue running contract", async () => {
+    const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const { duration } = await createContract(
+      TEST_DATA.nftId,
+      {
+        [DurationAction.Subscription]: {
+          [SubscriptionActionDetails.PeriodLength]: 5,
+          [SubscriptionActionDetails.MaxDuration]: 10,
+          [SubscriptionActionDetails.IsChangeable]: false,
+        },
       },
-    },
-    {
-      [AcceptanceAction.AutoAcceptance]: null,
-    },
-    false,
-    { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-    CancellationFeeAction.None,
-    CancellationFeeAction.None,
-    testAccount,
-    WaitUntil.BlockInclusion,
-  )
-  await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
-  const { subscriptionQueue } = await getRentingQueues()
-  const filteredContract = subscriptionQueue.filter((x) => x.nftId === TEST_DATA.nftId)
-  expect(
-    filteredContract[0].nftId >= TEST_DATA.nftId &&
-      filteredContract[0].renewalOrEndBlockId >= duration[DurationAction.Subscription].periodLength,
-  ).toBe(true)
+      {
+        [AcceptanceAction.AutoAcceptance]: null,
+      },
+      false,
+      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
+      CancellationFeeAction.None,
+      CancellationFeeAction.None,
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+    await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { subscriptionQueue } = await getRentingQueues()
+    const filteredContract = subscriptionQueue.filter((x) => x.nftId === TEST_DATA.nftId)
+    expect(
+      filteredContract[0].nftId >= TEST_DATA.nftId &&
+        filteredContract[0].renewalOrEndBlockId >= duration[DurationAction.Subscription].periodLength,
+    ).toBe(true)
+  })
 })

@@ -17,12 +17,12 @@ export enum AcceptanceAction {
 
 export enum RentFeeAction {
   Tokens = "tokens",
-  NFT = "NFT",
+  NFT = "nft",
 }
 
 export enum CancellationFeeAction {
   FixedTokens = "fixedTokens",
   FlexibleTokens = "flexibleTokens",
-  NFT = "NFT",
+  NFT = "nft",
   None = "None",
 }

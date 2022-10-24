@@ -5,7 +5,7 @@ import { bnToBn, hexToString } from "@polkadot/util"
 import { roundBalance } from "./helpers/utils"
 import { Errors } from "./constants"
 import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
-import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction } from "./rent/enum"
+import { AcceptanceAction, CancellationFeeAction, RentFeeAction } from "./rent/enum"
 import { DurationType } from "./rent/types"
 
 export enum EventType {
@@ -568,18 +568,18 @@ export class ContractCreatedEvent extends BlockchainEvent {
   nftId: number
   renter: string
   duration: DurationType
-  acceptanceType: AcceptanceAction
+  acceptance: AcceptanceAction
   acceptanceList: string[] | null
   renterCanRevoke: boolean
-  rentFeeType: RentFeeAction
-  rentFee: string | number
-  rentFeeRounded: number
-  renterCancellationFeeType?: CancellationFeeAction
-  renterCancellationFee?: string | number | null
-  renterCancellationFeeRounded?: number | null
-  renteeCancellationFeeType?: CancellationFeeAction
-  renteeCancellationFee?: string | number | null
-  renteeCancellationFeeRounded?: number | null
+  rentFee: RentFeeAction
+  rentFeeValue: string | number
+  rentFeeValueRounded: number
+  renterCancellationFee: CancellationFeeAction
+  renterCancellationFeeValue?: string | number | null
+  renterCancellationFeeValueRounded?: number | null
+  renteeCancellationFee: CancellationFeeAction
+  renteeCancellationFeeValue?: string | number | null
+  renteeCancellationFeeValueRounded?: number | null
 
   /**
    * Construct the data object from the ContractCreatedEvent event
@@ -600,83 +600,80 @@ export class ContractCreatedEvent extends BlockchainEvent {
 
     const parsedDuration = JSON.parse(duration.toString())
     const parsedAcceptance = JSON.parse(acceptanceType.toString())
-    const isAutoAcceptance = Boolean(parsedAcceptance.autoAcceptance === null || parsedAcceptance.autoAcceptance)
+    const isAutoAcceptance = AcceptanceAction.AutoAcceptance in parsedAcceptance
     const parsedRentFee = JSON.parse(rentFee.toString())
-    const isRentFeeToken = Boolean(parsedRentFee.tokens)
+    const isRentFeeToken = RentFeeAction.Tokens in parsedRentFee
     const parsedRenterCancellationFee =
       renterCancellationFee.toString() !== CancellationFeeAction.None && JSON.parse(renterCancellationFee.toString())
-    const isRenterCancellationFeeFixed = Boolean(parsedRenterCancellationFee.fixedTokens)
-    const isRenterCancellationFeeFlexible = Boolean(parsedRenterCancellationFee.flexibleTokens)
-    const isRenterCancellationFeeNft = Boolean(parsedRenterCancellationFee.nft >= 0)
     const parsedRenteeCancellationFee =
       renteeCancellationFee.toString() !== CancellationFeeAction.None && JSON.parse(renteeCancellationFee.toString())
-    const isRenteeCancellationFeeFixed = Boolean(parsedRenteeCancellationFee.fixedTokens)
-    const isRenteeCancellationFeeFlexible = Boolean(parsedRenteeCancellationFee.flexibleTokens)
-    const isRenteeCancellationFeeNft = Boolean(parsedRenteeCancellationFee.nft >= 0)
 
     this.nftId = Number.parseInt(nftId.toString())
     this.renter = renter.toString()
     this.duration = parsedDuration
-    this.renterCanRevoke = Boolean(renterCanRevoke.toString() === "true")
-    this.renterCancellationFeeType = undefined
-    this.renterCancellationFee = undefined
-    this.renterCancellationFeeRounded = undefined
-    this.renteeCancellationFeeType = undefined
-    this.renteeCancellationFee = undefined
-    this.renteeCancellationFeeRounded = undefined
-
+    this.renterCanRevoke = renterCanRevoke.toString() === "true"
     if (isAutoAcceptance) {
-      this.acceptanceType = AcceptanceAction.AutoAcceptance
+      this.acceptance = AcceptanceAction.AutoAcceptance
       this.acceptanceList = parsedAcceptance.autoAcceptance?.map((account: string) => account) ?? []
     } else {
-      this.acceptanceType = AcceptanceAction.ManualAcceptance
+      this.acceptance = AcceptanceAction.ManualAcceptance
       this.acceptanceList = parsedAcceptance.manualAcceptance?.map((account: string) => account) ?? []
     }
 
     if (isRentFeeToken) {
-      this.rentFeeType = RentFeeAction.Tokens
-      this.rentFee = bnToBn(parsedRentFee.tokens).toString()
-      this.rentFeeRounded = roundBalance(this.rentFee)
+      this.rentFee = RentFeeAction.Tokens
+      this.rentFeeValue = bnToBn(parsedRentFee[this.rentFee]).toString()
+      this.rentFeeValueRounded = roundBalance(this.rentFeeValue)
     } else {
-      this.rentFeeType = RentFeeAction.NFT
-      this.rentFee = Number.parseInt(parsedRentFee.nft.toString())
-      this.rentFeeRounded = this.rentFee
+      this.rentFee = RentFeeAction.NFT
+      this.rentFeeValue = Number.parseInt(parsedRentFee[this.rentFee].toString())
+      this.rentFeeValueRounded = this.rentFeeValue
     }
 
-    if (isRenterCancellationFeeFixed) {
-      this.renterCancellationFeeType = CancellationFeeAction.FixedTokens
-      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.fixedTokens).toString()
-      this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
-    } else if (isRenterCancellationFeeFlexible) {
-      this.renterCancellationFeeType = CancellationFeeAction.FlexibleTokens
-      this.renterCancellationFee = bnToBn(parsedRenterCancellationFee.flexibleTokens).toString()
-      this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
-    } else if (isRenterCancellationFeeNft) {
-      this.renterCancellationFeeType = CancellationFeeAction.NFT
-      this.renterCancellationFee = Number.parseInt(parsedRenterCancellationFee.nft.toString())
-      this.renterCancellationFeeRounded = this.renterCancellationFee
-    } else {
-      this.renterCancellationFeeType = CancellationFeeAction.None
-      this.renterCancellationFee = null
-      this.renterCancellationFeeRounded = this.renterCancellationFee
+    switch (true) {
+      case parsedRenterCancellationFee && CancellationFeeAction.FixedTokens in parsedRenterCancellationFee:
+        this.renterCancellationFee = CancellationFeeAction.FixedTokens
+        this.renterCancellationFeeValue = bnToBn(parsedRenterCancellationFee[this.renterCancellationFee]).toString()
+        this.renterCancellationFeeValueRounded = roundBalance(this.renterCancellationFeeValue)
+        break
+      case parsedRenterCancellationFee && CancellationFeeAction.FlexibleTokens in parsedRenterCancellationFee:
+        this.renterCancellationFee = CancellationFeeAction.FlexibleTokens
+        this.renterCancellationFeeValue = bnToBn(parsedRenterCancellationFee[this.renterCancellationFee]).toString()
+        this.renterCancellationFeeValueRounded = roundBalance(this.renterCancellationFeeValue)
+        break
+      case parsedRenterCancellationFee && CancellationFeeAction.NFT in parsedRenterCancellationFee:
+        this.renterCancellationFee = CancellationFeeAction.NFT
+        this.renterCancellationFeeValue = Number(parsedRenterCancellationFee[this.renterCancellationFee])
+        this.renterCancellationFeeValueRounded = this.renterCancellationFeeValue
+        break
+      default:
+        this.renterCancellationFee = CancellationFeeAction.None
+        this.renterCancellationFeeValue = null
+        this.renterCancellationFeeValueRounded = null
+        break
     }
 
-    if (isRenteeCancellationFeeFixed) {
-      this.renteeCancellationFeeType = CancellationFeeAction.FixedTokens
-      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.fixedTokens).toString()
-      this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
-    } else if (isRenteeCancellationFeeFlexible) {
-      this.renteeCancellationFeeType = CancellationFeeAction.FlexibleTokens
-      this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee.flexibleTokens).toString()
-      this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
-    } else if (isRenteeCancellationFeeNft) {
-      this.renteeCancellationFeeType = CancellationFeeAction.NFT
-      this.renteeCancellationFee = Number.parseInt(parsedRenteeCancellationFee.nft.toString())
-      this.renteeCancellationFeeRounded = this.renteeCancellationFee
-    } else {
-      this.renteeCancellationFeeType = CancellationFeeAction.None
-      this.renteeCancellationFee = null
-      this.renteeCancellationFeeRounded = this.renteeCancellationFee
+    switch (true) {
+      case parsedRenteeCancellationFee && CancellationFeeAction.FixedTokens in parsedRenteeCancellationFee:
+        this.renteeCancellationFee = CancellationFeeAction.FixedTokens
+        this.renteeCancellationFeeValue = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFee]).toString()
+        this.renteeCancellationFeeValueRounded = roundBalance(this.renteeCancellationFeeValue)
+        break
+      case parsedRenteeCancellationFee && CancellationFeeAction.FlexibleTokens in parsedRenteeCancellationFee:
+        this.renteeCancellationFee = CancellationFeeAction.FlexibleTokens
+        this.renteeCancellationFeeValue = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFee]).toString()
+        this.renteeCancellationFeeValueRounded = roundBalance(this.renteeCancellationFeeValue)
+        break
+      case parsedRenteeCancellationFee && CancellationFeeAction.NFT in parsedRenteeCancellationFee:
+        this.renteeCancellationFee = CancellationFeeAction.NFT
+        this.renteeCancellationFeeValue = Number(parsedRenteeCancellationFee[this.renteeCancellationFee])
+        this.renteeCancellationFeeValueRounded = this.renteeCancellationFeeValue
+        break
+      default:
+        this.renteeCancellationFee = CancellationFeeAction.None
+        this.renteeCancellationFeeValue = null
+        this.renteeCancellationFeeValueRounded = null
+        break
     }
   }
 }

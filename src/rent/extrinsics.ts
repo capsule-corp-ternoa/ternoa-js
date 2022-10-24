@@ -22,7 +22,7 @@ import {
  * @summary                         Creates an unsigned unsubmitted Create-Rent-Contract Transaction Hash for an NFT.
  * @param nftId                     The NFT Id of the contract.
  * @param duration                  The contract duration : Fixed(EndBlock (a block number)) or Subscription(Period (a block number), MaxDuration (a block number), IsChangeable (a boolean))
- * @param acceptanceType            The type of acceptance: automatic or manuall (with or without whitelist)
+ * @param acceptanceType            The type of acceptance: automatic or manual (with or without whitelist)
  * @param renterCanRevoke           A boolean to allow renter to cancel the contract once started
  * @param rentFee                   The fee to rent the contract: a token amount or an NFT
  * @param renterCancellationFee     The fee to cancel the contract (due by the renter): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
@@ -57,7 +57,7 @@ export const createContractTx = async (
  * @summary                         Creates a rental contract on the chain for an NFT.
  * @param nftId                     The NFT Id of the contract.
  * @param duration                  The contract duration : Fixed(EndBlock (a block number)) or Subscription(Period (a block number), MaxDuration (a block number), IsChangeable (a boolean))
- * @param acceptanceType            The type of acceptance: automatic or manuall (with or without whitelist)
+ * @param acceptanceType            The type of acceptance: automatic or manual (with or without whitelist)
  * @param renterCanRevoke           A boolean to allow renter to cancel the contract once started
  * @param rentFee                   The fee to rent the contract: a token amount or an NFT
  * @param renterCancellationFee     The fee to cancel the contract (due by the renter): No Fee (None), FixedTokens amount, FlexibleTokens (only for Fixed contract) amount or an NFT
