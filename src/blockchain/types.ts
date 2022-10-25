@@ -1,5 +1,3 @@
-import BN from "bn.js"
-
 import { BatchInterruptedEvent, BlockchainEvents, ExtrinsicFailedEvent, ItemFailedEvent } from "../events"
 
 import { BlockInfo } from "./utils"
@@ -37,7 +35,6 @@ export type SubmitTxBlockingType = {
 }
 
 export type TransactionHashType = `0x${string}`
-export type BalanceType = BN
 
 export type CheckTransactionType = {
   isTxSuccess: boolean

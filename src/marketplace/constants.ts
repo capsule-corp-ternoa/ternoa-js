@@ -1,4 +1,6 @@
-import { BalanceType, consts } from "../blockchain"
+import BN from "bn.js"
+
+import { consts } from "../blockchain"
 import { txPallets, chainConstants } from "../constants"
 
 /**
@@ -8,7 +10,7 @@ import { txPallets, chainConstants } from "../constants"
  */
 export const getMarketplaceOffchainDataLimit = async (): Promise<number> => {
   const limit = consts(txPallets.marketplace, chainConstants.offchainDataLimit)
-  return (limit as any as BalanceType).toNumber()
+  return (limit as any as BN).toNumber()
 }
 
 /**
@@ -18,5 +20,5 @@ export const getMarketplaceOffchainDataLimit = async (): Promise<number> => {
  */
 export const getMarketplaceAccountSizeLimit = async (): Promise<number> => {
   const limit = consts(txPallets.marketplace, chainConstants.accountSizeLimit)
-  return (limit as any as BalanceType).toNumber()
+  return (limit as any as BN).toNumber()
 }

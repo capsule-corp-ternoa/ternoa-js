@@ -1,8 +1,9 @@
 import { bnToBn, hexToString } from "@polkadot/util"
+import BN from "bn.js"
 
 import { IListedNft, MarketplaceDataType } from "./types"
 
-import { query, BalanceType, balanceToNumber } from "../blockchain"
+import { query, balanceToNumber } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
 
 /**
@@ -10,9 +11,9 @@ import { chainQuery, Errors, txPallets } from "../constants"
  * @summary               Fee to mint a Marketplace. (extra fee on top of the tx fees).
  * @returns               Marketplace mint fee.
  */
-export const getMarketplaceMintFee = async (): Promise<BalanceType> => {
+export const getMarketplaceMintFee = async (): Promise<BN> => {
   const fee = await query(txPallets.marketplace, chainQuery.marketplaceMintFee)
-  return fee as any as BalanceType
+  return fee as any as BN
 }
 
 /**
@@ -22,7 +23,7 @@ export const getMarketplaceMintFee = async (): Promise<BalanceType> => {
  */
 export const getNextMarketplaceId = async (): Promise<number> => {
   const id = await query(txPallets.marketplace, chainQuery.nextMarketplaceId)
-  return (id as any as BalanceType).toNumber()
+  return (id as any as BN).toNumber()
 }
 
 /**
