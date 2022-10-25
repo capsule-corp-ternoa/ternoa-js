@@ -26,12 +26,12 @@ export interface ICollectionData {
 export interface INFTMetadata {
   title: string
   description: string
-  file: File | null
+  file: File
 }
 
 export interface ICollectionMetadata {
   name: string
   description: string
-  profileFile: File | null
-  bannerFile: File | null
+  profileFile: File
+  bannerFile: File
 }

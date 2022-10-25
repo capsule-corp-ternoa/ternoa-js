@@ -9,30 +9,30 @@ import { BalancesTransferEvent } from "../events"
  * @name balancesTransferTx
  * @summary             Creates an unsigned unsubmitted Balance-Transfert Transaction Hash.
  * @param to            Public address of the account to transfer the amount to.
- * @param value         Token amount to transfer.
+ * @param amount        Token amount to transfer.
  * @returns             Unsigned unsubmitted Balance-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const balancesTransferTx = async (to: string, value: number | BN): Promise<TransactionHashType> => {
-  const amount = typeof value === "number" ? await numberToBalance(value) : value
-  return await createTxHex(txPallets.balances, txActions.transfer, [to, amount])
+export const balancesTransferTx = async (to: string, amount: number | BN): Promise<TransactionHashType> => {
+  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  return await createTxHex(txPallets.balances, txActions.transfer, [to, formattedAmount])
 }
 
 /**
  * @name balancesTransfer
  * @summary             Transfers some liquid free balance to another account.
  * @param to            Public address of the account to transfer the amount to.
- * @param value         Token amount to transfer.
+ * @param amount        Token amount to transfer.
  * @param keyring       Account that will sign the transaction.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns             BalancesTransferEvent Blockchain event.
  */
 export const balancesTransfer = async (
   to: string,
-  value: number | BN,
+  amount: number | BN,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<BalancesTransferEvent> => {
-  const tx = await balancesTransferTx(to, value)
+  const tx = await balancesTransferTx(to, amount)
   const events = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalancesTransferEvent)
 }
@@ -72,30 +72,30 @@ export const balancesTransferAll = async (
  * @name balancesTransferKeepAliveTx
  * @summary             Creates an unsigned unsubmitted Balance-TransfertKeepAlive Transaction Hash.
  * @param to            Public address of the account to transfer the amount to.
- * @param value         Token amount to transfer.
+ * @param amount        Token amount to transfer.
  * @returns             Unsigned unsubmitted Balance-TransfertKeepAlive Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const balancesTransferKeepAliveTx = async (to: string, value: number | BN): Promise<TransactionHashType> => {
-  const amount = typeof value === "number" ? await numberToBalance(value) : value
-  return await createTxHex(txPallets.balances, txActions.transferKeepAlive, [to, amount])
+export const balancesTransferKeepAliveTx = async (to: string, amount: number | BN): Promise<TransactionHashType> => {
+  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  return await createTxHex(txPallets.balances, txActions.transferKeepAlive, [to, formattedAmount])
 }
 
 /**
  * @name balancesTransferKeepAlive
  * @summary             Transfers some liquid free balance to another account with a check that the transfer will not kill the origin account.
  * @param to            Public address of the account to transfer the amount to.
- * @param value         Token amount to transfer.
+ * @param amount        Token amount to transfer.
  * @param keyring       Account that will sign the transaction.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns             BalancesTransferEvent Blockchain event.
  */
 export const balancesTransferKeepAlive = async (
   to: string,
-  value: number | BN,
+  amount: number | BN,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<BalancesTransferEvent> => {
-  const tx = await balancesTransferKeepAliveTx(to, value)
+  const tx = await balancesTransferKeepAliveTx(to, amount)
   const events = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(BalancesTransferEvent)
 }

@@ -13,7 +13,7 @@ import { Errors } from "../constants"
  */
 export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, apiKey?: string) => {
   const { description, file, title } = data
-  if (file === null) throw new Error(Errors.IPFS_FILE_NULL_ON_UPLOAD)
+  if (!file) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
   const { hash: fileHash } = await ipfsFileUpload(file, ipfsGateway, apiKey)
   const nftMetadata = {
     title,
@@ -22,9 +22,9 @@ export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, ap
     properties: {
       media: {
         hash: fileHash,
-        name: file?.name,
-        size: file?.size,
-        type: file?.type,
+        name: file.name,
+        size: file.size,
+        type: file.type,
       },
     },
   }
@@ -43,7 +43,7 @@ export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, ap
  */
 export const collectionIpfsUpload = async (data: ICollectionMetadata, ipfsGateway?: string, apiKey?: string) => {
   const { name, description, profileFile, bannerFile } = data
-  if (profileFile === null || bannerFile === null) throw new Error(Errors.IPFS_FILE_NULL_ON_UPLOAD)
+  if (!profileFile || !bannerFile) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
   const { hash: profileFileHash } = await ipfsFileUpload(profileFile, ipfsGateway, apiKey)
   const { hash: bannerFileHash } = await ipfsFileUpload(bannerFile, ipfsGateway, apiKey)
   const collectionMetadata = {

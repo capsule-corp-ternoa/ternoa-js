@@ -1,0 +1,30 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        step: ["lint", "format", "docs"]
+        node-version: [14.x]
+    name: ${{ matrix.step }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: ${{ matrix.step }}
+        if: always()
+        run: |
+          npm ci --ignore-scripts
+          npm run ${{ matrix.step }}
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "PR: ${{ matrix.step }} fixed"
