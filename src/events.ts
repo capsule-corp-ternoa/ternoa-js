@@ -1,3 +1,4 @@
+import BN from "bn.js"
 import { Event } from "@polkadot/types/interfaces/system"
 import { bnToBn, hexToString } from "@polkadot/util"
 
@@ -43,8 +44,10 @@ export enum EventType {
   NFTSold = "marketplace.NFTSold",
 
   // Utility
+  ItemFailed = "utility.ItemFailed",
   ItemCompleted = "utility.ItemCompleted",
   BatchInterrupted = "utility.BatchInterrupted",
+  BatchCompletedWithErrors = "utility.BatchCompletedWithErrors",
   BatchCompleted = "utility.BatchCompleted",
 
   // System
@@ -128,8 +131,12 @@ export class BlockchainEvent {
       // Utility
       case EventType.ItemCompleted:
         return new ItemCompletedEvent(event)
+      case EventType.ItemFailed:
+        return new ItemFailedEvent(event)
       case EventType.BatchInterrupted:
         return new BatchInterruptedEvent(event)
+      case EventType.BatchCompletedWithErrors:
+        return new BatchCompletedWithErrorsEvent(event)
       case EventType.BatchCompleted:
         return new BatchCompletedEvent(event)
       // System
@@ -771,19 +778,55 @@ export class ItemCompletedEvent extends BlockchainEvent {
 }
 
 /**
- * This class represents the on-chain BatchInterruptedEvent event,
- * when a batch of dispatches did not complete fully.
+ * This class represents the on-chain ItemFailedEvent event,
+ * when a single item within a Batch of dispatches has completed with error. .
  */
-export class BatchInterruptedEvent extends BlockchainEvent {
-  index: number
+export class ItemFailedEvent extends BlockchainEvent {
   error: {
     module: {
       index: number
       error: string
     }
   }
-  errorType?: string
-  details?: string
+  errorType: string
+  errorDetails: string
+  /**
+   * Construct the data object from the ItemFailedEvent event
+   * @param event The ItemFailedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ItemFailed)
+    const [error] = event.data
+    this.error = error.toJSON() as {
+      module: {
+        index: number
+        error: string
+      }
+    }
+    const errorNumber = parseInt(this.error.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const { docs, name } = error.registry.findMetaError({
+      index: new BN(this.error.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.errorDetails = docs.join(" ")
+  }
+}
+
+/**
+ * This class represents the on-chain BatchInterruptedEvent event,
+ * when a batch of dispatches did not complete fully.
+ */
+export class BatchInterruptedEvent extends BlockchainEvent {
+  index: number
+  dispatchError: {
+    module: {
+      index: number
+      error: string
+    }
+  }
+  errorType: string
+  details: string
 
   /**
    * Construct the data object from the BatchInterruptedEvent event
@@ -791,17 +834,37 @@ export class BatchInterruptedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.BatchInterrupted)
-    const [index, error, errorType, details] = event.data
+    const [index, dispatchError] = event.data
 
     this.index = Number.parseInt(index.toString())
-    this.error = error.toJSON() as {
+    this.dispatchError = dispatchError.toJSON() as {
       module: {
         index: number
         error: string
       }
     }
-    this.errorType = errorType?.toString()
-    this.details = details?.toString()
+    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registry.
+    const { docs, name } = dispatchError.registry.findMetaError({
+      index: new BN(this.dispatchError.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.details = docs.join(" ")
+  }
+}
+
+/**
+ * This class represents the on-chain BatchCompletedWithErrorsEvent event,
+ * when a batch of dispatches completed but has errors.
+ */
+export class BatchCompletedWithErrorsEvent extends BlockchainEvent {
+  /**
+   * Construct the data object from the BatchCompletedWithErrorsEvent event
+   * @param event The BatchCompletedWithErrorsEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.BatchCompletedWithErrors)
+    // This is an empty event.
   }
 }
 
@@ -831,8 +894,8 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
       error: string
     }
   }
-  errorType?: string
-  details?: string
+  errorType: string
+  details: string
   dispatchInfo: {
     weigth: string
     class: string
@@ -844,7 +907,7 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.ExtrinsicFailed)
-    const [dispatchError, errorType, details, dispatchInfo] = event.data
+    const [dispatchError, dispatchInfo] = event.data
 
     this.dispatchError = dispatchError.toJSON() as {
       module: {
@@ -852,8 +915,13 @@ export class ExtrinsicFailedEvent extends BlockchainEvent {
         error: string
       }
     }
-    this.errorType = errorType?.toString()
-    this.details = details?.toString()
+    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const { docs, name } = dispatchError.registry.findMetaError({
+      index: new BN(this.dispatchError.module.index),
+      error: new BN(errorNumber),
+    })
+    this.errorType = name
+    this.details = docs.join(" ")
     this.dispatchInfo = dispatchInfo?.toJSON() as {
       weigth: string
       class: string
@@ -935,22 +1003,22 @@ export class BlockchainEvents {
   }
 
   findEvent<T extends BlockchainEvent>(ctor: new (...args: any[]) => T): T | undefined {
-    const maybe_event = this.inner.find((event) => event instanceof ctor)
-    return maybe_event ? (maybe_event as T) : undefined
+    const maybeEvent = this.inner.find((event) => event instanceof ctor)
+    return maybeEvent ? (maybeEvent as T) : undefined
   }
 
   findEventOrThrow<T extends BlockchainEvent>(ctor: new (...args: any[]) => T): T {
-    const failed_event = this.inner.find((event) => event.type == EventType.ExtrinsicFailed)
-    const target_event = this.inner.find((event) => event instanceof ctor)
+    const failedEvent = this.inner.find((event) => event.type == EventType.ExtrinsicFailed) as ExtrinsicFailedEvent
+    const targetEvent = this.inner.find((event) => event instanceof ctor)
 
-    if (failed_event) {
-      throw new Error(Errors.EXTRINSIC_FAILED)
+    if (failedEvent) {
+      throw new Error(`${Errors.EXTRINSIC_FAILED} : ${failedEvent.errorType} - ${failedEvent.details}`)
     }
 
-    if (target_event == undefined) {
+    if (targetEvent == undefined) {
       throw new Error(Errors.EVENT_NOT_FOUND)
     }
 
-    return target_event as T
+    return targetEvent as T
   }
 }

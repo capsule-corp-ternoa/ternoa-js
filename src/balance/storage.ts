@@ -1,4 +1,5 @@
 import BN from "bn.js"
+
 import { chainQuery, txPallets } from "../constants"
 import { query, numberToBalance } from "../blockchain"
 

@@ -1,6 +1,6 @@
 import BN from "bn.js"
 
-import { consts, BalanceType } from "../blockchain"
+import { consts } from "../blockchain"
 import { chainConstants, txPallets } from "../constants"
 
 /**
@@ -8,9 +8,9 @@ import { chainConstants, txPallets } from "../constants"
  * @summary Original mint fee.
  * @returns Original NFT mint fee.
  */
-export const getInitialMintFee = async (): Promise<BalanceType> => {
+export const getInitialMintFee = async (): Promise<BN> => {
   const fee = consts(txPallets.nft, chainConstants.initialMintFee)
-  return fee as any as BalanceType
+  return fee as any as BN
 }
 
 /**

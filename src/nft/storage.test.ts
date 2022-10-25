@@ -45,22 +45,22 @@ it("Testing collection offchain data size limit to be 150", async () => {
 
 describe("Testing getting NFT data", (): void => {
   it("Should return null if an Invalid NFT ID is passed", async () => {
-    const maybe_nft = await getNftData(1000000)
-    expect(maybe_nft).toBeNull()
+    const maybeNft = await getNftData(1000000)
+    expect(maybeNft).toBeNull()
   })
   it("Should return the NFT Data when the NFT ID exists", async () => {
-    const maybe_nft = await getNftData(TEST_DATA.nftId)
-    expect(maybe_nft != null).toBe(true)
+    const maybeNft = await getNftData(TEST_DATA.nftId)
+    expect(maybeNft != null).toBe(true)
   })
 })
 
 describe("Testing Collection NFT data", (): void => {
   it("Should return null if an Invalid Collection ID is passed", async () => {
-    const maybe_collection = await getCollectionData(1000000)
-    expect(maybe_collection).toBeNull()
+    const maybeCollection = await getCollectionData(1000000)
+    expect(maybeCollection).toBeNull()
   })
   it("Should return the NFT Data when the Collection ID exists", async () => {
-    const maybe_collection = await getCollectionData(TEST_DATA.collectionId)
-    expect(maybe_collection != null).toBe(true)
+    const maybeCollection = await getCollectionData(TEST_DATA.collectionId)
+    expect(maybeCollection != null).toBe(true)
   })
 })

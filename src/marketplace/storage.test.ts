@@ -35,24 +35,24 @@ it("Next Marketplace ID storage should exist and it should not be null", async (
 
 describe("Testing Marketplace data", (): void => {
   it("Should return null if an invalid Marketplace ID is passed", async () => {
-    const maybe_Marketplace = await getMarketplaceData(1000000)
-    expect(maybe_Marketplace).toBeNull()
+    const maybeMarketplace = await getMarketplaceData(1000000)
+    expect(maybeMarketplace).toBeNull()
   })
   it("Should return the NFT Data when the Marketplace ID exists", async () => {
-    const maybe_Marketplace = await getMarketplaceData(TEST_DATA.marketplaceId)
-    expect(maybe_Marketplace != null).toBe(true)
+    const maybeMarketplace = await getMarketplaceData(TEST_DATA.marketplaceId)
+    expect(maybeMarketplace != null).toBe(true)
   })
 })
 
 describe("Testing NFT for sale data", (): void => {
   it("Should return null if an invalid NFT ID is passed", async () => {
-    const maybe_NFTListed = await getNftForSale(1000000)
-    expect(maybe_NFTListed).toBeNull()
+    const maybeNFTListed = await getNftForSale(1000000)
+    expect(maybeNFTListed).toBeNull()
   })
   it("Should return the NFT Data when the Marketplace ID exists", async () => {
     const { test: testAccount } = await createTestPairs()
     await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 13, testAccount, WaitUntil.BlockInclusion)
-    const maybe_NFTListed = await getNftForSale(TEST_DATA.nftId)
-    expect(maybe_NFTListed != null).toBe(true)
+    const maybeNFTListed = await getNftForSale(TEST_DATA.nftId)
+    expect(maybeNFTListed != null).toBe(true)
   })
 })

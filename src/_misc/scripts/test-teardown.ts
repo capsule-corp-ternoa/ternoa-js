@@ -17,9 +17,9 @@ module.exports = async (): Promise<void> => {
   const zero = new BN("0")
   const keyrings = await Promise.all(pairs.map((pair) => getKeyringFromSeed(pair.seed)))
   const balances = await Promise.all(pairs.map((pair) => getTransferrableBalance(pair.publicKey)))
-  const filtered_keyrings = keyrings.filter((_, i) => balances[i].gt(zero))
+  const filteredKeyrings = keyrings.filter((_, i) => balances[i].gt(zero))
   await Promise.all(
-    filtered_keyrings.map((keyring) =>
+    filteredKeyrings.map((keyring) =>
       balancesTransferAll(dstKeyring.address, false, keyring, WaitUntil.BlockInclusion),
     ),
   )
