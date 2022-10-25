@@ -67,19 +67,19 @@ describe("Testing Rent extrinsics", (): void => {
         contractEvent.duration[DurationAction.Subscription].maxDuration === 100 &&
         contractEvent.duration[DurationAction.Subscription].isChangeable === true &&
         contractEvent.duration[DurationAction.Subscription].newTerms === false &&
-        contractEvent.acceptance === AcceptanceAction.ManualAcceptance &&
+        contractEvent.acceptanceType === AcceptanceAction.ManualAcceptance &&
         contractEvent.acceptanceList?.includes(destAccount.address) &&
         contractEvent.acceptanceList?.length === 1 &&
         contractEvent.renterCanRevoke === true &&
-        contractEvent.rentFee === RentFeeAction.Tokens &&
-        contractEvent.rentFeeValue === rentFee &&
-        contractEvent.rentFeeValueRounded === 1 &&
-        contractEvent.renterCancellationFee === CancellationFeeAction.FixedTokens &&
-        contractEvent.renterCancellationFeeValue === cancellationFee &&
-        contractEvent.renterCancellationFeeValueRounded === 1 &&
-        contractEvent.renteeCancellationFee === CancellationFeeAction.None &&
-        contractEvent.renteeCancellationFeeValue === null &&
-        contractEvent.renteeCancellationFeeValueRounded === null,
+        contractEvent.rentFeeType === RentFeeAction.Tokens &&
+        contractEvent.rentFee === rentFee &&
+        contractEvent.rentFeeRounded === 1 &&
+        contractEvent.renterCancellationFeeType === CancellationFeeAction.FixedTokens &&
+        contractEvent.renterCancellationFee === cancellationFee &&
+        contractEvent.renterCancellationFeeRounded === 1 &&
+        contractEvent.renteeCancellationFeeType === CancellationFeeAction.None &&
+        contractEvent.renteeCancellationFee === null &&
+        contractEvent.renteeCancellationFeeRounded === null,
     ).toBe(true)
   })
 

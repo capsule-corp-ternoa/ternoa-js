@@ -565,18 +565,18 @@ export class ContractCreatedEvent extends BlockchainEvent {
   nftId: number
   renter: string
   duration: DurationType
-  acceptance: AcceptanceAction
+  acceptanceType: AcceptanceAction
   acceptanceList: string[] | null
   renterCanRevoke: boolean
-  rentFee: RentFeeAction
-  rentFeeValue: string | number
-  rentFeeValueRounded: number
-  renterCancellationFee: CancellationFeeAction
-  renterCancellationFeeValue?: string | number | null
-  renterCancellationFeeValueRounded?: number | null
-  renteeCancellationFee: CancellationFeeAction
-  renteeCancellationFeeValue?: string | number | null
-  renteeCancellationFeeValueRounded?: number | null
+  rentFeeType: RentFeeAction
+  rentFee: string | number
+  rentFeeRounded: number
+  renterCancellationFeeType: CancellationFeeAction
+  renterCancellationFee?: string | number | null
+  renterCancellationFeeRounded?: number | null
+  renteeCancellationFeeType: CancellationFeeAction
+  renteeCancellationFee?: string | number | null
+  renteeCancellationFeeRounded?: number | null
 
   /**
    * Construct the data object from the ContractCreatedEvent event
@@ -610,66 +610,66 @@ export class ContractCreatedEvent extends BlockchainEvent {
     this.duration = parsedDuration
     this.renterCanRevoke = renterCanRevoke.toString() === "true"
     if (isAutoAcceptance) {
-      this.acceptance = AcceptanceAction.AutoAcceptance
+      this.acceptanceType = AcceptanceAction.AutoAcceptance
       this.acceptanceList = parsedAcceptance.autoAcceptance?.map((account: string) => account) ?? []
     } else {
-      this.acceptance = AcceptanceAction.ManualAcceptance
+      this.acceptanceType = AcceptanceAction.ManualAcceptance
       this.acceptanceList = parsedAcceptance.manualAcceptance?.map((account: string) => account) ?? []
     }
 
     if (isRentFeeToken) {
-      this.rentFee = RentFeeAction.Tokens
-      this.rentFeeValue = bnToBn(parsedRentFee[this.rentFee]).toString()
-      this.rentFeeValueRounded = roundBalance(this.rentFeeValue)
+      this.rentFeeType = RentFeeAction.Tokens
+      this.rentFee = bnToBn(parsedRentFee[this.rentFeeType]).toString()
+      this.rentFeeRounded = roundBalance(this.rentFee)
     } else {
-      this.rentFee = RentFeeAction.NFT
-      this.rentFeeValue = Number.parseInt(parsedRentFee[this.rentFee].toString())
-      this.rentFeeValueRounded = this.rentFeeValue
+      this.rentFeeType = RentFeeAction.NFT
+      this.rentFee = Number.parseInt(parsedRentFee[this.rentFeeType].toString())
+      this.rentFeeRounded = this.rentFee
     }
 
     switch (true) {
       case parsedRenterCancellationFee && CancellationFeeAction.FixedTokens in parsedRenterCancellationFee:
-        this.renterCancellationFee = CancellationFeeAction.FixedTokens
-        this.renterCancellationFeeValue = bnToBn(parsedRenterCancellationFee[this.renterCancellationFee]).toString()
-        this.renterCancellationFeeValueRounded = roundBalance(this.renterCancellationFeeValue)
+        this.renterCancellationFeeType = CancellationFeeAction.FixedTokens
+        this.renterCancellationFee = bnToBn(parsedRenterCancellationFee[this.renterCancellationFeeType]).toString()
+        this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
         break
       case parsedRenterCancellationFee && CancellationFeeAction.FlexibleTokens in parsedRenterCancellationFee:
-        this.renterCancellationFee = CancellationFeeAction.FlexibleTokens
-        this.renterCancellationFeeValue = bnToBn(parsedRenterCancellationFee[this.renterCancellationFee]).toString()
-        this.renterCancellationFeeValueRounded = roundBalance(this.renterCancellationFeeValue)
+        this.renterCancellationFeeType = CancellationFeeAction.FlexibleTokens
+        this.renterCancellationFee = bnToBn(parsedRenterCancellationFee[this.renterCancellationFeeType]).toString()
+        this.renterCancellationFeeRounded = roundBalance(this.renterCancellationFee)
         break
       case parsedRenterCancellationFee && CancellationFeeAction.NFT in parsedRenterCancellationFee:
-        this.renterCancellationFee = CancellationFeeAction.NFT
-        this.renterCancellationFeeValue = Number(parsedRenterCancellationFee[this.renterCancellationFee])
-        this.renterCancellationFeeValueRounded = this.renterCancellationFeeValue
+        this.renterCancellationFeeType = CancellationFeeAction.NFT
+        this.renterCancellationFee = Number(parsedRenterCancellationFee[this.renterCancellationFeeType])
+        this.renterCancellationFeeRounded = this.renterCancellationFee
         break
       default:
-        this.renterCancellationFee = CancellationFeeAction.None
-        this.renterCancellationFeeValue = null
-        this.renterCancellationFeeValueRounded = null
+        this.renterCancellationFeeType = CancellationFeeAction.None
+        this.renterCancellationFee = null
+        this.renterCancellationFeeRounded = null
         break
     }
 
     switch (true) {
       case parsedRenteeCancellationFee && CancellationFeeAction.FixedTokens in parsedRenteeCancellationFee:
-        this.renteeCancellationFee = CancellationFeeAction.FixedTokens
-        this.renteeCancellationFeeValue = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFee]).toString()
-        this.renteeCancellationFeeValueRounded = roundBalance(this.renteeCancellationFeeValue)
+        this.renteeCancellationFeeType = CancellationFeeAction.FixedTokens
+        this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFeeType]).toString()
+        this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
         break
       case parsedRenteeCancellationFee && CancellationFeeAction.FlexibleTokens in parsedRenteeCancellationFee:
-        this.renteeCancellationFee = CancellationFeeAction.FlexibleTokens
-        this.renteeCancellationFeeValue = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFee]).toString()
-        this.renteeCancellationFeeValueRounded = roundBalance(this.renteeCancellationFeeValue)
+        this.renteeCancellationFeeType = CancellationFeeAction.FlexibleTokens
+        this.renteeCancellationFee = bnToBn(parsedRenteeCancellationFee[this.renteeCancellationFeeType]).toString()
+        this.renteeCancellationFeeRounded = roundBalance(this.renteeCancellationFee)
         break
       case parsedRenteeCancellationFee && CancellationFeeAction.NFT in parsedRenteeCancellationFee:
-        this.renteeCancellationFee = CancellationFeeAction.NFT
-        this.renteeCancellationFeeValue = Number(parsedRenteeCancellationFee[this.renteeCancellationFee])
-        this.renteeCancellationFeeValueRounded = this.renteeCancellationFeeValue
+        this.renteeCancellationFeeType = CancellationFeeAction.NFT
+        this.renteeCancellationFee = Number(parsedRenteeCancellationFee[this.renteeCancellationFeeType])
+        this.renteeCancellationFeeRounded = this.renteeCancellationFee
         break
       default:
-        this.renteeCancellationFee = CancellationFeeAction.None
-        this.renteeCancellationFeeValue = null
-        this.renteeCancellationFeeValueRounded = null
+        this.renteeCancellationFeeType = CancellationFeeAction.None
+        this.renteeCancellationFee = null
+        this.renteeCancellationFeeRounded = null
         break
     }
   }

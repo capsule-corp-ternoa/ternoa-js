@@ -40,18 +40,18 @@ export type RentalContractDataType = {
   renter: string
   rentee: string | null
   duration: DurationType
-  acceptance: AcceptanceAction
+  acceptanceType: AcceptanceAction
   acceptanceList: string[]
-  rentFee: RentFeeAction
-  rentFeeValue: string | number
-  rentFeeValueRounded: number
+  rentFeeType: RentFeeAction
+  rentFee: string | number
+  rentFeeRounded: number
   renterCanRevoke: boolean
-  renterCancellationFee: CancellationFeeAction
-  renterCancellationFeeValue: string | number | null
-  renterCancellationFeeValueRounded: number | null
-  renteeCancellationFee: CancellationFeeAction
-  renteeCancellationFeeValue: string | number | null
-  renteeCancellationFeeValueRounded: number | null
+  renterCancellationFeeType: CancellationFeeAction
+  renterCancellationFee: string | number | null
+  renterCancellationFeeRounded: number | null
+  renteeCancellationFeeType: CancellationFeeAction
+  renteeCancellationFee: string | number | null
+  renteeCancellationFeeRounded: number | null
 }
 
 export type RentalContractChainRawDataType = {

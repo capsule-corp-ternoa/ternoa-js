@@ -56,18 +56,18 @@ describe("Testing contracts in queue and getting contract datas", (): void => {
         contract?.renter == testAccount.address &&
         contract.rentee == null &&
         contract.duration[DurationAction.Fixed] == 1000 &&
-        contract.acceptance === AcceptanceAction.ManualAcceptance &&
+        contract.acceptanceType === AcceptanceAction.ManualAcceptance &&
         contract.acceptanceList.length == 0 &&
-        contract.rentFee === RentFeeAction.Tokens &&
-        contract.rentFeeValue === rentFee &&
-        contract.rentFeeValueRounded === 1 &&
+        contract.rentFeeType === RentFeeAction.Tokens &&
+        contract.rentFee === rentFee &&
+        contract.rentFeeRounded === 1 &&
         contract.renterCanRevoke == false &&
-        contract.renterCancellationFee === CancellationFeeAction.FlexibleTokens &&
-        contract.renterCancellationFeeValue === cancellationFee &&
-        contract.renterCancellationFeeValueRounded === 1 &&
-        contract.renteeCancellationFee === CancellationFeeAction.None &&
-        contract.renteeCancellationFeeValue === null &&
-        contract.renteeCancellationFeeValueRounded === null,
+        contract.renterCancellationFeeType === CancellationFeeAction.FlexibleTokens &&
+        contract.renterCancellationFee === cancellationFee &&
+        contract.renterCancellationFeeRounded === 1 &&
+        contract.renteeCancellationFeeType === CancellationFeeAction.None &&
+        contract.renteeCancellationFee === null &&
+        contract.renteeCancellationFeeRounded === null,
     ).toBe(true)
   })
 
