@@ -843,7 +843,7 @@ export class BatchInterruptedEvent extends BlockchainEvent {
         error: string
       }
     }
-    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registery.
+    const errorNumber = parseInt(this.dispatchError.module.error.slice(2, 4), 16) // parse firsts 2 bytes of dipatchError.module.error using 16 base to get the error number and error message from substrate registry.
     const { docs, name } = dispatchError.registry.findMetaError({
       index: new BN(this.dispatchError.module.index),
       error: new BN(errorNumber),

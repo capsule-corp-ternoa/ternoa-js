@@ -511,7 +511,9 @@ export const numberToBalance = async (_input: number): Promise<BN> => {
  * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @param keyring       Account that will sign the transaction if provided
- * @returns             A list of blockchain events related to an extrinsics execution.
+ * @returns             Returns a pair of objects :
+ *                      - The first returned object contains some block information as the block hash, the block header and block extrinsics.
+ *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
  */
 export const submitTxBlocking = async (
   tx: TransactionHashType,
@@ -533,7 +535,10 @@ export const submitTxBlocking = async (
  * @param tx            Unsigned unsubmitted transaction Hash. The Hash is only valid for 5 minutes.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @param keyring       Account that will sign the transaction if provided
- * @returns             Returns a pair objects that are used to track the progress of the transaction execution. The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned objects is an array of events which gets populated automatically once the operation is finished.
+ * @returns             Returns a group objects that are used to track the progress of the transaction execution:
+ *                      - The first returned object is a conditional variable which can yield the information if the operation is finished.
+ *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
+ *                      - The third returned object contains the block information as the block hash, the block header and block extrinsics.
  */
 export const submitTxNonBlocking = async (
   tx: TransactionHashType,

@@ -128,8 +128,8 @@ async function main() {
   // we provide three different submitting functions. Here, we use the most convenient one but it's the least
   // flexible. This function will sign the transaction for us if we pass a keyring (one less thing to worry about)
   // and it's blocking the execution flow until the transaction is either in a block or in a finalized block.
-  // Since submitting needs to work will all kinds of transactions, the result is an object that contains all
-  // the events that have happen (instead of only specific ones).
+  // Since submitting needs to work will all kinds of transactions, the result is an object that contains the block information
+  // (the block hash, the block header and block extrinsics) and all the events that have happened (instead of only specific ones).
   const allEvents = await submitTxBlocking(signableNFTBatchTx, WaitUntil.BlockInclusion, keyring)
 
   // Here we get only the events that we are interested in.

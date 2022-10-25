@@ -9,7 +9,7 @@ import { AssetTransferredEvent } from "../events"
  * @name assetTransferTx
  * @summary             Creates an unsigned unsubmitted Assets-Transfert Transaction Hash.
  * @param id            ID of the Asset
- * @param to        Public address of the account to transfer the amount to.
+ * @param to            Public address of the account to transfer the amount to.
  * @param amount        Token amount to transfer.
  * @returns             Unsigned unsubmitted Assets-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
  */
@@ -22,7 +22,7 @@ export const assetTransferTx = async (id: number, to: string, amount: number | B
  * @name assetTransfer
  * @summary             Transfers some balance to another account.
  * @param id            ID of the Asset
- * @param to        Public address of the account to transfer the amount to.
+ * @param to            Public address of the account to transfer the amount to.
  * @param amount        Token amount to transfer.
  * @param keyring       Account that will sign the transaction.
  * @param waitUntil     Execution trigger that can be set either to BlockInclusion or BlockFinalization.

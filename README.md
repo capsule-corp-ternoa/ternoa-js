@@ -10,7 +10,7 @@ Lastly, don’t forget to have a good time, that's like the most important thing
 
 **Table of Contents**
 
-- [Introduction](#🤔-introduction)
+- [Introduction](#introduction)
   - [Contribution Guidelines](#contribution-guidelines)
   - [Error Reporting](#error-reporting)
 - [Installation](#installation)
@@ -46,7 +46,7 @@ Lastly, don’t forget to have a good time, that's like the most important thing
     - [Create A Development Environment](#create-a-development-environment)
 - [License](#license)
 
-## 🤔 Introduction
+## Introduction
 
 Ternoa is a Decentralised, Open source, NFT-centric Layer 1 blockchain that is multi-chain by design and aims to provide a technical stack to build scalable and secure NFTs with native support for advanced features.
 
@@ -60,7 +60,7 @@ With native support for Secret NFTs, Delegating and Lending, Transaction Batchin
 
 #### Ecosystem
 
-Our ecosystem of NFT-based Dapps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
+Our ecosystem of NFT-based dApps keeps growing day after day. Our SDK relies upon the most popular high-level languages, allowing us to tap into the world’s largest pool of existing developers, thereby minimizing the transition period.
 
 ### Contribution Guidelines
 
@@ -108,7 +108,7 @@ npm i ternoa-js@1.2.0-rc0
 ### On Chain Events
 
 **What are chain events ?**
-Events are objects containing decoded values (data) provided by the chain in the result of any transaction executed using the `submitTxBlocking` function. At least one of these two `ExtrinsicSuccessEvent` or `ExtrinsicFailedEvent` events are provided for any transaction depending on its execution. While `submitTxBlocking` provides the SDK handlers with the list of main On Chain events `BlockchainEvents`, we also allow you to filter this list to get the ones you need.
+Events are objects containing decoded values (data) provided by the chain in the result of any transaction executed using the `submitTxBlocking` function. At least one of these two `ExtrinsicSuccessEvent` or `ExtrinsicFailedEvent` events are provided for any transaction depending on its execution. While `submitTxBlocking` provides the SDK handlers with the list of main On Chain events `BlockchainEvents` (alongside the Block information), we also allow you to filter this list to get the ones you need.
 
 An example to filter only the events list of a balance transfer transaction:
 
@@ -116,7 +116,7 @@ An example to filter only the events list of a balance transfer transaction:
 const balanceTransfertEvents = BlockchainEvents.events.findEvents(BalancesTransferEvent)
 ```
 
-**Note**: BlockchainEvents is the result of `submitTxBlocking` function. It can be stored in a constant for example.
+**Note**: BlockchainEvents is the result of `submitTxBlocking` function: it now contains both block information (block hash, header (...)) and the events list. It can be stored in a constant for example.
 
 ### SDK design
 
@@ -128,8 +128,8 @@ The `balancesTransferTx` function creates an unsigned unsubmitted transaction ha
 
 1. Each Helper is composed of two functions
 
-- a `xxxxxxxx` varient that signs and submits the transaction, then returns the dedicated event.
-- a `xxxxxxxxTx` varient to create a unsigned and unsubmitted transaction hash.
+- a `xxxxxxxx` version that signs and submits the transaction, then returns the dedicated event.
+- a `xxxxxxxxTx` version to create an unsigned and unsubmitted transaction hash.
 
 2. We already cover the most common Ternoa pallets with ready to use pallets. However, all extrinsics can be triggered using a combination of generic blockchain helpers like `createTxHex`,`signTxHex`,`submitTxHex`, etc (check the Handlers Architecture in the next section for more info)
 
@@ -167,7 +167,7 @@ The main handlers are as follows:
 - balance: the Balance pallet with its extrinsics, query and storage.
 - nft: the NFT pallet with its extrinsics, query and storage.
 - marketplace: the Marketplace pallet with its extrinsics, query and storage.
-- events: the events list returned when `submitTxBlocking` function is triggered.
+- events: the events list returned, alongside of block information, when `submitTxBlocking` function is triggered.
 
 ### Handlers architecture
 
@@ -182,7 +182,7 @@ For those who are familiar with Polkadot, you will quickly recognize the design 
 
 As it makes sense for us to provide you the easiest tools to build on the Ternoa chain, we also try to simplify the response format of our functions as much as we can.
 
-Depending on if you go the easy way or choose the complex route (for added customization ) , we suggest you choose the right function: Events and features data will be provided directly on some function while only transaction hash hex will be returned on others.
+Depending on if you go with the easy way or choose the complex route (for added customization), we suggest you to choose the right function: Events and features data will be provided directly on some functions while only transaction hash hex will be returned on others.
 
 #### Initialize an API Instance
 
@@ -278,9 +278,9 @@ const createMyFirstNFT = async () => {
 
 **That being said, You can opt for the manual route which although being complex, offers more versatility.**
 
-The Simple way automated the 3 steps (Create -> Sign => Send) assosiated with creating an NFT making it much easier to use while not allowing any room for customisation and optimisation.
+The Simple way automated the 3 steps (Create -> Sign => Send) associated with creating an NFT making it much easier to use while not allowing any room for customisation and optimisation.
 
-The manual way provides much more versatility but is significantly more complex. Let's say for example you can batch transactions together instead of executing them one by one (covered in example section). It'll be useful if you want to simplify the process of creating a large amount of NFTs and minimize repetitive tasks like sending and signing each transaction.
+The manual way provides much more versatility but is significantly more complex. Let's say for example you want to batch transactions together instead of executing them one by one (covered in example section). It'll be useful if you want to simplify the process of creating a large amount of NFTs and minimize repetitive tasks like sending and signing each transaction.
 
 ##### STEP 1 - Create an NFT transaction
 
@@ -342,9 +342,9 @@ const create createNFTManually = async () => {
 }
 ```
 
-- `submitTxBlocking()` - The most most convenient way to get Events and Data: This function will sign the transaction for you if you pass a keyring (one less thing to worry about) and it's blocking the execution flow until the transaction is either in a block or in a finalized block. Since submitting needs to work will all kinds of transactions, the result is an object that contains all the events that have happened (instead of only specific ones).
+- `submitTxBlocking()` - The most most convenient way to get Events and Data: This function will sign the transaction for you if you pass a keyring (one less thing to worry about) and it's blocking the execution flow until the transaction is either in a block or in a finalized block. Since submitting needs to work will all kinds of transactions, the result is an object that contains the block information (the block hash, the block header and block extrinsics) and all the events that have happened (instead of only specific ones).
 
-Note: Here you do not need to necessarily pass a signed txHash. If you pass the Keyring as a parameter and an unsigned tx hash as the signing process will be done here for you.
+Note: Here you do not need to necessarily pass a signed txHash. If you pass the Keyring as a parameter and an unsigned tx hash the signing process will be done here for you.
 
 ```javascript
 const create createNFTManually = async () => {
@@ -355,9 +355,10 @@ const create createNFTManually = async () => {
     // We could have used the unsigned tx Hash and pass a keyring as a third parameter instead.
     // Once again, we use here the tx hex signTxHash, from the previous step.
     const submitTxHash = await submitTxBlocking(signTxHash, WaitUntil.BlockInclusion)
-
-    // Do something with the events recieved.
-    console.log(submitTxHash.events.findEvents(NFTCreatedEvent));
+    // We destructure the result of submitTxHash:
+    const { events, blockInfo } = submitTxHash
+    // Do something with the events recieved. Example: find the NFTCreatedEvent to access the NFT datas.
+    console.log(events.findEvents(NFTCreatedEvent));
     ...
   } catch (e) {
     console.log(e)
@@ -365,7 +366,7 @@ const create createNFTManually = async () => {
 }
 ```
 
-- `submitTxNonBlocking()`: This one works as the `submitTxBlocking` but in a non blocking way. It returns a pair of objects that are used to track the progress of the transaction execution. The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned objects is an array of events which gets populated automatically once the operation is finished.
+- `submitTxNonBlocking()`: This one works as the `submitTxBlocking` but in a non blocking way. Returns a group objects that are used to track the progress of the transaction execution: The first returned object is a conditional variable which can yield the information if the operation is finished. The second returned object is an array of events which gets populated automatically once the operation is finished. The third returned object contains the block information as the block hash, the block header and block extrinsics.
 
 ```javascript
 const create createNFTManually = async () => {
@@ -485,7 +486,7 @@ Use the flag `--rm` to make sure it’s deleted and later removed.
 
 The container uses a local copy of the repo in order to compile and run examples. This means that if changes are made inside the container, they’ll fail to propagate and will be lost. To mitigate this issue, the virtual container volume `/workdir` needs to be mapped to a directory on the host machine that contains the Ternoa.js repo. After the mapping is done, any changes made in the mapped directory will be reflected in the container.
 
-This way, you can develop Dapps without having to install all the required dependencies. For the workflow check out the "Create A Development Environment" section.
+This way, you can develop dApps without having to install all the required dependencies. For the workflow check out the "Create A Development Environment" section.
 
 ```bash
   # Flag -v tells the host machine to map the physical "./." path with the virtual container one "/workdir". If no command arguments are given this will try to compile and run the starter-project project.
