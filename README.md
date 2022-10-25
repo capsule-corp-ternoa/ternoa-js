@@ -1,6 +1,9 @@
 # ⚙️ Ternoa SDK
 
-[![npm version](https://badge.fury.io/js/ternoa-js.svg)](https://badge.fury.io/js/ternoa-js)
+[![ternoajs](https://img.shields.io/badge/ternoa-js-yellow?style=flat-square)](https://ternoa-js.ternoa.dev/)
+![license](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=flat-square)
+[![npm stable](https://img.shields.io/npm/v/ternoa-js?logo=npm&style=flat-square)](https://www.npmjs.com/package/ternoa-js)
+[![beta](https://img.shields.io/npm/v/ternoa-js/next?label=next-rc&logo=npm&&style=flat-square)](https://www.npmjs.com/package/ternoa-js)
 
 It's the easiest and fastest way to build on top of the Ternoa Chain. Based on Javascript and the Polkadot.js API, it offers developers a seamless experience in the Domain of Web 3.
 
