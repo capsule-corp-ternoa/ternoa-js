@@ -1,4 +1,4 @@
-import { BalanceType } from "../blockchain"
+import BN from "bn.js"
 
 export type Bidder = {
   bidder: string
@@ -10,8 +10,8 @@ export type AuctionChainRawDataType = {
   creator: string
   startBlock: number
   endBlock: number
-  startPrice: BalanceType
-  buyItPrice: BalanceType | null
+  startPrice: BN
+  buyItPrice: BN | null
   bidders: { list: [string[]] }
   marketplaceId: number
   isExtended: boolean

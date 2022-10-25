@@ -1,7 +1,7 @@
 import BN from "bn.js"
 
 import { chainQuery, txPallets } from "../constants"
-import { query, numberToBalance, BalanceType } from "../blockchain"
+import { query, numberToBalance } from "../blockchain"
 
 /**
  * @name getBalances
@@ -29,7 +29,7 @@ export const getBalances = async (
  * @param address       Public address of the account to get total balance for.
  * @returns             The total balance of an account (free & reserve balances)
  */
-export const getTotalBalance = async (address: string): Promise<BalanceType> => {
+export const getTotalBalance = async (address: string): Promise<BN> => {
   const { free, reserved } = await getBalances(address)
   return free.add(reserved)
 }
@@ -40,7 +40,7 @@ export const getTotalBalance = async (address: string): Promise<BalanceType> => 
  * @param address       Public address of the account to get transferrable balance for.
  * @returns             The transferrable balance of an account.
  */
-export const getTransferrableBalance = async (address: string): Promise<BalanceType> => {
+export const getTransferrableBalance = async (address: string): Promise<BN> => {
   const { free, miscFrozen } = await getBalances(address)
   return free.sub(miscFrozen)
 }

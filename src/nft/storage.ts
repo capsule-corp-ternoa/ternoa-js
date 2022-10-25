@@ -22,7 +22,7 @@ export const getNftMintFee = async (): Promise<BN> => {
  */
 export const getNextNftId = async (): Promise<number> => {
   const id = await query(txPallets.nft, chainQuery.nextNFTId)
-  return (id as any as BalanceType).toNumber()
+  return (id as any as BN).toNumber()
 }
 
 /**
@@ -32,7 +32,7 @@ export const getNextNftId = async (): Promise<number> => {
  */
 export const getNextCollectionId = async (): Promise<number> => {
   const id = await query(txPallets.nft, chainQuery.nextCollectionId)
-  return (id as any as BalanceType).toNumber()
+  return (id as any as BN).toNumber()
 }
 
 /**

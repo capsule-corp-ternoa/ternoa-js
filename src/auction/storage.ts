@@ -1,6 +1,7 @@
+import BN from "bn.js"
 import { bnToBn } from "@polkadot/util"
 import { roundBalance } from "../helpers/utils"
-import { BalanceType, query } from "../blockchain"
+import { query } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
 import { AuctionChainRawDataType, AuctionDataType, Bidder, ClaimableBidBalanceDataType } from "./types"
 
@@ -77,7 +78,7 @@ export const getAuctionDeadline = async (nftId: number): Promise<number | null> 
  */
 export const getClaimableBidBalance = async (address: string): Promise<ClaimableBidBalanceDataType> => {
   const data = await query(txPallets.auction, chainQuery.claims, [address])
-  const parsedData = data.toJSON() as any as BalanceType
+  const parsedData = data.toJSON() as any as BN
   const claimable = bnToBn(parsedData).toString()
   const claimableRounded = roundBalance(claimable)
 
