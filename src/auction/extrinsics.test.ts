@@ -115,7 +115,7 @@ describe("Testing to create an auction & add/update/remove bids", (): void => {
     const currentBlock = await query(txPallets.system, chainQuery.number)
     const auctionMinDuration = getMinAuctionDuration()
     const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 1
-    const auctionEndBlock = auctionStartBlock + auctionMinDuration
+    const auctionEndBlock = auctionStartBlock + auctionMinDuration * 2
     const startPrice = await numberToBalance(1)
     const buyItPrice = await numberToBalance(10)
     await createAuction(
