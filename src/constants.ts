@@ -18,7 +18,9 @@ export enum txActions {
   forceBatch = "forceBatch",
 
   // nft
+  addSecret = "addSecret",
   createNft = "createNft",
+  createSecretNft = "createSecretNft",
   burnNft = "burnNft",
   transferNft = "transferNft",
   delegateNft = "delegateNft",

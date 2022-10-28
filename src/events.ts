@@ -21,6 +21,7 @@ export enum EventType {
 
   // NFT
   NFTCreated = "nft.NFTCreated",
+  SecretAddedToNFT = "nft.SecretAddedToNFT",
   NFTBurned = "nft.NFTBurned",
   NFTDelegated = "nft.NFTDelegated",
   NFTRoyaltySet = "nft.NFTRoyaltySet",
@@ -93,6 +94,8 @@ export class BlockchainEvent {
       // NFT
       case EventType.NFTCreated:
         return new NFTCreatedEvent(event)
+      case EventType.SecretAddedToNFT:
+        return new SecretAddedToNFTEvent(event)
       case EventType.NFTBurned:
         return new NFTBurnedEvent(event)
       case EventType.NFTDelegated:
@@ -316,6 +319,23 @@ export class NFTCreatedEvent extends BlockchainEvent {
     this.offchainData = hexToString(offchainData.toString())
     this.mintFee = mintFee.toString()
     this.mintFeeRounded = roundBalance(this.mintFee)
+  }
+}
+
+export class SecretAddedToNFTEvent extends BlockchainEvent {
+  nftId: number
+  offchainData: string
+
+  /**
+   * Construct the data object from the SecretAddedToNFTEvent event
+   * @param event The SecretAddedToNFTEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.SecretAddedToNFT)
+    const [nftId, offchainData] = event.data
+
+    this.nftId = Number.parseInt(nftId.toString())
+    this.offchainData = hexToString(offchainData.toString())
   }
 }
 

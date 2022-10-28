@@ -1,4 +1,4 @@
-export type INftState = {
+export type NftState = {
   isCapsule: boolean
   listedForSale: boolean
   isSecret: boolean
@@ -12,7 +12,18 @@ export type NftData = {
   offchainData: string
   collectionId: number | undefined
   royalty: number
-  state: INftState
+  state: NftState
+}
+
+export type SecretNftData = {
+  nftId: number
+  owner: string
+  creator: string
+  offchainData: string
+  secretOffchainData: string
+  collectionId: number | null
+  royalty: number,
+  isSoulbound: boolean
 }
 
 export type CollectionData = {

@@ -1,10 +1,12 @@
 import {
   addNftToCollection,
+  addSecretToNft,
   burnCollection,
   burnNft,
   closeCollection,
   createCollection,
   createNft,
+  createSecretNft,
   delegateNft,
   limitCollection,
   setRoyalty,
@@ -53,6 +55,43 @@ describe("Testing NFT extrinsics", (): void => {
       nEvent.nftId > 0 &&
         nEvent.owner === testAccount.address &&
         nEvent.offchainData === "Test NFT Data" &&
+        nEvent.royalty === 0 &&
+        nEvent.collectionId === null &&
+        nEvent.isSoulbound === false,
+    ).toBe(true)
+  })
+
+  it("Testing to add secret to an NFT", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const nft = await createNft("Test NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+
+    const nEvent = await addSecretToNft(
+      nft.nftId.toString(),
+      "Test Secret Data",
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+
+    expect(nEvent.nftId === nft.nftId && nEvent.offchainData === "Test Secret Data").toBe(true)
+  })
+
+  it("Testing to create a Secret NFT", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const nEvent = await createSecretNft(
+      "Test NFT Data",
+      "Test Secret Data",
+      0,
+      undefined,
+      false,
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+    expect(
+      nEvent.nftId > 0 &&
+        nEvent.owner === testAccount.address &&
+        nEvent.creator === testAccount.address &&
+        nEvent.offchainData === "Test NFT Data" &&
+        nEvent.secretOffchainData === "Test Secret Data" &&
         nEvent.royalty === 0 &&
         nEvent.collectionId === null &&
         nEvent.isSoulbound === false,
