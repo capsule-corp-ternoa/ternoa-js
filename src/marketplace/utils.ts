@@ -41,7 +41,16 @@ export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata, ipfsGate
     name,
     logoUri: logoFileHash,
   }
-  const finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
-  const finalFile = new File([finalBlob], "marketplace metadata")
+
+  const isBrowser = typeof Blob === "function" && typeof File === "function"
+  let finalBlob
+  let finalFile
+  if (isBrowser) {
+    finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
+    finalFile = new File([finalBlob], "marketplace metadata")
+  } else {
+    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(marketplaceMetadata)))
+    finalFile = Buffer.from(finalBlob)
+  }
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }
