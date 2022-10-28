@@ -13,9 +13,11 @@ import {
   NFTDelegatedEvent,
   NFTRoyaltySetEvent,
   NFTTransferredEvent,
+  SecretAddedToNFTEvent,
 } from "../events"
 
 import { formatPermill } from "../helpers/utils"
+import { SecretNftData } from "./types"
 
 // NFTs
 
@@ -65,6 +67,101 @@ export const createNft = async (
   const tx = await createNftTx(offchainData, royalty, collectionId, isSoulbound)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTCreatedEvent)
+}
+
+/**
+ * @name createSecretNftTx
+ * @summary                   Creates an unsigned unsubmitted Create-Secret-NFT Transaction Hash.
+ * @param offchainData        Off-chain related NFT preview metadata. Can be an IPFS hash, a URL or plain text.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty             Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId        The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound         If true, makes the NFT intransferable. Default is false.
+ * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const createSecretNftTx = async (
+  offchainData: string,
+  secretOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+): Promise<TransactionHashType> => {
+  const formatedRoyalty = formatPermill(royalty)
+  return await createTxHex(txPallets.nft, txActions.createSecretNft, [
+    offchainData,
+    secretOffchainData,
+    formatedRoyalty,
+    collectionId,
+    isSoulbound,
+  ])
+}
+
+/**
+ * @name createSecretNft
+ * @summary                   Creates a Secret NFT on chain.
+ * @param offchainData        Off-chain related NFT preview metadata. Can be an IPFS hash, a URL or plain text.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty             Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId        The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound         If true, makes the NFT intransferable. Default is false.
+ * @param keyring             Account that will sign the transaction.
+ * @param waitUntil           Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns                   Secret NFT data combining the data from NFTCreatedEvent and SecretAddedToNFTEvent.
+ */
+export const createSecretNft = async (
+  offchainData: string,
+  secretOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<SecretNftData> => {
+  const tx = await createSecretNftTx(offchainData, secretOffchainData, royalty, collectionId, isSoulbound)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  const nftCreatedEvent = events.findEventOrThrow(NFTCreatedEvent)
+  const secretAddedToNFTEvent = events.findEventOrThrow(SecretAddedToNFTEvent)
+  return {
+    nftId: nftCreatedEvent.nftId,
+    owner: nftCreatedEvent.owner,
+    creator: nftCreatedEvent.owner,
+    offchainData: nftCreatedEvent.offchainData,
+    secretOffchainData: secretAddedToNFTEvent.offchainData,
+    royalty: nftCreatedEvent.royalty,
+    collectionId: nftCreatedEvent.collectionId,
+    isSoulbound: nftCreatedEvent.isSoulbound,
+  }
+}
+
+/**
+ * @name addSecretToNftTx
+ * @summary                   Creates an unsigned unsubmitted Add-Secret-NFT Transaction Hash.
+ * @param id                  The ID of the NFT.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const addSecretToNftTx = async (id: string, secretOffchainData: string): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.addSecret, [id, secretOffchainData])
+}
+
+/**
+ * @name addSecretToNft
+ * @summary                   Adds a Secret to an NFT on chain.
+ * @param id                  The ID of the NFT.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param keyring             Account that will sign the transaction.
+ * @param waitUntil           Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns                   SecretAddedToNFTEvent Blockchain event.
+ */
+export const addSecretToNft = async (
+  id: string,
+  secretOffchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<SecretAddedToNFTEvent> => {
+  const tx = await addSecretToNftTx(id, secretOffchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(SecretAddedToNFTEvent)
 }
 
 /**

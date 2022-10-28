@@ -20,7 +20,9 @@ export enum txActions {
   forceBatch = "forceBatch",
 
   // nft
+  addSecret = "addSecret",
   createNft = "createNft",
+  createSecretNft = "createSecretNft",
   burnNft = "burnNft",
   transferNft = "transferNft",
   delegateNft = "delegateNft",
@@ -76,6 +78,8 @@ export enum txEvent {
 
 export enum chainQuery {
   nftMintFee = "nftMintFee",
+  secretNftMintFee = "secretNftMintFee",
+  secretNftsOffchainData = "secretNftsOffchainData",
   nfts = "nfts",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
@@ -100,6 +104,7 @@ export enum chainQuery {
 
 export enum chainConstants {
   initialMintFee = "initialMintFee",
+  initialSecretMintFee = "initialSecretMintFee",
   collectionSizeLimit = "collectionSizeLimit",
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",

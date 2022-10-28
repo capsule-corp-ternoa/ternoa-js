@@ -1,13 +1,22 @@
 import { initializeApi } from "../blockchain"
 import { getCollectionOffchainDataLimit } from "./constants"
-import { getCollectionData, getNextCollectionId, getNextNftId, getNftData, getNftMintFee } from "./storage"
+import {
+  getCollectionData,
+  getNextCollectionId,
+  getNextNftId,
+  getNftData,
+  getNftMintFee,
+  getSecretNftMintFee,
+  getSecretNftOffchainData,
+} from "./storage"
 import { createTestPairs } from "../_misc/testingPairs"
-import { createCollection, createNft } from "./extrinsics"
+import { createCollection, createNft, createSecretNft } from "./extrinsics"
 import { WaitUntil } from "../constants"
 
 const TEST_DATA = {
   collectionId: 0,
   nftId: 0,
+  secretNftId: 0,
 }
 
 beforeAll(async () => {
@@ -18,12 +27,20 @@ beforeAll(async () => {
   const { test: testAccount } = await createTestPairs()
   const cEvent = await createCollection("Collection Test", undefined, testAccount, WaitUntil.BlockInclusion)
   const nEvent = await createNft("Test NFT Data", 0, cEvent.collectionId, false, testAccount, WaitUntil.BlockInclusion)
+  const secretNft = await createSecretNft("Test NFT Data", "Test Secret NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+
   TEST_DATA.collectionId = cEvent.collectionId
   TEST_DATA.nftId = nEvent.nftId
+  TEST_DATA.secretNftId = secretNft.nftId
 })
 
 it("NFT Mint Fee storage should exist and it should not be null", async () => {
   const actual = await getNftMintFee()
+  expect(actual != undefined).toBe(true)
+})
+
+it("Secret NFT Mint Fee storage should exist and it should not be null", async () => {
+  const actual = await getSecretNftMintFee()
   expect(actual != undefined).toBe(true)
 })
 
@@ -51,6 +68,10 @@ describe("Testing getting NFT data", (): void => {
   it("Should return the NFT Data when the NFT ID exists", async () => {
     const maybeNft = await getNftData(TEST_DATA.nftId)
     expect(maybeNft != null).toBe(true)
+  })
+  it("Should return secret offchain data when the NFT ID exists and is a Secret NFT", async () => {
+    const actual = await getSecretNftOffchainData(TEST_DATA.secretNftId)
+    expect(actual != undefined).toBe(true)
   })
 })
 
