@@ -65,12 +65,7 @@ describe("Testing NFT extrinsics", (): void => {
     const { test: testAccount } = await createTestPairs()
     const nft = await createNft("Test NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
 
-    const nEvent = await addSecretToNft(
-      nft.nftId.toString(),
-      "Test Secret Data",
-      testAccount,
-      WaitUntil.BlockInclusion,
-    )
+    const nEvent = await addSecretToNft(nft.nftId.toString(), "Test Secret Data", testAccount, WaitUntil.BlockInclusion)
 
     expect(nEvent.nftId === nft.nftId && nEvent.offchainData === "Test Secret Data").toBe(true)
   })
