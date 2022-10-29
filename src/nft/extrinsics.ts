@@ -17,7 +17,7 @@ import {
 } from "../events"
 
 import { formatPermill } from "../helpers/utils"
-import { AddSecretToNftData, SecretNftData } from "./types"
+import { SecretNftData } from "./types"
 
 // NFTs
 

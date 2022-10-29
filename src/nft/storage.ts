@@ -1,5 +1,6 @@
 import { hexToString } from "@polkadot/util"
 import BN from "bn.js"
+import { u8aToHex } from "index"
 
 import { query } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
@@ -13,6 +14,26 @@ import { CollectionData, NftData } from "./types"
 export const getNftMintFee = async (): Promise<BN> => {
   const fee = await query(txPallets.nft, chainQuery.nftMintFee)
   return fee as any as BN
+}
+
+/**
+ * @name secretNftMintFee
+ * @summary Fee to mint a secret NFT (extra fee on top of the tx fees and basic nft).
+ * @returns Secret NFT mint fee.
+ */
+export const getSecretNftMintFee = async (): Promise<BN> => {
+  const fee = await query(txPallets.nft, chainQuery.secretNftMintFee)
+  return fee as any as BN
+}
+
+/**
+ * @name getSecretNftOffchainData
+ * @summary Get the secret offchain data of a Secret NFT.
+ * @returns Secret NFT secret offchain data.
+ */
+export const getSecretNftOffchainData = async (nftId: number | string) => {
+  const secretOffchainData = await query(txPallets.nft, chainQuery.secretNftsOffchainData, [nftId])
+  return secretOffchainData.toHuman()
 }
 
 /**

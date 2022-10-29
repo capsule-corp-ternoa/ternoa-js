@@ -56,6 +56,8 @@ export enum txEvent {
 
 export enum chainQuery {
   nftMintFee = "nftMintFee",
+  secretNftMintFee = "secretNftMintFee",
+  secretNftsOffchainData = "secretNftsOffchainData",
   nfts = "nfts",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
