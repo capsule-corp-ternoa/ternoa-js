@@ -14,6 +14,16 @@ export const getInitialMintFee = async (): Promise<BN> => {
 }
 
 /**
+ * @name getInitialSecretMintFee
+ * @summary Original secret mint fee.
+ * @returns Original Secret NFT mint fee.
+ */
+ export const getInitialSecretMintFee = async (): Promise<BN> => {
+  const fee = consts(txPallets.nft, chainConstants.initialSecretMintFee)
+  return fee as any as BN
+}
+
+/**
  * @name getCollectionSizeLimit
  * @summary Maximum collection length.
  * @returns Number.

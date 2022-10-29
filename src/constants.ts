@@ -72,6 +72,7 @@ export enum chainQuery {
 
 export enum chainConstants {
   initialMintFee = "initialMintFee",
+  initialSecretMintFee = "initialSecretMintFee",
   collectionSizeLimit = "collectionSizeLimit",
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",

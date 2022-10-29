@@ -135,7 +135,7 @@ export const createSecretNft = async (
 
 /**
  * @name addSecretToNftTx
- * @summary                   Creates an unsigned unsubmitted Create-Secret-NFT Transaction Hash.
+ * @summary                   Creates an unsigned unsubmitted Add-Secret-NFT Transaction Hash.
  * @param id                  The ID of the NFT.
  * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
  * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
