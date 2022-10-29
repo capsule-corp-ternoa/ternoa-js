@@ -98,7 +98,7 @@ export const createSecretNftTx = async (
 
 /**
  * @name createSecretNft
- * @summary                   Creates an unsigned unsubmitted Create-Secret-NFT Transaction Hash.
+ * @summary                   Creates a Secret NFT on chain.
  * @param offchainData        Off-chain related NFT preview metadata. Can be an IPFS hash, a URL or plain text.
  * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
  * @param royalty             Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
@@ -146,7 +146,7 @@ export const addSecretToNftTx = async (id: string, secretOffchainData: string): 
 
 /**
  * @name addSecretToNft
- * @summary                   Creates an unsigned unsubmitted Create-Secret-NFT Transaction Hash.
+ * @summary                   Adds a Secret to an NFT on chain.
  * @param id                  The ID of the NFT.
  * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
  * @param keyring             Account that will sign the transaction.

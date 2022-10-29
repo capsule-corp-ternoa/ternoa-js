@@ -17,7 +17,7 @@ export const getNftMintFee = async (): Promise<BN> => {
 }
 
 /**
- * @name secretNftMintFee
+ * @name getSecretNftMintFee
  * @summary Fee to mint a secret NFT (extra fee on top of the tx fees and basic nft).
  * @returns Secret NFT mint fee.
  */
