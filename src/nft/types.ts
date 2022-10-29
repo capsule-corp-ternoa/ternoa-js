@@ -22,7 +22,7 @@ export type SecretNftData = {
   offchainData: string
   secretOffchainData: string
   collectionId: number | null
-  royalty: number,
+  royalty: number
   isSoulbound: boolean
 }
 
