@@ -28,15 +28,15 @@ export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, ap
       },
     },
   }
-  const isBrowser = typeof Blob === 'function' && typeof File === 'function'
+  const isBrowser = typeof Blob === "function" && typeof File === "function"
   let finalBlob
   let finalFile
   if (isBrowser) {
-      finalBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
-      finalFile = new File([finalBlob], "nft metadata")
+    finalBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
+    finalFile = new File([finalBlob], "nft metadata")
   } else {
-      finalBlob = new Uint8Array(Buffer.from(JSON.stringify(nftMetadata)))
-      finalFile = Buffer.from(finalBlob)
+    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(nftMetadata)))
+    finalFile = Buffer.from(finalBlob)
   }
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }
@@ -60,15 +60,15 @@ export const collectionIpfsUpload = async (data: ICollectionMetadata, ipfsGatewa
     profileImage: profileFileHash,
     bannerImage: bannerFileHash,
   }
-  const isBrowser = typeof Blob === 'function' && typeof File === 'function'
+  const isBrowser = typeof Blob === "function" && typeof File === "function"
   let finalBlob
   let finalFile
   if (isBrowser) {
-      finalBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
-      finalFile = new File([finalBlob], "collection metadata")
+    finalBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
+    finalFile = new File([finalBlob], "collection metadata")
   } else {
-      finalBlob = new Uint8Array(Buffer.from(JSON.stringify(collectionMetadata)))
-      finalFile = Buffer.from(finalBlob)
+    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(collectionMetadata)))
+    finalFile = Buffer.from(finalBlob)
   }
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }
