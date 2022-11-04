@@ -18,7 +18,7 @@
 <h1>Function ipfsFileUpload</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-<li class="tsd-signature tsd-anchor-link" id="ipfsFileUpload">ipfs<wbr/>File<wbr/>Upload<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">File</span>, ipfsGateway<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, apiKey<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>hash<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>size<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span><a href="#ipfsFileUpload" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="ipfsFileUpload">ipfs<wbr/>File<wbr/>Upload<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span>, ipfsGateway<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, apiKey<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>hash<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>size<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span><a href="#ipfsFileUpload" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography">
 <h3>Name</h3><p>ipfsFilesUpload</p>
@@ -31,7 +31,7 @@
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5>file: <span class="tsd-signature-type">File</span></h5>
+<h5>file: <span class="tsd-signature-type">File</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Buffer</span></h5>
 <div class="tsd-comment tsd-typography"><p>File to upload on IPFS.</p>
 </div></li>
 <li>
@@ -44,7 +44,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>hash<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>size<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/138957b/src/helpers/ipfs.ts#L15">src/helpers/ipfs.ts:15</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/c652d16/src/helpers/ipfs.ts#L15">src/helpers/ipfs.ts:15</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -68,10 +68,12 @@
 <ul>
 <li class="tsd-kind-namespace"><a href="../modules/Account.html">Account</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Assets.html">Assets</a></li>
+<li class="tsd-kind-namespace"><a href="../modules/Auction.html">Auction</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Balance.html">Balance</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Blockchain.html">Blockchain</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Marketplace.html">Marketplace</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Nft.html">Nft</a></li>
+<li class="tsd-kind-namespace"><a href="../modules/Rent.html">Rent</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/TernoaConstants.html">Ternoa<wbr/>Constants</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/TernoaEvents.html">Ternoa<wbr/>Events</a></li>
 <li class="current tsd-kind-namespace"><a href="../modules/TernoaHelpers.html">Ternoa<wbr/>Helpers</a></li></ul></li></ul></div></details></nav>

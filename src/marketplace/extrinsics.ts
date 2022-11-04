@@ -15,7 +15,7 @@ import {
 } from "../events"
 
 import { MarketplaceConfigAction, MarketplaceKind } from "./enum"
-import { AccountListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./types"
+import { AccountListType, CollectionListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./types"
 import { formatMarketplaceFee } from "./utils"
 
 /**
@@ -57,12 +57,14 @@ export const createMarketplace = async (
  *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
  *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
  *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
+ *                        CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
  *
  * @param id              Marketplace Id of the marketplace to update.
  * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
  * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
  * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed. ex: { [MarketplaceConfigAction.Set]: [0, 1, 2] }
  * @returns               MarketplaceConfigSetEvent Blockchain event.
  */
 export const setMarketplaceConfigurationTx = async (
@@ -71,6 +73,7 @@ export const setMarketplaceConfigurationTx = async (
   listingFee: ListingFeeType = MarketplaceConfigAction.Noop,
   accountList: AccountListType = MarketplaceConfigAction.Noop,
   offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
+  collectionList: CollectionListType = MarketplaceConfigAction.Noop,
 ): Promise<TransactionHashType> => {
   await formatMarketplaceFee(commissionFee)
   await formatMarketplaceFee(listingFee)
@@ -80,6 +83,7 @@ export const setMarketplaceConfigurationTx = async (
     listingFee,
     accountList,
     offchainData,
+    collectionList,
   ])
 }
 
@@ -94,12 +98,14 @@ export const setMarketplaceConfigurationTx = async (
  *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
  *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
  *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
+ *                        CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
  *
  * @param id              Marketplace Id of the marketplace to update.
  * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
  * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
  * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed. ex: { [MarketplaceConfigAction.Set]: [0, 1, 2] }
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               MarketplaceConfigSetEvent Blockchain event.
@@ -110,10 +116,18 @@ export const setMarketplaceConfiguration = async (
   listingFee: ListingFeeType = MarketplaceConfigAction.Noop,
   accountList: AccountListType = MarketplaceConfigAction.Noop,
   offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
+  collectionList: CollectionListType = MarketplaceConfigAction.Noop,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<MarketplaceConfigSetEvent> => {
-  const tx = await setMarketplaceConfigurationTx(id, commissionFee, listingFee, accountList, offchainData)
+  const tx = await setMarketplaceConfigurationTx(
+    id,
+    commissionFee,
+    listingFee,
+    accountList,
+    offchainData,
+    collectionList,
+  )
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MarketplaceConfigSetEvent)
 }
@@ -181,8 +195,8 @@ export const setMarketplaceKind = async (
 /**
  * @name listNftTx
  * @summary               Creates an unsigned unsubmitted List-NFT Transaction Hash.
- * @param nftId          NFT Id of the NFT to be listed for sale.
- * @param marketplaceId  Marketplace Id of the marketplace to list the NFT on.
+ * @param nftId           NFT Id of the NFT to be listed for sale.
+ * @param marketplaceId   Marketplace Id of the marketplace to list the NFT on.
  * @param price           Price of the NFT.
  * @returns               Unsigned unsubmitted List-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
@@ -198,8 +212,8 @@ export const listNftTx = async (
 /**
  * @name listNft
  * @summary               Lists an NFT on a marketplace.
- * @param nftId          NFT Id of the NFT to be listed for sale.
- * @param marketplaceId  Marketplace Id of the marketplace to list the NFT on.
+ * @param nftId           NFT Id of the NFT to be listed for sale.
+ * @param marketplaceId   Marketplace Id of the marketplace to list the NFT on.
  * @param price           Price of the NFT.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
@@ -220,7 +234,7 @@ export const listNft = async (
 /**
  * @name unlistNftTx
  * @summary               Creates an unsigned unsubmitted Unlist-NFT Transaction Hash.
- * @param nftId          NFT Id of the NFT to be unlisted from sale.
+ * @param nftId           NFT Id of the NFT to be unlisted from sale.
  * @returns               Unsigned unsubmitted Unlist-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const unlistNftTx = async (nftId: number): Promise<TransactionHashType> => {
@@ -230,7 +244,7 @@ export const unlistNftTx = async (nftId: number): Promise<TransactionHashType> =
 /**
  * @name unlistNft
  * @summary               Unlists an NFT from a marketplace.
- * @param nftId          NFT Id of the NFT to be unlisted from sale.
+ * @param nftId           NFT Id of the NFT to be unlisted from sale.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTUnlistedEvent Blockchain event.
@@ -248,7 +262,7 @@ export const unlistNft = async (
 /**
  * @name buyNftTx
  * @summary               Creates an unsigned unsubmitted Buy-NFT Transaction Hash.
- * @param nftId          NFT Id of the NFT for sale.
+ * @param nftId           NFT Id of the NFT for sale.
  * @returns               Unsigned unsubmitted Buy-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const buyNftTx = async (nftId: number): Promise<TransactionHashType> => {
@@ -258,7 +272,7 @@ export const buyNftTx = async (nftId: number): Promise<TransactionHashType> => {
 /**
  * @name buyNft
  * @summary               Buys an NFT on a marketplace.
- * @param nftId          NFT Id of the NFT for sale.
+ * @param nftId           NFT Id of the NFT for sale.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTSoldEvent Blockchain event.
