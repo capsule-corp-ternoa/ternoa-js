@@ -432,7 +432,7 @@ You can locate the static website in the [/docs](https://github.com/capsule-corp
 
 ### Testing
 
-The test suites rely upon testing pairs in the [testing pairs file](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/testingPairs.ts). In order to prepare these pairs, [test-setup.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-setup.ts) and [test-teardown.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-teardown.ts) are supplied and drained of `$CAPS` respectively. Environmental variables `SEED_TEST_FUNDS` and `SEED_TEST_FUNDS_PUBLIC_KEY` have to be defined in order to run these test suites.
+The test suites rely upon testing pairs in the [testing pairs file](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/testingPairs.ts). In order to prepare these pairs, [test-setup.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-setup.ts) and [test-teardown.ts](https://github.com/capsule-corp-ternoa/ternoa-js/blob/main/src/_misc/scripts/test-teardown.ts) are supplied and drained of `$CAPS` respectively. Environmental variables `BLOCKCHAIN_ENDPOINT` (e.g. `BLOCKCHAIN_ENDPOINT=wss://alphanet.ternoa.com`), `SEED_TEST_FUNDS` and `SEED_TEST_FUNDS_PUBLIC_KEY` have to be defined in order to run these test suites.
 
 To initiate the test suites, run:
 
