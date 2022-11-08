@@ -71,7 +71,8 @@
     "bn.js": "5.2.x",
     "form-data": "4.0.x",
     "mime-types": "2.1.x",
-    "openpgp": "5.5.0"
+    "openpgp": "5.5.0",
+    "shamirs-secret-sharing": "^1.0.1"
   },
   "resolutions": {
     "@polkadot/api": "9.6.1",

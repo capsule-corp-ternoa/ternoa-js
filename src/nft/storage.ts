@@ -1,6 +1,5 @@
 import { hexToString } from "@polkadot/util"
 import BN from "bn.js"
-import { u8aToHex } from "index"
 
 import { query } from "../blockchain"
 import { chainQuery, Errors, txPallets } from "../constants"
