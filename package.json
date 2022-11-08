@@ -70,7 +70,8 @@
     "axios": "1.1.x",
     "bn.js": "5.2.x",
     "form-data": "4.0.x",
-    "mime-types": "2.1.x"
+    "mime-types": "2.1.x",
+    "shamirs-secret-sharing": "^1.0.1"
   },
   "resolutions": {
     "@polkadot/api": "9.6.1",
