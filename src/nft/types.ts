@@ -41,6 +41,12 @@ export interface INFTMetadata {
   file: File
 }
 
+export interface INFTSecretMetadata {
+  file: File
+  title?: string
+  description?: string
+}
+
 export interface ICollectionMetadata {
   name: string
   description: string
