@@ -2,26 +2,19 @@
 // @ts-ignore
 import { combine, split } from "shamirs-secret-sharing"
 import { IKeyringPair } from "@polkadot/types/types"
-import { u8aToString } from "@polkadot/util"
+import { u8aToHex } from "@polkadot/util"
+
 import axios from "axios"
 
-export const SSSA_NUMSHARES = 5
-export const SSSA_THRESHOLD = 3
+export const SSSA_NUMSHARES = 1
+export const SSSA_THRESHOLD = 1
 
 export const SGX_STORE_ENDPOINT = "/api/nft/storeSecretShares"
 export const SGX_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
 
-export type SecretDataType = {
-  nft_id: number
-  data: Uint8Array
-}
-
 export type SecretPayload = {
   account_address: string
-  secret_data: {
-    nft_id: number
-    data: Uint8Array
-  }
+  secret_data: string
   signature: string
 }
 
@@ -60,7 +53,7 @@ export const combineSSSShares = (shares: string[]): string => {
  */
 export const getSgxEnclaves = async () => {
   // query storage to chain
-  return ["url1", "url2", "url3"]
+  return ["https://15.235.119.14:3000"]
 }
 
 /**
@@ -70,9 +63,9 @@ export const getSgxEnclaves = async () => {
  * @param secretData    TODO
  * @returns             TODO
  */
-export const getSignature = (keyring: IKeyringPair, secretData: SecretDataType) => {
-  const finalData = new Uint8Array(Buffer.from(JSON.stringify(secretData)))
-  return u8aToString(keyring.sign(finalData)) // u8aToHex ?
+export const getSignature = (keyring: IKeyringPair, secretData: string) => {
+  const finalData = new Uint8Array(Buffer.from(secretData))
+  return u8aToHex(keyring.sign(finalData))
 }
 
 /**
@@ -83,12 +76,12 @@ export const getSignature = (keyring: IKeyringPair, secretData: SecretDataType) 
  * @param keyring       TODO
  * @returns             TODO
  */
-export const formatPayload = (nftId: number, share: Uint8Array, keyring: IKeyringPair): SecretPayload => {
-  const secretData = {
-    nft_id: nftId,
-    data: share,
-  }
+export const formatPayload = (nftId: number, share: string, keyring: IKeyringPair): SecretPayload => {
+  const secretData = `${nftId}_${share}`
   const signature = getSignature(keyring, secretData)
+
+  console.log("SecretData: ", secretData)
+  console.log("Signature: ", signature)
   return {
     account_address: keyring.address,
     secret_data: secretData,
@@ -127,9 +120,10 @@ export const sgxUpload = async (baseUrl: string, secretPayload: SecretPayload) =
 export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyring: IKeyringPair) => {
   const sgxEnclaves = await getSgxEnclaves()
   const sharesUpload = await Promise.all(
-    shares.map((s, idx) => {
-      const share = new Uint8Array(Buffer.from(s))
+    shares.map((share, idx) => {
+      //const share = new Uint8Array(Buffer.from(s))
       const secretPayload = formatPayload(nftId, share, keyring)
+      console.log("secretPayload: ", secretPayload)
       const enclaveBaseUrl = sgxEnclaves[idx]
       return sgxUpload(enclaveBaseUrl, secretPayload)
     }),
