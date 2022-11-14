@@ -1,5 +1,4 @@
 import * as openpgp from "openpgp"
-import mime from "mime-types"
 
 import { ipfsFileUpload } from "./ipfs"
 import { generatePGPKeysType } from "./types"
@@ -14,28 +13,23 @@ import { INFTSecretMetadata } from "../nft"
  */
 export const generatePGPKeys = async (): Promise<generatePGPKeysType> => {
   const { privateKey, publicKey } = await openpgp.generateKey({
-    type: "ecc", // Type of the key, defaults to ECC
-    curve: "curve25519", // ECC curve name, defaults to curve25519
-    userIDs: [{ name: "Jon Smith", email: "jon@example.com" }], // you can pass multiple user IDs
-    // revocationCertificate not needed ??
-    // passphrase: "super long and hard to guess secret", // protects the private key
-    // format: "armored", // output key format, defaults to 'armored' (other options: 'binary' or 'object')
+    type: "ecc",
+    curve: "curve25519",
+    userIDs: [{ name: "Jon Smith", email: "jon@example.com" }],
   })
   return { privateKey, publicKey }
 }
 
 /**
  * @name encryptFile
- * @summary             Encrypts file with the public key.
- * @param file          File to encrypt.
- * @param publicPGPKey  Public Key to encrypt the file.
- * @see                 Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
- * @returns             A string containing the encrypted file.
+ * @summary               Encrypts file with the public key.
+ * @param fileDataBuffer  File to encrypt.
+ * @param publicPGPKey    Public Key to encrypt the file.
+ * @see                   Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
+ * @returns               A string containing the encrypted file.
  */
-export const encryptFile = async (file: File, publicPGPKey: string) => {
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-  const content = buffer.toString("base64")
+export const encryptFile = async (fileDataBuffer: Buffer, publicPGPKey: string) => {
+  const content = fileDataBuffer.toString("base64")
   const message = await openpgp.createMessage({
     text: content,
   })
@@ -58,36 +52,21 @@ export const encryptFile = async (file: File, publicPGPKey: string) => {
  * @param apiKey        API Key to validate the upload on the IPFS gateway.
  * @returns             An array containing both secretFile IPFS hash and publicPGPKey hash.
  */
-export const encryptAndUploadFile = async (publicPGPKey: string, file: File, ipfsGateway?: string, apiKey?: string) => {
-  // Encrypt file with public key
+export const encryptAndUploadFile = async (
+  publicPGPKey: string,
+  file: Buffer,
+  ipfsGateway?: string,
+  apiKey?: string,
+) => {
   const encryptedFile = await encryptFile(file, publicPGPKey)
-  // Get file type
-  const fileType = mime.lookup(file.name)
+  const encryptedFileDataBuffer = Buffer.from(encryptedFile as string)
+  const publicPGPKeyBuffer = Buffer.from(publicPGPKey as string)
 
-  let encryptedFileBlob
-  let secretFile
-  let pgpBlob
-  let pgpFile
-  // Create a new file from encrypted string and public key
-  const isBrowser = typeof Blob === "function" && typeof File === "function"
-  if (isBrowser) {
-    encryptedFileBlob = new Blob([encryptedFile as string], { type: fileType ? fileType : undefined })
-    secretFile = new File([encryptedFileBlob], "encrypted nft")
-    pgpBlob = new Blob([publicPGPKey], { type: "text/plain" })
-    pgpFile = new File([pgpBlob], "publicPGPKey")
-  } else {
-    encryptedFileBlob = new Uint8Array(Buffer.from(encryptedFile as string))
-    secretFile = Buffer.from(encryptedFileBlob)
-    pgpBlob = new Uint8Array(Buffer.from(publicPGPKey as string))
-    pgpFile = Buffer.from(pgpBlob)
-  }
-
-  // Upload Secret and Pgp Public Key on IPFS to get hash
-  const [{ hash: secretUploadHash }, { hash: pgpUploadHash }] = await Promise.all([
-    ipfsFileUpload(secretFile, ipfsGateway, apiKey),
-    ipfsFileUpload(pgpFile, ipfsGateway, apiKey),
+  const [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes] = await Promise.all([
+    ipfsFileUpload(encryptedFileDataBuffer, ipfsGateway, apiKey),
+    ipfsFileUpload(publicPGPKeyBuffer, ipfsGateway, apiKey),
   ])
-  return [secretUploadHash, pgpUploadHash]
+  return [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes]
 }
 
 /**
@@ -104,22 +83,22 @@ export const secretNftIpfsUpload = async (
   ipfsGateway?: string,
   apiKey?: string,
 ) => {
-  const { description, file, title } = data
-  if (!file) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-  const [cryptedFileHash, publicPGPKeyHash] = await encryptAndUploadFile(publicPGPKey, file, ipfsGateway, apiKey)
+  const { description, fileDataBuffer, fileType: type, title } = data
+  if (!fileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
+  const [{ hash: encryptedFileIpfsHash, size: encryptedFileSize }, { hash: publicPGPKeyIpfsHash }] =
+    await encryptAndUploadFile(publicPGPKey, fileDataBuffer, ipfsGateway, apiKey)
   const secretMetaDatas = {
     title,
     description,
     properties: {
       encryptedMedia: {
-        hash: cryptedFileHash,
-        size: file.size,
-        type: file.type,
+        hash: encryptedFileIpfsHash,
+        size: encryptedFileSize,
+        type,
       },
-      publicKeyOfNft: publicPGPKeyHash,
+      publicKeyOfNft: publicPGPKeyIpfsHash,
     },
   }
-  const finalBlob = new Blob([JSON.stringify(secretMetaDatas)], { type: "application/json" })
-  const finalFile = new File([finalBlob], "secret nft metadatas")
+  const finalFile = Buffer.from(JSON.stringify(secretMetaDatas))
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }

@@ -46,6 +46,8 @@ export interface INFTMetadata {
 export interface INFTSecretMetadata {
   title?: string
   description?: string
+  fileDataBuffer: Buffer
+  fileType: string
 }
 
 export interface ICollectionMetadata {
