@@ -12,9 +12,9 @@ import { Errors } from "../constants"
  * @returns             The data object with the hash to add as offchain metadata in the extrinsic.
  */
 export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, apiKey?: string) => {
-  const { description, file, title } = data
-  if (!file) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-  const { hash: fileHash } = await ipfsFileUpload(file, ipfsGateway, apiKey)
+  const { description, fileDataBuffer, fileName: name, fileType: type, title } = data
+  if (!fileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
+  const { hash: fileHash, size } = await ipfsFileUpload(fileDataBuffer, ipfsGateway, apiKey)
   const nftMetadata = {
     title,
     description,
@@ -22,23 +22,14 @@ export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, ap
     properties: {
       media: {
         hash: fileHash,
-        name: file.name,
-        size: file.size,
-        type: file.type,
+        size,
+        type,
+        ...(name && { name }),
       },
     },
   }
-  const isBrowser = typeof Blob === "function" && typeof File === "function"
-  let finalBlob
-  let finalFile
-  if (isBrowser) {
-    finalBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
-    finalFile = new File([finalBlob], "nft metadata")
-  } else {
-    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(nftMetadata)))
-    finalFile = Buffer.from(finalBlob)
-  }
-  return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
+  const metadataBuffer = Buffer.from(JSON.stringify(nftMetadata))
+  return await ipfsFileUpload(metadataBuffer, ipfsGateway, apiKey)
 }
 
 /**
@@ -50,25 +41,17 @@ export const nftIpfsUpload = async (data: INFTMetadata, ipfsGateway?: string, ap
  * @returns             The data object with the hash to add as offchain metadata in the extrinsic.
  */
 export const collectionIpfsUpload = async (data: ICollectionMetadata, ipfsGateway?: string, apiKey?: string) => {
-  const { name, description, profileFile, bannerFile } = data
-  if (!profileFile || !bannerFile) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-  const { hash: profileFileHash } = await ipfsFileUpload(profileFile, ipfsGateway, apiKey)
-  const { hash: bannerFileHash } = await ipfsFileUpload(bannerFile, ipfsGateway, apiKey)
+  const { name, description, profileFileDataBuffer, bannerFileDataBuffer } = data
+  if (!profileFileDataBuffer || !bannerFileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
+  const { hash: profileFileHash } = await ipfsFileUpload(profileFileDataBuffer, ipfsGateway, apiKey)
+  const { hash: bannerFileHash } = await ipfsFileUpload(bannerFileDataBuffer, ipfsGateway, apiKey)
   const collectionMetadata = {
     name,
     description,
     profileImage: profileFileHash,
     bannerImage: bannerFileHash,
   }
-  const isBrowser = typeof Blob === "function" && typeof File === "function"
-  let finalBlob
-  let finalFile
-  if (isBrowser) {
-    finalBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
-    finalFile = new File([finalBlob], "collection metadata")
-  } else {
-    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(collectionMetadata)))
-    finalFile = Buffer.from(finalBlob)
-  }
+
+  const finalFile = Buffer.from(JSON.stringify(collectionMetadata))
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }

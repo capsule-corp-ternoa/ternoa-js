@@ -1,6 +1,7 @@
 import axios from "axios"
-import mime from "mime-types"
 import FormData from "form-data"
+
+import { IpfsAddDataResponseType } from "./types"
 
 export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
 
@@ -12,10 +13,10 @@ export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
  * @param apiKey        API Key to validate the upload on the IPFS gateway.
  * @returns             A formatted object datas with name, hash, size and type.
  */
-export const ipfsFileUpload = async (file: File | Buffer, ipfsGateway?: string, apiKey?: string) => {
+export const ipfsFileUpload = async (file: Buffer, ipfsGateway?: string, apiKey?: string) => {
   const formData = new FormData()
-  formData.append(`file`, file)
-  const headers = apiKey ? { apiKey: apiKey } : undefined
+  formData.append("file", file)
+  const headers = apiKey ? { apiKey } : undefined
   const response = await axios
     .request({
       method: "post",
@@ -26,21 +27,10 @@ export const ipfsFileUpload = async (file: File | Buffer, ipfsGateway?: string, 
     .catch((err) => {
       throw new Error(err)
     })
-  return formatIpfsResponse(response.data)
-}
-
-/**
- * @name formatIpfsResponse
- * @summary             Format the IPFS response from a gateway upload.
- * @param res           An IPFS post request response.
- * @returns             A formatted object datas with name, hash, size and type.
- */
-export const formatIpfsResponse = (res: any) => {
-  const type = mime.lookup(res.Name)
+  const { data } = response
+  const { Hash, Size } = data as IpfsAddDataResponseType
   return {
-    name: res.Name,
-    hash: res.Hash,
-    size: res.Size,
-    type: type || "",
+    hash: Hash,
+    size: Size,
   }
 }
