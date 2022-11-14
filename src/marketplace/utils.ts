@@ -34,23 +34,14 @@ export const formatMarketplaceFee = async (fee: CommissionFeeType | ListingFeeTy
  * @returns             The data object with the hash to add as offchain metadata in the extrinsic.
  */
 export const marketplaceIpfsUpload = async (data: IMarketplaceMetadata, ipfsGateway?: string, apiKey?: string) => {
-  const { name, logoFile } = data
-  if (!logoFile) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-  const { hash: logoFileHash } = await ipfsFileUpload(logoFile, ipfsGateway, apiKey)
+  const { name, logoFileDataBuffer } = data
+  if (!logoFileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
+  const { hash: logoFileHash } = await ipfsFileUpload(logoFileDataBuffer, ipfsGateway, apiKey)
   const marketplaceMetadata = {
     name,
-    logoUri: logoFileHash,
+    logo: logoFileHash,
   }
 
-  const isBrowser = typeof Blob === "function" && typeof File === "function"
-  let finalBlob
-  let finalFile
-  if (isBrowser) {
-    finalBlob = new Blob([JSON.stringify(marketplaceMetadata)], { type: "application/json" })
-    finalFile = new File([finalBlob], "marketplace metadata")
-  } else {
-    finalBlob = new Uint8Array(Buffer.from(JSON.stringify(marketplaceMetadata)))
-    finalFile = Buffer.from(finalBlob)
-  }
+  const finalFile = Buffer.from(JSON.stringify(marketplaceMetadata))
   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
 }

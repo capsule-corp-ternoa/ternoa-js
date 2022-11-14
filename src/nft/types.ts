@@ -38,11 +38,12 @@ export type CollectionData = {
 export interface INFTMetadata {
   title: string
   description: string
-  file: File
+  fileDataBuffer: Buffer
+  fileType: string
+  fileName?: string
 }
 
 export interface INFTSecretMetadata {
-  file: File
   title?: string
   description?: string
 }
@@ -50,6 +51,6 @@ export interface INFTSecretMetadata {
 export interface ICollectionMetadata {
   name: string
   description: string
-  profileFile: File
-  bannerFile: File
+  profileFileDataBuffer: Buffer
+  bannerFileDataBuffer: Buffer
 }
