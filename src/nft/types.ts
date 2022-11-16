@@ -22,16 +22,3 @@ export type CollectionData = {
   limit: number
   isClosed: boolean
 }
-
-export interface INFTMetadata {
-  title: string
-  description: string
-  file: File
-}
-
-export interface ICollectionMetadata {
-  name: string
-  description: string
-  profileFile: File
-  bannerFile: File
-}

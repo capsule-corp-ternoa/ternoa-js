@@ -1,46 +1,177 @@
-import axios from "axios"
-import mime from "mime-types"
-import FormData from "form-data"
+import { Blob, File, FormData } from "formdata-node"
+import { FormDataEncoder } from "form-data-encoder"
+import { Readable } from "stream"
 
-export const DEFAULT_IPFS_GATEWAY = "https://ipfs.ternoa.dev/api/v0/add"
+import { Errors } from "../constants"
 
-/**
- * @name ipfsFilesUpload
- * @summary             Uploads a file on an IFPS gateway.
- * @param file          File to upload on IPFS.
- * @param ipfsGateway   IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev/api/v0/add
- * @param apiKey        API Key to validate the upload on the IPFS gateway.
- * @returns             A formatted object datas with name, hash, size and type.
- */
-export const ipfsFileUpload = async (file: File, ipfsGateway?: string, apiKey?: string) => {
-  const formData = new FormData()
-  formData.append(`file`, file)
-  const headers = apiKey ? { apiKey: apiKey } : undefined
-  const response = await axios
-    .request({
-      method: "post",
-      url: ipfsGateway ? ipfsGateway : DEFAULT_IPFS_GATEWAY,
-      headers: headers,
-      data: formData,
-    })
-    .catch((err) => {
-      throw new Error(err)
-    })
-  return formatIpfsResponse(response.data)
-}
+import { HttpClient } from "./http"
+import {
+  IpfsAddDataResponseType,
+  IServiceIPFS,
+  CollectionMetadataType,
+  NftMetadataType,
+  MarketplaceMetadataType,
+} from "./types"
 
 /**
- * @name formatIpfsResponse
- * @summary             Format the IPFS response from a gateway upload.
- * @param res           An IPFS post request response.
- * @returns             A formatted object datas with name, hash, size and type.
+ * @implements {IServiceIPFS}
  */
-export const formatIpfsResponse = (res: any) => {
-  const type = mime.lookup(res.Name)
-  return {
-    name: res.Name,
-    hash: res.Hash,
-    size: res.Size,
-    type: type || "",
+export class TernoaIPFS {
+  apiKey?: string
+  apiUrl: URL
+
+  constructor(apiUrl = new URL("https://ipfs.ternoa.dev"), apiKey?: string) {
+    /**
+     * Service API `URL`.
+     * @readonly
+     */
+    this.apiUrl = apiUrl
+    /**
+     * Authorization token.
+     *
+     * @readonly
+     */
+    this.apiKey = apiKey
+  }
+
+  /**
+   * Get file from IPFS.
+   *
+   * @param ternoaIpfsService
+   * @param hash
+   * @returns IPFS file
+   */
+  static get = async ({ apiUrl }: IServiceIPFS, hash: string) => {
+    const httpClient = new HttpClient(apiUrl.toString())
+    const endpoint = `/ipfs/${hash}`
+    return httpClient.get(endpoint)
+  }
+
+  /**
+   * Upload file form data to IPFS.
+   *
+   * @param service
+   * @param form
+   * @returns IPFS data (hash, size, name)
+   */
+  static upload = async ({ apiKey, apiUrl }: IServiceIPFS, form: FormData) => {
+    const httpClient = new HttpClient(apiUrl.toString())
+    const endpoint = "/api/v0/add"
+    const encoder = new FormDataEncoder(form)
+    const headers = { ...encoder.headers, ...(apiKey && { apiKey }) }
+    return httpClient.post<IpfsAddDataResponseType>(endpoint, Readable.from(encoder), {
+      headers,
+    })
+  }
+
+  /**
+   * Store a single file on IPFS.
+   *
+   * @param service
+   * @param file
+   * @returns IPFS data (hash, size, name)
+   */
+  static storeFile = async (service: IServiceIPFS, file: File) => {
+    const form = new FormData()
+    form.set("file", file)
+    return await TernoaIPFS.upload(service, form)
+  }
+
+  /**
+   * Store a Ternoa basic NFT's metadata & asset on IPFS.
+   *
+   * @param service
+   * @param file      NFT's asset
+   * @param metadata  Ternoa basic NFT metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-100-Basic-NFT.md#metadata here}.
+   * @returns         IPFS data (Hash, Size, Name)
+   */
+  static storeNFT = async <T>(service: IServiceIPFS, file: File, metadata: NftMetadataType<T>) => {
+    const res = await TernoaIPFS.storeFile(service, file)
+    if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload NFT's asset`)
+    const { Hash: hash, Size: size } = res
+    const nftMetadata = {
+      ...metadata,
+      image: hash,
+      properties: {
+        media: {
+          hash,
+          size,
+          type: file.type,
+          name: file.name,
+        },
+      },
+    }
+    const metadataBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
+    const metadataFile = new File([metadataBlob], "NFT metadata")
+    return await TernoaIPFS.storeFile(service, metadataFile)
+  }
+
+  /**
+   * Store a single Ternoa Collection's metadata & assets on IPFS.
+   *
+   * @param service
+   * @param profileFile   Collection's profile asset
+   * @param bannerFile    Collection's banner asset
+   * @param metadata      Ternoa Collection metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-101-Collection.md#metadata here}.
+   * @returns             IPFS data (Hash, Size, Name)
+   */
+  static storeCollection = async <T>(
+    service: IServiceIPFS,
+    profileFile: File,
+    bannerFile: File,
+    metadata: CollectionMetadataType<T>,
+  ) => {
+    const profileRes = await TernoaIPFS.storeFile(service, profileFile)
+    if (!profileRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload collection's profile asset`)
+    const bannerRes = await TernoaIPFS.storeFile(service, bannerFile)
+    if (!bannerRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload collection's banner asset`)
+    const collectionMetadata = {
+      ...metadata,
+      profileImage: profileRes.Hash,
+      bannerImage: bannerRes.Hash,
+    }
+    const metadataBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
+    const metadataFile = new File([metadataBlob], "Collection metadata")
+    return await TernoaIPFS.storeFile(service, metadataFile)
+  }
+
+  /**
+   * Store a single Ternoa Marketplace's metadata & asset on IPFS.
+   *
+   * @param service
+   * @param file      Marketplace's logo asset
+   * @param metadata  Ternoa Marketplace metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-200-Marketplace.md#metadata here}.
+   * @returns         IPFS data (Hash, Size, Name)
+   */
+  static storeMarketplace = async <T>(service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType<T>) => {
+    const res = await TernoaIPFS.storeFile(service, file)
+    if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload marketplace's logo asset`)
+    const collectionMetadata = {
+      ...metadata,
+      logo: res.Hash,
+    }
+    const metadataBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
+    const metadataFile = new File([metadataBlob], "Collection metadata")
+    return await TernoaIPFS.storeFile(service, metadataFile)
+  }
+
+  getFile(hash: string) {
+    return TernoaIPFS.get(this, hash)
+  }
+
+  storeFile(file: File) {
+    return TernoaIPFS.storeFile(this, file)
+  }
+
+  storeNFT<T>(file: File, metadata: NftMetadataType<T>) {
+    return TernoaIPFS.storeNFT(this, file, metadata)
+  }
+
+  storeCollection<T>(profileFile: File, bannerFile: File, metadata: CollectionMetadataType<T>) {
+    return TernoaIPFS.storeCollection(this, profileFile, bannerFile, metadata)
+  }
+
+  storeMarketplace<T>(file: File, metadata: MarketplaceMetadataType<T>) {
+    return TernoaIPFS.storeMarketplace(this, file, metadata)
   }
 }
