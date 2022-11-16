@@ -45,8 +45,3 @@ export interface IListedNft {
   price: BN
   commissionFee?: RequireOnlyOne<IFeeType>
 }
-
-export interface IMarketplaceMetadata {
-  name: string
-  logoFileDataBuffer: Buffer
-}

@@ -69,6 +69,7 @@
     "@polkadot/api": "9.6.1",
     "axios": "1.1.x",
     "bn.js": "5.2.x",
-    "form-data": "4.0.x"
+    "form-data-encoder": "1.7.x",
+    "formdata-node": "4.4.x"
   }
 }
