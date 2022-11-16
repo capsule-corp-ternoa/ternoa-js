@@ -1,10 +1,6 @@
 import * as openpgp from "openpgp"
 
-import { ipfsFileUpload } from "./ipfs"
 import { generatePGPKeysType } from "./types"
-
-import { Errors } from "../constants"
-import { INFTSecretMetadata } from "../nft"
 
 /**
  * @name generatePGPKeys
@@ -58,15 +54,14 @@ export const encryptAndUploadFile = async (
   ipfsGateway?: string,
   apiKey?: string,
 ) => {
-  const encryptedFile = await encryptFile(file, publicPGPKey)
-  const encryptedFileDataBuffer = Buffer.from(encryptedFile as string)
-  const publicPGPKeyBuffer = Buffer.from(publicPGPKey as string)
-
-  const [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes] = await Promise.all([
-    ipfsFileUpload(encryptedFileDataBuffer, ipfsGateway, apiKey),
-    ipfsFileUpload(publicPGPKeyBuffer, ipfsGateway, apiKey),
-  ])
-  return [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes]
+  // const encryptedFile = await encryptFile(file, publicPGPKey)
+  // const encryptedFileDataBuffer = Buffer.from(encryptedFile as string)
+  // const publicPGPKeyBuffer = Buffer.from(publicPGPKey as string)
+  // const [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes] = await Promise.all([
+  //   ipfsFileUpload(encryptedFileDataBuffer, ipfsGateway, apiKey),
+  //   ipfsFileUpload(publicPGPKeyBuffer, ipfsGateway, apiKey),
+  // ])
+  // return [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes]
 }
 
 /**
@@ -77,28 +72,28 @@ export const encryptAndUploadFile = async (
  * @param apiKey        API Key to validate the upload on the IPFS gateway.
  * @returns             The data object with the hash to add as offchain secret metadatas in the extrinsic.
  */
-export const secretNftIpfsUpload = async (
-  publicPGPKey: string,
-  data: INFTSecretMetadata,
-  ipfsGateway?: string,
-  apiKey?: string,
-) => {
-  const { description, fileDataBuffer, fileType: type, title } = data
-  if (!fileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-  const [{ hash: encryptedFileIpfsHash, size: encryptedFileSize }, { hash: publicPGPKeyIpfsHash }] =
-    await encryptAndUploadFile(publicPGPKey, fileDataBuffer, ipfsGateway, apiKey)
-  const secretMetaDatas = {
-    title,
-    description,
-    properties: {
-      encryptedMedia: {
-        hash: encryptedFileIpfsHash,
-        size: encryptedFileSize,
-        type,
-      },
-      publicKeyOfNft: publicPGPKeyIpfsHash,
-    },
-  }
-  const finalFile = Buffer.from(JSON.stringify(secretMetaDatas))
-  return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
-}
+// export const secretNftIpfsUpload = async (
+//   publicPGPKey: string,
+//   data: INFTSecretMetadata,
+//   ipfsGateway?: string,
+//   apiKey?: string,
+// ) => {
+//   const { description, fileDataBuffer, fileType: type, title } = data
+//   if (!fileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
+//   const [{ hash: encryptedFileIpfsHash, size: encryptedFileSize }, { hash: publicPGPKeyIpfsHash }] =
+//     await encryptAndUploadFile(publicPGPKey, fileDataBuffer, ipfsGateway, apiKey)
+//   const secretMetaDatas = {
+//     title,
+//     description,
+//     properties: {
+//       encryptedMedia: {
+//         hash: encryptedFileIpfsHash,
+//         size: encryptedFileSize,
+//         type,
+//       },
+//       publicKeyOfNft: publicPGPKeyIpfsHash,
+//     },
+//   }
+//   const finalFile = Buffer.from(JSON.stringify(secretMetaDatas))
+//   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
+// }

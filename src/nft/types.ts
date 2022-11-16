@@ -34,25 +34,3 @@ export type CollectionData = {
   limit: number
   isClosed: boolean
 }
-
-export interface INFTMetadata {
-  title: string
-  description: string
-  fileDataBuffer: Buffer
-  fileType: string
-  fileName?: string
-}
-
-export interface INFTSecretMetadata {
-  title?: string
-  description?: string
-  fileDataBuffer: Buffer
-  fileType: string
-}
-
-export interface ICollectionMetadata {
-  name: string
-  description: string
-  profileFileDataBuffer: Buffer
-  bannerFileDataBuffer: Buffer
-}
