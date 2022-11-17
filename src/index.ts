@@ -30,6 +30,8 @@ export * as TernoaEvents from "./events"
 export * as TernoaConstants from "./constants"
 
 export { hexToString, hexToU8a, stringToHex, u8aToHex } from "@polkadot/util"
+export { Blob, File, FormData } from "formdata-node"
+
 // const NFT_METADATA = {
 //   file: new File(["Random datas"], "Fake File"),
 //   title: "Title",

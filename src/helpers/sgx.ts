@@ -53,7 +53,7 @@ export const combineSSSShares = (shares: string[]): string => {
  */
 export const getSgxEnclaves = async () => {
   // query storage to chain
-  return ["https://15.235.119.14:3000"]
+  return ["https://worker-ca-0.trnnfr.com"]
 }
 
 /**
@@ -76,8 +76,8 @@ export const getSignature = (keyring: IKeyringPair, secretData: string) => {
  * @param keyring       TODO
  * @returns             TODO
  */
-export const formatPayload = (nftId: number, share: string, keyring: IKeyringPair): SecretPayload => {
-  const secretData = `${nftId}_${share}`
+export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayload => {
+  const secretData = `${nftId}_${share ? share : "0"}`
   const signature = getSignature(keyring, secretData)
 
   console.log("SecretData: ", secretData)
@@ -90,23 +90,26 @@ export const formatPayload = (nftId: number, share: string, keyring: IKeyringPai
 }
 
 /**
- * @name sgxUpload
+ * @name sgxApiPost
  * @summary             TODO
  * @param baseUrl       TODO
  * @param secretPayload TODO
  * @returns             TODO
  */
-export const sgxUpload = async (baseUrl: string, secretPayload: SecretPayload) => {
-  await axios
-    .request({
+export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
+  try {
+    const res = await axios.request({
       method: "post",
-      url: `${baseUrl}${SGX_STORE_ENDPOINT}`,
-      headers: { "Content-Type": "application/json" },
+      url,
+      headers: {
+        "Content-Type": "application/json",
+      },
       data: secretPayload,
     })
-    .catch((err) => {
-      throw new Error(err)
-    })
+    return res.data
+  } catch (err: any) {
+    throw new Error(err)
+  }
 }
 
 /**
@@ -119,16 +122,34 @@ export const sgxUpload = async (baseUrl: string, secretPayload: SecretPayload) =
  */
 export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyring: IKeyringPair) => {
   const sgxEnclaves = await getSgxEnclaves()
-  const sharesUpload = await Promise.all(
-    shares.map((share, idx) => {
-      //const share = new Uint8Array(Buffer.from(s))
+  return await Promise.all(
+    shares.map(async (share, idx) => {
       const secretPayload = formatPayload(nftId, share, keyring)
       console.log("secretPayload: ", secretPayload)
-      const enclaveBaseUrl = sgxEnclaves[idx]
-      return sgxUpload(enclaveBaseUrl, secretPayload)
+      const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
+      return await sgxApiPost(enclaveUrl, secretPayload)
     }),
   )
-  return sharesUpload
+}
+
+/**
+ * @name sgxSSSSharesRetrieve
+ * @summary             TODO
+ * @param nftId       TODO
+ * @param keyring       TODO
+ * @returns             TODO
+ */
+export const sgxSSSSharesRetrieve = async (nftId: number, keyring: IKeyringPair) => {
+  const sgxEnclaves = await getSgxEnclaves()
+  const shares = await Promise.all(
+    sgxEnclaves.map(async (sgxEnclaveBaseUrl) => {
+      const secretPayload = formatPayload(nftId, null, keyring)
+      const enclaveUrl = `${sgxEnclaveBaseUrl}${SGX_RETRIEVE_ENDPOINT}`
+      const res = await sgxApiPost(enclaveUrl, secretPayload)
+      return res.secret_data.split("_")[1]
+    }),
+  )
+  return shares
 }
 
 //nftID, pgpPrivateKey, addressPubTernoa, keyring

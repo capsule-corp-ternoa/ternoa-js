@@ -41,6 +41,30 @@ export const encryptFile = async (fileDataBuffer: Buffer, publicPGPKey: string) 
 }
 
 /**
+ * @name decryptFile
+ * @summary             Decrypts file with the private key.
+ * @param encryptedMessage  File to decrypt.
+ * @param privatePGPKey Private Key to decrypt the file.
+ * @see                 Learn more about encryption {@link https://docs.openpgpjs.org/global.html#decrypt here}.
+ * @returns             A base64 string containing the decrypted file.
+ */
+ export const decryptFile = async (encryptedMessage: string, privateKeyArmored: string) => {
+  const privateKey = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored })
+
+  const message = await openpgp.readMessage({
+    armoredMessage: encryptedMessage,
+  })
+
+  const { data: decrypted } = await openpgp.decrypt({
+    message,
+    decryptionKeys: privateKey,
+  })
+
+  return decrypted
+}
+
+
+/**
  * @name encryptAndUploadFile
  * @summary             Encrypts and uploads a file on an IFPS gateway.
  * @param file          File to encrypt and then upload on IPFS.

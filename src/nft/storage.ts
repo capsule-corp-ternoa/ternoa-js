@@ -30,9 +30,9 @@ export const getSecretNftMintFee = async (): Promise<BN> => {
  * @summary Get the secret offchain data of a Secret NFT.
  * @returns Secret NFT secret offchain data.
  */
-export const getSecretNftOffchainData = async (nftId: number | string) => {
+export const getSecretNftOffchainData = async (nftId: number | string): Promise<string> => {
   const secretOffchainData = await query(txPallets.nft, chainQuery.secretNftsOffchainData, [nftId])
-  return secretOffchainData.toHuman()
+  return secretOffchainData.toHuman() as string
 }
 
 /**
