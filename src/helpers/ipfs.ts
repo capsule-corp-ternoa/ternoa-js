@@ -59,7 +59,7 @@ export class TernoaIPFS {
     const endpoint = "/api/v0/add"
     let headers = { ...(apiKey && { apiKey }) }
     let data: FormData | Readable = form
-    if (typeof process === "object") {
+    if (typeof process !== "undefined" && process.versions !== null && process.versions.node !== null) {
       const encoder = new FormDataEncoder(form)
       headers = { ...headers, ...encoder.headers }
       data = Readable.from(encoder)
