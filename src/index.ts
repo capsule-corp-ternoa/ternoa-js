@@ -32,6 +32,33 @@ export * as TernoaConstants from "./constants"
 export { hexToString, hexToU8a, stringToHex, u8aToHex } from "@polkadot/util"
 export { Blob, File, FormData } from "formdata-node"
 
+import { sgxApi, setSgxApis } from "./helpers/sgxInstance"
+import { ipfsApi, setIpfsApis } from "./helpers/ipfsInstance"
+
+const test = async () => {
+  console.log("1", sgxApi)
+  setIpfsApis({
+    alphanet: {
+      baseURL: "https://ipfs-dev.trnnfr.com",
+      apiKey: "3hR7ziS3.con7hqVhS9feH43huFaTq3lFV6fdeUik",
+    },
+    mainnet: {
+      baseURL: "https://ipfs-mainnet.trnnfr.com",
+      apiKey: "3hR7ziS3.con7hqVhS9feH43huFaTq3lFV6fdeUik",
+    },
+  })
+  setSgxApis([
+    "https://worker-ca-0.trnnfr.com",
+    "https://worker-ca-1.trnnfr.com",
+    "https://worker-ca-2.trnnfr.com",
+    "https://worker-ca-3.trnnfr.com",
+    "https://worker-ca-4.trnnfr.com",
+  ])
+  console.log("2", sgxApi)
+
+  await sgxApi[0].post("/api/v0/add", {})
+}
+test()
 // const NFT_METADATA = {
 //   file: new File(["Random datas"], "Fake File"),
 //   title: "Title",

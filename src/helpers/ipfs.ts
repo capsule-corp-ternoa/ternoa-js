@@ -57,16 +57,9 @@ export class TernoaIPFS {
   static upload = async ({ apiKey, apiUrl }: IServiceIPFS, form: FormData) => {
     const httpClient = new HttpClient(apiUrl.toString())
     const endpoint = "/api/v0/add"
-    let headers = { ...(apiKey && { apiKey }) }
-    let data: FormData | Readable = form
-    if (typeof process === "object") {
-      const encoder = new FormDataEncoder(form)
-      headers = { ...headers, ...encoder.headers }
-      data = Readable.from(encoder)
-    }
-    return httpClient.post<IpfsAddDataResponseType>(endpoint, data, {
-      maxContentLength: 100000000,
-      maxBodyLength: 1000000000,
+    const encoder = new FormDataEncoder(form)
+    const headers = { ...encoder.headers, ...(apiKey && { apiKey }) }
+    return httpClient.post<IpfsAddDataResponseType>(endpoint, Readable.from(encoder), {
       headers,
     })
   }
