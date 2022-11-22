@@ -53,7 +53,7 @@ export const combineSSSShares = (shares: string[]): string => {
  */
 export const getSgxEnclaves = async () => {
   // query storage to chain
-  return ["https://worker-ca-0.trnnfr.com"]
+  return ["https://worker-ca-0.trnnfr.com", "https://worker-ca-0.trnnfr.com", "https://worker-ca-0.trnnfr.com"]
 }
 
 /**
@@ -96,7 +96,7 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
  * @param secretPayload TODO
  * @returns             TODO
  */
-export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
+export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Promise<any> => {
   try {
     const res = await axios.request({
       method: "post",
@@ -112,6 +112,24 @@ export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
   }
 }
 
+export const retryPost = async (fn: () => Promise<any>, n: number): Promise<any> => {
+  let lastError: any
+
+  for (let i = 0; i < n; i++) {
+    try {
+      console.log("RETRY:", i)
+      return await fn()
+    } catch (e) {
+      lastError = {
+        name: (e as Error).name,
+        message: (e as Error).message,
+      }
+    }
+  }
+
+  return lastError
+}
+
 /**
  * @name sgxSSSSharesUpload
  * @summary             TODO
@@ -122,14 +140,17 @@ export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
  */
 export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyring: IKeyringPair) => {
   const sgxEnclaves = await getSgxEnclaves()
-  return await Promise.all(
+  const sgxRes = await Promise.all(
     shares.map(async (share, idx) => {
       const secretPayload = formatPayload(nftId, share, keyring)
-      console.log("secretPayload: ", secretPayload)
+      // console.log("secretPayload: ", secretPayload)
       const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
-      return await sgxApiPost(enclaveUrl, secretPayload)
+      const post = () => sgxApiPost(enclaveUrl, secretPayload)
+      return await retryPost(post, 3)
     }),
   )
+
+  return sgxRes
 }
 
 /**
