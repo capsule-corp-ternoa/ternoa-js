@@ -8,8 +8,8 @@ import { Errors } from "../constants"
 
 /**
  * @name generatePGPKeys
- * @summary                 Generates a new OpenPGP key pair.
- * @returns                 An object with both private and public keys.
+ * @summary                 Generates a new PGP key pair.
+ * @returns                 An object with both private and public PGP keys.
  */
 export const generatePGPKeys = async (): Promise<generatePGPKeysType> => {
   const { privateKey, publicKey } = await openpgp.generateKey({
@@ -25,7 +25,7 @@ export const generatePGPKeys = async (): Promise<generatePGPKeysType> => {
  * @name encryptContent
  * @summary                 Encrypts a content (string).
  * @param content           Content to encrypt.
- * @param publicPGPKey      Public Key to encrypt the file.
+ * @param publicPGPKey      Public Key to encrypt the content.
  * @see                     Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
  * @returns                 A string containing the encrypted content.
  */
@@ -62,23 +62,23 @@ export const encryptFile = async (file: File, publicPGPKey: string) => {
 
 /**
  * @name decryptFile
- * @summary                 Decrypts file with the private key.
- * @param encryptedMessage  File to decrypt.
- * @param privatePGPKey     Private Key to decrypt the file.
+ * @summary                 Decrypts message with the private key.
+ * @param encryptedMessage  Message to decrypt.
+ * @param privatePGPKey     Private Key to decrypt the message.
  * @see                     Learn more about encryption {@link https://docs.openpgpjs.org/global.html#decrypt here}.
- * @returns                 A base64 string containing the decrypted file.
+ * @returns                 A base64 string containing the decrypted message.
  */
 export const decryptFile = async (encryptedMessage: string, privatePGPKey: string) => {
   const privateKey = await openpgp.readPrivateKey({ armoredKey: privatePGPKey })
   const message = await openpgp.readMessage({
     armoredMessage: encryptedMessage,
   })
-  const { data: decryptedFile } = await openpgp.decrypt({
+  const { data: decryptedMessage } = await openpgp.decrypt({
     message,
     decryptionKeys: privateKey,
   })
 
-  return decryptedFile
+  return decryptedMessage
 }
 
 /**
