@@ -1,7 +1,7 @@
 import * as openpgp from "openpgp"
 import { File } from "formdata-node"
 
-import { generatePGPKeysType, secretNftMetadataType } from "./types"
+import { generatePGPKeysType, SecretNftMetadataType } from "./types"
 import { convertFileToBuffer } from "./utils"
 import { TernoaIPFS } from "./ipfs"
 import { Errors } from "../constants"
@@ -96,7 +96,7 @@ export const secretNftEncryptAndUploadFile = async <T>(
   publicPGPKey: string,
   ipfsGateway?: URL,
   apiKey?: string,
-  metadata?: secretNftMetadataType<T>,
+  metadata?: SecretNftMetadataType<T>,
 ) => {
   if (!file) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - File undefined`)
   const encryptedFile = (await encryptFile(file, publicPGPKey)) as string

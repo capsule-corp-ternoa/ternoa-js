@@ -20,7 +20,7 @@ export type NftMetadataType<T> = T & {
   description: string
 }
 
-export type secretNftMetadataType<T> = T & {
+export type SecretNftMetadataType<T> = T & {
   title?: string
   description?: string
 }

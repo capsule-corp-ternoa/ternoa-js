@@ -11,7 +11,7 @@ import {
   CollectionMetadataType,
   NftMetadataType,
   MarketplaceMetadataType,
-  secretNftMetadataType,
+  SecretNftMetadataType,
 } from "./types"
 
 /**
@@ -133,22 +133,25 @@ export class TernoaIPFS {
     service: IServiceIPFS,
     encryptedFile: string,
     publicKey?: string,
-    metadata?: secretNftMetadataType<T>,
+    metadata?: SecretNftMetadataType<T>,
     encryptedFileType?: string,
   ) => {
+    if (metadata) validateSecretNFTMetadata(metadata)
     let publicNFTKeyHash
-    const blob = new Blob([encryptedFile], { type: "text/plain" })
-    const file = new File([blob], "SecretNFT metadata")
-    const secretNFTRes = await TernoaIPFS.storeFile(service, file)
-    if (!secretNFTRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's asset`)
-    const { Hash: secretNFTHash, Size: secretNFTSize } = secretNFTRes
     if (publicKey) {
+      if (typeof publicKey !== "string")
+        throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's publicKey must be a string`)
       const publicKeyBlob = new Blob([publicKey], { type: "text/plain" })
       const publicKeyFile = new File([publicKeyBlob], "SecretNFT public key")
       const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile)
       if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
       publicNFTKeyHash = publicKeyRes.Hash
     }
+    const blob = new Blob([encryptedFile], { type: "text/plain" })
+    const file = new File([blob], "SecretNFT metadata")
+    const secretNFTRes = await TernoaIPFS.storeFile(service, file)
+    if (!secretNFTRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's asset`)
+    const { Hash: secretNFTHash, Size: secretNFTSize } = secretNFTRes
     const secretNFTMetadata = {
       ...(metadata && metadata),
       properties: {
@@ -231,7 +234,7 @@ export class TernoaIPFS {
   storeSecretNFT<T>(
     encryptedFile: string,
     publicNFTKey?: string,
-    metadata?: secretNftMetadataType<T>,
+    metadata?: SecretNftMetadataType<T>,
     encryptedFileType?: string,
   ) {
     return TernoaIPFS.storeSecretNFT(this, encryptedFile, publicNFTKey, metadata, encryptedFileType)
@@ -252,6 +255,15 @@ export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T
   }
   if (typeof description !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description must be a string`)
+  }
+}
+
+export const validateSecretNFTMetadata = <T>({ title, description }: SecretNftMetadataType<T>) => {
+  if (title !== undefined && typeof title !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's title must be a string`)
+  }
+  if (description !== undefined && typeof description !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's description must be a string`)
   }
 }
 
