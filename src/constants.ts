@@ -9,29 +9,13 @@ export enum txPallets {
 }
 
 export enum txActions {
-  buy = "buy",
-  list = "list",
-  unlist = "unlist",
-  burn = "burn",
-
-  //TO DO : CLEAN list below
   create = "create",
   transfer = "transfer",
   transferAll = "transferAll",
   transferKeepAlive = "transferKeepAlive",
-  finishSeries = "finishSeries",
   batch = "batch",
   batchAll = "batchAll",
-  createFromNft = "createFromNft",
-  remove = "remove",
-  setIpfsReference = "setIpfsReference",
-  setAltvrUsername = "setAltvrUsername",
-  setCommissionFee = "setCommissionFee",
-  setOwner = "setOwner",
-  setKind = "setMarketType",
-  setName = "setName",
-  setUri = "setUri",
-  setLogoUri = "setLogoUri",
+  forceBatch = "forceBatch",
 
   // nft
   createNft = "createNft",
@@ -102,7 +86,7 @@ export enum Errors {
   EVENT_NOT_FOUND = "EVENT_NOT_FOUND",
   SEED_NOT_FOUND = "SEED_NOT_FOUND",
   PUBLIC_SEED_ADDRESS_NOT_FOUND = "PUBLIC_SEED_ADDRESS_NOT_FOUND",
-  VALUE_LOWER_THAN_0 = "VALUE_LOWER_THAN_0",
+  VALUE_MUST_BE_GREATER_THAN_0 = "VALUE_MUST_BE_GREATER_THAN_0",
   INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS",
   API_NOT_INITIALIZED = "API_NOT_INITIALIZED",
   API_NOT_CONNECTED = "API_NOT_CONNECTED",
@@ -118,5 +102,7 @@ export enum Errors {
   COLLECTION_CONVERSION_ERROR = "COLLECTION_CONVERSION_ERROR",
   MARKETPLACE_CONVERSION_ERROR = "MARKETPLACE_CONVERSION_ERROR",
   LISTED_NFT_CONVERSION_ERROR = "LISTED_NFT_CONVERSION_ERROR",
-  IPFS_FILE_UNDEFINED_ON_UPLOAD = "IPFS_FILE_UNDEFINED_ON_UPLOAD",
+  IPFS_FILE_UPLOAD_ERROR = "IPFS_FILE_UPLOAD_ERROR",
+  IPFS_METADATA_VALIDATION_ERROR = "IPFS_METADATA_VALIDATION_ERROR",
+  BLOCK_NOT_FOUND_ON_CHAIN = "BLOCK_NOT_FOUND_ON_CHAIN",
 }

@@ -1,9 +1,10 @@
 import { bnToBn } from "@polkadot/util"
+import BN from "bn.js"
 
 import { AccountAssetDataType } from "./types"
 
 import { chainQuery, txPallets } from "../constants"
-import { BalanceType, query } from "../blockchain"
+import { query } from "../blockchain"
 
 /**
  * @name getTotalAssetBalance
@@ -26,7 +27,7 @@ export const getAccountAssetData = async (assetId: number, address: string): Pro
  * @param address   Public address of the account to get balance.
  * @returns           The balance of the account.
  */
-export const getAccountAssetBalance = async (assetId: number, address: string): Promise<BalanceType | null> => {
+export const getAccountAssetBalance = async (assetId: number, address: string): Promise<BN | null> => {
   const data = await getAccountAssetData(assetId, address)
   const balance = data ? bnToBn(data.balance) : null
   return balance
