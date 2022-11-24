@@ -97,6 +97,7 @@ export class TernoaIPFS {
    * @returns         IPFS data (Hash, Size, Name)
    */
   static storeNFT = async <T>(service: IServiceIPFS, file: File, metadata: NftMetadataType<T>) => {
+    validateNFTMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload NFT's asset`)
     const { Hash: hash, Size: size } = res
@@ -132,6 +133,7 @@ export class TernoaIPFS {
     bannerFile: File,
     metadata: CollectionMetadataType<T>,
   ) => {
+    validateCollectionMetadata(metadata)
     const profileRes = await TernoaIPFS.storeFile(service, profileFile)
     if (!profileRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload collection's profile asset`)
     const bannerRes = await TernoaIPFS.storeFile(service, bannerFile)
@@ -155,6 +157,7 @@ export class TernoaIPFS {
    * @returns         IPFS data (Hash, Size, Name)
    */
   static storeMarketplace = async <T>(service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType<T>) => {
+    validateMarketplaceMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload marketplace's logo asset`)
     const collectionMetadata = {
@@ -184,5 +187,29 @@ export class TernoaIPFS {
 
   storeMarketplace<T>(file: File, metadata: MarketplaceMetadataType<T>) {
     return TernoaIPFS.storeMarketplace(this, file, metadata)
+  }
+}
+
+export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T>) => {
+  if (typeof title !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's title must be a string`)
+  }
+  if (typeof description !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description must be a string`)
+  }
+}
+
+export const validateCollectionMetadata = <T>({ name, description }: CollectionMetadataType<T>) => {
+  if (typeof name !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's name must be a string`)
+  }
+  if (typeof description !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's description must be a string`)
+  }
+}
+
+export const validateMarketplaceMetadata = <T>({ name }: MarketplaceMetadataType<T>) => {
+  if (typeof name !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Marketplace's name must be a string`)
   }
 }
