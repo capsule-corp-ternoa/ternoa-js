@@ -69,8 +69,8 @@ export class TernoaIPFS {
       data = Readable.from(encoder)
     }
     return httpClient.post<IpfsAddDataResponseType>(endpoint, data, {
-      maxContentLength: 100000000,
-      maxBodyLength: 1000000000,
+      maxContentLength: 100000000, // 100mb
+      maxBodyLength: 1000000000, // 100mb
       headers,
     })
   }
@@ -191,25 +191,32 @@ export class TernoaIPFS {
 }
 
 export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T>) => {
-  if (typeof title !== "string") {
+  if (!title) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's title is required`)
+  else if (typeof title !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's title must be a string`)
   }
-  if (typeof description !== "string") {
+
+  if (!description) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description is required`)
+  else if (typeof description !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description must be a string`)
   }
 }
 
 export const validateCollectionMetadata = <T>({ name, description }: CollectionMetadataType<T>) => {
-  if (typeof name !== "string") {
+  if (!name) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's name is required`)
+  else if (typeof name !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's name must be a string`)
   }
-  if (typeof description !== "string") {
+
+  if (!name) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's description is required`)
+  else if (typeof description !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's description must be a string`)
   }
 }
 
 export const validateMarketplaceMetadata = <T>({ name }: MarketplaceMetadataType<T>) => {
-  if (typeof name !== "string") {
+  if (!name) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Marketplace's name is required`)
+  else if (typeof name !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Marketplace's name must be a string`)
   }
 }
