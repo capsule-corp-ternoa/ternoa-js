@@ -1,6 +1,6 @@
 {
   "name": "ternoa-js",
-  "version": "1.4.0-alpha0",
+  "version": "1.4.0-rc0",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "engines": {
     "node": ">=14.13.1 || >=16.0.0"
@@ -67,8 +67,10 @@
   },
   "dependencies": {
     "@polkadot/api": "9.6.1",
-    "axios": "1.1.x",
+    "axios": "0.27.x",
     "bn.js": "5.2.x",
-    "form-data": "4.0.x"
+    "form-data-encoder": "1.7.x",
+    "formdata-node": "4.4.x",
+    "stream": "0.0.x"
   }
 }
