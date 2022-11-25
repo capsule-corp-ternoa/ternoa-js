@@ -4,6 +4,7 @@ export type NftState = {
   isSecret: boolean
   isDelegated: boolean
   isSoulbound: boolean
+  isSyncing: boolean
   isRented: boolean
 }
 
