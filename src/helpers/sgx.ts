@@ -80,8 +80,6 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
   const secretData = `${nftId}_${share ? share : "0"}`
   const signature = getSignature(keyring, secretData)
 
-  console.log("SecretData: ", secretData)
-  console.log("Signature: ", signature)
   return {
     account_address: keyring.address,
     secret_data: secretData,
@@ -143,7 +141,7 @@ export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyrin
   const sgxRes = await Promise.all(
     shares.map(async (share, idx) => {
       const secretPayload = formatPayload(nftId, share, keyring)
-      // console.log("secretPayload: ", secretPayload)
+
       const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
       const post = () => sgxApiPost(enclaveUrl, secretPayload)
       return await retryPost(post, 3)
