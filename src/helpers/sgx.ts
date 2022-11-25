@@ -119,8 +119,7 @@ export const retryPost = async (fn: () => Promise<any>, n: number): Promise<any>
       return await fn()
     } catch (e) {
       lastError = {
-        name: (e as Error).name,
-        message: (e as Error).message,
+        ...(e as Error),
       }
     }
   }
