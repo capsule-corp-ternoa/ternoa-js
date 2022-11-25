@@ -2,6 +2,7 @@ import BN from "bn.js"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
+import { SgxResDataType } from "./types"
 
 /**
  * @name formatPermill
@@ -28,4 +29,21 @@ export const removeURLSlash = (url: string) => {
   } else {
     return url
   }
+}
+
+export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T> => {
+  let lastError: any
+
+  for (let i = 0; i < n; i++) {
+    try {
+      console.log("RETRY:", i)
+      return await fn()
+    } catch (e) {
+      lastError = {
+        ...(e as Error),
+      }
+    }
+  }
+
+  return lastError
 }

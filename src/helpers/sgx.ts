@@ -5,6 +5,8 @@ import { IKeyringPair } from "@polkadot/types/types"
 import { u8aToHex } from "@polkadot/util"
 
 import axios from "axios"
+import { SgxResDataType } from "./types"
+import { retryPost } from "./utils"
 
 export const SSSA_NUMSHARES = 1
 export const SSSA_THRESHOLD = 1
@@ -80,8 +82,6 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
   const secretData = `${nftId}_${share ? share : "0"}`
   const signature = getSignature(keyring, secretData)
 
-  console.log("SecretData: ", secretData)
-  console.log("Signature: ", signature)
   return {
     account_address: keyring.address,
     secret_data: secretData,
@@ -96,7 +96,7 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
  * @param secretPayload TODO
  * @returns             TODO
  */
-export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
+export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Promise<SgxResDataType> => {
   try {
     const res = await axios.request({
       method: "post",
@@ -122,14 +122,17 @@ export const sgxApiPost = async (url: string, secretPayload: SecretPayload) => {
  */
 export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyring: IKeyringPair) => {
   const sgxEnclaves = await getSgxEnclaves()
-  return await Promise.all(
+  const sgxRes = await Promise.all(
     shares.map(async (share, idx) => {
       const secretPayload = formatPayload(nftId, share, keyring)
-      console.log("secretPayload: ", secretPayload)
+
       const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
-      return await sgxApiPost(enclaveUrl, secretPayload)
+      const post = () => sgxApiPost(enclaveUrl, secretPayload)
+      return await retryPost<SgxResDataType | Error>(post, 3)
     }),
   )
+
+  return sgxRes
 }
 
 /**
@@ -146,7 +149,7 @@ export const sgxSSSSharesRetrieve = async (nftId: number, keyring: IKeyringPair)
       const secretPayload = formatPayload(nftId, null, keyring)
       const enclaveUrl = `${sgxEnclaveBaseUrl}${SGX_RETRIEVE_ENDPOINT}`
       const res = await sgxApiPost(enclaveUrl, secretPayload)
-      return res.secret_data.split("_")[1]
+      return res.secret_data?.split("_")[1]
     }),
   )
   return shares

@@ -28,3 +28,11 @@ export type CollectionMetadataType<T> = T & {
 export type MarketplaceMetadataType<T> = T & {
   name: string
 }
+
+export type SgxResDataType = {
+  status: number
+  nft_id: number
+  cluster_id: number
+  secret_data?: string
+  description: string
+}
