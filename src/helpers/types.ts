@@ -29,7 +29,7 @@ export type MarketplaceMetadataType<T> = T & {
   name: string
 }
 
-export type SgxErrorResDataType = {
+export type SgxResDataType = {
   status: number
   nft_id: number
   cluster_id: number

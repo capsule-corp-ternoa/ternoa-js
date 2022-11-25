@@ -5,7 +5,8 @@ import { IKeyringPair } from "@polkadot/types/types"
 import { u8aToHex } from "@polkadot/util"
 
 import axios from "axios"
-import { SgxErrorResDataType } from "./types"
+import { SgxResDataType } from "./types"
+import { retryPost } from "./utils"
 
 export const SSSA_NUMSHARES = 1
 export const SSSA_THRESHOLD = 1
@@ -95,7 +96,7 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
  * @param secretPayload TODO
  * @returns             TODO
  */
-export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Promise<SgxErrorResDataType> => {
+export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Promise<SgxResDataType> => {
   try {
     const res = await axios.request({
       method: "post",
@@ -109,23 +110,6 @@ export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Pro
   } catch (err: any) {
     throw new Error(err)
   }
-}
-
-export const retryPost = async (fn: () => Promise<any>, n: number): Promise<SgxErrorResDataType | Error> => {
-  let lastError: any
-
-  for (let i = 0; i < n; i++) {
-    try {
-      console.log("RETRY:", i)
-      return await fn()
-    } catch (e) {
-      lastError = {
-        ...(e as Error),
-      }
-    }
-  }
-
-  return lastError
 }
 
 /**
@@ -144,7 +128,7 @@ export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyrin
 
       const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
       const post = () => sgxApiPost(enclaveUrl, secretPayload)
-      return await retryPost(post, 3)
+      return await retryPost<SgxResDataType | Error>(post, 3)
     }),
   )
 
