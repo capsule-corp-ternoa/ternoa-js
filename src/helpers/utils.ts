@@ -2,7 +2,6 @@ import BN from "bn.js"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
-import { SgxResDataType } from "./types"
 
 /**
  * @name formatPermill
