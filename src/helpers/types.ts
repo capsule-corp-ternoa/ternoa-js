@@ -1,4 +1,4 @@
-export type generatePGPKeysType = {
+export type PGPKeysType = {
   privateKey: string
   publicKey: string
 }

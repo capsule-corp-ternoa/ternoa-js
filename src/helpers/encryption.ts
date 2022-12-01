@@ -1,7 +1,7 @@
 import * as openpgp from "openpgp"
 import { File } from "formdata-node"
 
-import { generatePGPKeysType, SecretNftMetadataType } from "./types"
+import { PGPKeysType, SecretNftMetadataType } from "./types"
 import { convertFileToBuffer } from "./utils"
 import { TernoaIPFS } from "./ipfs"
 import { Errors } from "../constants"
@@ -11,7 +11,7 @@ import { Errors } from "../constants"
  * @summary                 Generates a new PGP key pair.
  * @returns                 An object with both private and public PGP keys.
  */
-export const generatePGPKeys = async (): Promise<generatePGPKeysType> => {
+export const generatePGPKeys = async (): Promise<PGPKeysType> => {
   const { privateKey, publicKey } = await openpgp.generateKey({
     type: "ecc",
     curve: "curve25519",
@@ -86,21 +86,18 @@ export const decryptFile = async (encryptedMessage: string, privatePGPKey: strin
  * @summary                 Encrypts and uploads a file on an IFPS gateway.
  * @param file              File to encrypt and then upload on IPFS.
  * @param publicPGPKey      Public Key to encrypt the file.
- * @param ipfsGateway       IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev/api/v0/add
- * @param apiKey            API Key to validate the upload on the IPFS gateway.
+ * @param ipfsClient        A TernoaIPFS instance.
  * @param metadata          Optional secret NFT metadata (Title, Description) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
  * @returns                 The data object with the secret NFT IPFS hash (ex: to add as offchain secret metadatas in the extrinsic).
  */
 export const secretNftEncryptAndUploadFile = async <T>(
   file: File,
   publicPGPKey: string,
-  ipfsGateway?: URL,
-  apiKey?: string,
+  ipfsClient: TernoaIPFS,
   metadata?: SecretNftMetadataType<T>,
 ) => {
   if (!file) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - File undefined`)
   const encryptedFile = (await encryptFile(file, publicPGPKey)) as string
-  const ipfsClient = new TernoaIPFS(ipfsGateway, apiKey)
   const ipfsRes = await ipfsClient.storeSecretNFT(encryptedFile, publicPGPKey, metadata, file.type)
 
   return ipfsRes

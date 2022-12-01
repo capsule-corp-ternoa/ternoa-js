@@ -137,7 +137,7 @@ export class TernoaIPFS {
     encryptedFileType?: string,
   ) => {
     if (metadata) validateSecretNFTMetadata(metadata)
-    let publicNFTKeyHash
+    let nftPublicKeyHash
     if (publicKey) {
       if (typeof publicKey !== "string")
         throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's publicKey must be a string`)
@@ -145,7 +145,7 @@ export class TernoaIPFS {
       const publicKeyFile = new File([publicKeyBlob], "SecretNFT public key")
       const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile)
       if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
-      publicNFTKeyHash = publicKeyRes.Hash
+      nftPublicKeyHash = publicKeyRes.Hash
     }
     const blob = new Blob([encryptedFile], { type: "text/plain" })
     const file = new File([blob], "SecretNFT metadata")
@@ -160,7 +160,7 @@ export class TernoaIPFS {
           type: encryptedFileType ?? file.type,
           size: secretNFTSize,
         },
-        nftPublicKey: publicNFTKeyHash && publicNFTKeyHash,
+        ...(nftPublicKeyHash && { nftPublicKey: nftPublicKeyHash }),
       },
     }
     const secretNFTMetadataBlob = new Blob([JSON.stringify(secretNFTMetadata)], { type: "application/json" })
