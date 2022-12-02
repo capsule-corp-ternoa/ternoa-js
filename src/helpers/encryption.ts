@@ -1,123 +1,104 @@
 import * as openpgp from "openpgp"
+import { File } from "formdata-node"
 
-import { generatePGPKeysType } from "./types"
+import { PGPKeysType, SecretNftMetadataType } from "./types"
+import { convertFileToBuffer } from "./utils"
+import { TernoaIPFS } from "./ipfs"
+import { Errors } from "../constants"
 
 /**
  * @name generatePGPKeys
- * @summary             Generates a new OpenPGP key pair
- * @returns             An object with both private and public keys.
+ * @summary                 Generates a new PGP key pair.
+ * @returns                 An object with both private and public PGP keys.
  */
-export const generatePGPKeys = async (): Promise<generatePGPKeysType> => {
+export const generatePGPKeys = async (): Promise<PGPKeysType> => {
   const { privateKey, publicKey } = await openpgp.generateKey({
     type: "ecc",
     curve: "curve25519",
     userIDs: [{ name: "Jon Smith", email: "jon@example.com" }],
   })
+
   return { privateKey, publicKey }
 }
 
 /**
- * @name encryptFile
- * @summary               Encrypts file with the public key.
- * @param fileDataBuffer  File to encrypt.
- * @param publicPGPKey    Public Key to encrypt the file.
- * @see                   Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
- * @returns               A string containing the encrypted file.
+ * @name encryptContent
+ * @summary                 Encrypts a content (string).
+ * @param content           Content to encrypt.
+ * @param publicPGPKey      Public Key to encrypt the content.
+ * @see                     Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
+ * @returns                 A string containing the encrypted content.
  */
-export const encryptFile = async (fileDataBuffer: Buffer, publicPGPKey: string) => {
-  const content = fileDataBuffer.toString("base64")
+export const encryptContent = async (content: string, publicPGPKey: string) => {
   const message = await openpgp.createMessage({
     text: content,
   })
   const publicKey = await openpgp.readKey({
     armoredKey: publicPGPKey,
   })
-  const encrypted = await openpgp.encrypt({
+  const encryptedContent = await openpgp.encrypt({
     message,
     encryptionKeys: [publicKey],
   })
 
-  return encrypted
+  return encryptedContent
+}
+
+/**
+ * @name encryptFile
+ * @summary                 Encrypts file with the public key.
+ * @param file              File to encrypt.
+ * @param publicPGPKey      Public Key to encrypt the file.
+ * @see                     Learn more about encryption {@link https://docs.openpgpjs.org/global.html#encrypt here}.
+ * @returns                 A string containing the encrypted file.
+ */
+export const encryptFile = async (file: File, publicPGPKey: string) => {
+  const buffer = await convertFileToBuffer(file)
+  const content = buffer.toString("base64")
+  const encryptedFile = await encryptContent(content, publicPGPKey)
+
+  return encryptedFile
 }
 
 /**
  * @name decryptFile
- * @summary             Decrypts file with the private key.
- * @param encryptedMessage  File to decrypt.
- * @param privatePGPKey Private Key to decrypt the file.
- * @see                 Learn more about encryption {@link https://docs.openpgpjs.org/global.html#decrypt here}.
- * @returns             A base64 string containing the decrypted file.
+ * @summary                 Decrypts message with the private key.
+ * @param encryptedMessage  Message to decrypt.
+ * @param privatePGPKey     Private Key to decrypt the message.
+ * @see                     Learn more about encryption {@link https://docs.openpgpjs.org/global.html#decrypt here}.
+ * @returns                 A base64 string containing the decrypted message.
  */
- export const decryptFile = async (encryptedMessage: string, privateKeyArmored: string) => {
-  const privateKey = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored })
-
+export const decryptFile = async (encryptedMessage: string, privatePGPKey: string) => {
+  const privateKey = await openpgp.readPrivateKey({ armoredKey: privatePGPKey })
   const message = await openpgp.readMessage({
     armoredMessage: encryptedMessage,
   })
-
-  const { data: decrypted } = await openpgp.decrypt({
+  const { data: decryptedMessage } = await openpgp.decrypt({
     message,
     decryptionKeys: privateKey,
   })
 
-  return decrypted
+  return decryptedMessage
 }
 
-
 /**
- * @name encryptAndUploadFile
- * @summary             Encrypts and uploads a file on an IFPS gateway.
- * @param file          File to encrypt and then upload on IPFS.
- * @param ipfsGateway   IPFS gateway to upload your file on. Default is https://ipfs.ternoa.dev/api/v0/add
- * @param apiKey        API Key to validate the upload on the IPFS gateway.
- * @returns             An array containing both secretFile IPFS hash and publicPGPKey hash.
+ * @name secretNftEncryptAndUploadFile
+ * @summary                 Encrypts and uploads a file on an IFPS gateway.
+ * @param file              File to encrypt and then upload on IPFS.
+ * @param publicPGPKey      Public Key to encrypt the file.
+ * @param ipfsClient        A TernoaIPFS instance.
+ * @param metadata          Optional secret NFT metadata (Title, Description) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
+ * @returns                 The data object with the secret NFT IPFS hash (ex: to add as offchain secret metadatas in the extrinsic).
  */
-export const encryptAndUploadFile = async (
+export const secretNftEncryptAndUploadFile = async <T>(
+  file: File,
   publicPGPKey: string,
-  file: Buffer,
-  ipfsGateway?: string,
-  apiKey?: string,
+  ipfsClient: TernoaIPFS,
+  metadata?: SecretNftMetadataType<T>,
 ) => {
-  // const encryptedFile = await encryptFile(file, publicPGPKey)
-  // const encryptedFileDataBuffer = Buffer.from(encryptedFile as string)
-  // const publicPGPKeyBuffer = Buffer.from(publicPGPKey as string)
-  // const [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes] = await Promise.all([
-  //   ipfsFileUpload(encryptedFileDataBuffer, ipfsGateway, apiKey),
-  //   ipfsFileUpload(publicPGPKeyBuffer, ipfsGateway, apiKey),
-  // ])
-  // return [secretIpfsUploadRes, publicPGPKeyIpfsUploadRes]
-}
+  if (!file) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - File undefined`)
+  const encryptedFile = (await encryptFile(file, publicPGPKey)) as string
+  const ipfsRes = await ipfsClient.storeSecretNFT(encryptedFile, publicPGPKey, metadata, file.type)
 
-/**
- * @name secretNftIpfsUpload
- * @summary             Encrypts file and uploads secret metadatas containing encrypted file on IPFS.
- * @param data          Secret offchain metadatas to be uploaded. It must fit the INFTMetadata interface format with a description, file and title.
- * @param ipfsGateway   IPFS gateway to upload your secret metadatas on. If not provided, default is https://ipfs.ternoa.dev/api/v0/add
- * @param apiKey        API Key to validate the upload on the IPFS gateway.
- * @returns             The data object with the hash to add as offchain secret metadatas in the extrinsic.
- */
-// export const secretNftIpfsUpload = async (
-//   publicPGPKey: string,
-//   data: INFTSecretMetadata,
-//   ipfsGateway?: string,
-//   apiKey?: string,
-// ) => {
-//   const { description, fileDataBuffer, fileType: type, title } = data
-//   if (!fileDataBuffer) throw new Error(Errors.IPFS_FILE_UNDEFINED_ON_UPLOAD)
-//   const [{ hash: encryptedFileIpfsHash, size: encryptedFileSize }, { hash: publicPGPKeyIpfsHash }] =
-//     await encryptAndUploadFile(publicPGPKey, fileDataBuffer, ipfsGateway, apiKey)
-//   const secretMetaDatas = {
-//     title,
-//     description,
-//     properties: {
-//       encryptedMedia: {
-//         hash: encryptedFileIpfsHash,
-//         size: encryptedFileSize,
-//         type,
-//       },
-//       publicKeyOfNft: publicPGPKeyIpfsHash,
-//     },
-//   }
-//   const finalFile = Buffer.from(JSON.stringify(secretMetaDatas))
-//   return await ipfsFileUpload(finalFile, ipfsGateway, apiKey)
-// }
+  return ipfsRes
+}

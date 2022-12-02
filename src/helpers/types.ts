@@ -1,4 +1,4 @@
-export type generatePGPKeysType = {
+export type PGPKeysType = {
   privateKey: string
   publicKey: string
 }
@@ -18,6 +18,11 @@ export type IpfsAddDataResponseType = {
 export type NftMetadataType<T> = T & {
   title: string
   description: string
+}
+
+export type SecretNftMetadataType<T> = T & {
+  title?: string
+  description?: string
 }
 
 export type CollectionMetadataType<T> = T & {

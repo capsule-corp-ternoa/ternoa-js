@@ -1,8 +1,22 @@
 import BN from "bn.js"
+import { File } from "formdata-node"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
 import { SgxResDataType } from "./types"
+
+/**
+ * @name convertFileToBuffer
+ * @summary                 Converts a File to Buffer.
+ * @param file              File to convert.
+ * @returns                 A Buffer.
+ */
+export const convertFileToBuffer = async (file: File): Promise<Buffer> => {
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  return buffer
+}
 
 /**
  * @name formatPermill
