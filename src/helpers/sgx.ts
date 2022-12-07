@@ -2,32 +2,29 @@
 // @ts-ignore
 import { combine, split } from "shamirs-secret-sharing"
 import { IKeyringPair } from "@polkadot/types/types"
-import { u8aToHex } from "@polkadot/util"
 
-import axios from "axios"
-import { SgxResDataType } from "./types"
+import { Errors } from "../constants"
+
+import { getSignature } from "./crypto"
+import { HttpClient } from "./http"
+import { getClusterData, getEnclaveData } from "../sgx"
+import { SecretPayloadType, SgxDataResponseType } from "./types"
 import { retryPost } from "./utils"
 
-export const SSSA_NUMSHARES = 1
-export const SSSA_THRESHOLD = 1
+export const SSSA_NUMSHARES = 6
+export const SSSA_THRESHOLD = 4
 
 export const SGX_STORE_ENDPOINT = "/api/nft/storeSecretShares"
 export const SGX_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
 
-export type SecretPayload = {
-  account_address: string
-  secret_data: string
-  signature: string
-}
-
 /**
  * @name generateSSSShares
- * @summary             TODO
- * @param privateKey    TODO
- * @returns             TODO
+ * @summary     Generates an array of shares from the incoming parameter string.
+ * @param data  The data to split into shares (e.g. private key).
+ * @returns     An array of stringified shares.
  */
-export const generateSSSShares = (privateKey: string): string[] => {
-  const shares = split(privateKey, {
+export const generateSSSShares = (data: string): string[] => {
+  const shares = split(data, {
     shares: SSSA_NUMSHARES,
     threshold: SSSA_THRESHOLD,
   })
@@ -38,9 +35,9 @@ export const generateSSSShares = (privateKey: string): string[] => {
 
 /**
  * @name combineSSSShares
- * @summary             TODO
- * @param shares        TODO
- * @returns             TODO
+ * @summary       Combines an array of shares to reconstruct data.
+ * @param shares  Array of stringified shares.
+ * @returns       The original data reconstructed.
  */
 export const combineSSSShares = (shares: string[]): string => {
   const hexShares = shares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("hex"))
@@ -49,37 +46,37 @@ export const combineSSSShares = (shares: string[]): string => {
 }
 
 /**
- * @name getSgxEnclaves
- * @summary             TODO
- * @returns             TODO
+ * @name getSgxEnclavesBaseUrl
+ * @summary           Retrieves the SGX enclaves urls stored on-chain.
+ * @param clusterId   The SGX Cluster id.
+ * @returns           An array of the SGX enclaves urls available.
  */
-export const getSgxEnclaves = async () => {
-  // query storage to chain
-  return ["https://worker-ca-0.trnnfr.com"]
-}
+export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
+  // TODO: check query storage to chain
+  const clusterData = await getClusterData(clusterId)
+  if (!clusterData) throw new Error(Errors.SGX_CLUSTER_NOT_FOUND)
 
-/**
- * @name getSignature
- * @summary             TODO
- * @param keyring       TODO
- * @param secretData    TODO
- * @returns             TODO
- */
-export const getSignature = (keyring: IKeyringPair, secretData: string) => {
-  const finalData = new Uint8Array(Buffer.from(secretData))
-  return u8aToHex(keyring.sign(finalData))
+  const urls: string[] = await Promise.all(
+    clusterData.map(async ({ enclaveId }) => {
+      const enclaveData = await getEnclaveData(enclaveId)
+      if (!enclaveData) throw new Error(Errors.SGX_ENCLAVE_NOT_FOUND)
+      return enclaveData.apiUrl
+    }),
+  )
+
+  return urls
 }
 
 /**
  * @name formatPayload
- * @summary             TODO
- * @param nftId       TODO
- * @param share       TODO
- * @param keyring       TODO
- * @returns             TODO
+ * @summary         Prepares post request payload to store secret NFT data into SGX enclaves.
+ * @param nftId     The ID of the secret NFT.
+ * @param share     A share of the private key used to decrypt the secret NFT.
+ * @param keyring   Account of the secret NFT's owner.
+ * @returns         Payload ready to be submitted to SGX enclaves.
  */
-export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayload => {
-  const secretData = `${nftId}_${share ? share : "0"}`
+export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayloadType => {
+  const secretData = `${nftId}_${share ? share : "0"}` //TODO: remove null type allowance once SGX API supports '_...'
   const signature = getSignature(keyring, secretData)
 
   return {
@@ -90,45 +87,47 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
 }
 
 /**
- * @name sgxApiPost
- * @summary             TODO
- * @param baseUrl       TODO
- * @param secretPayload TODO
- * @returns             TODO
+ * @name sgxUpload
+ * @summary               Upload secret payload data to an SGX enclave.
+ * @param http            HttpClient instance.
+ * @param endpoint        SGX enclave endpoint.
+ * @param secretPayload   Payload formatted with the required secret NFT's data.
+ * @returns               SGX enclave response.
  */
-export const sgxApiPost = async (url: string, secretPayload: SecretPayload): Promise<SgxResDataType> => {
-  try {
-    const res = await axios.request({
-      method: "post",
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: secretPayload,
-    })
-    return res.data
-  } catch (err: any) {
-    throw new Error(err)
+export const sgxUpload = async (
+  http: HttpClient,
+  endpoint: string,
+  secretPayload: SecretPayloadType,
+): Promise<SgxDataResponseType> => {
+  const headers = {
+    "Content-Type": "application/json",
   }
+  return http.post<SgxDataResponseType>(endpoint, secretPayload, {
+    headers,
+  })
 }
 
 /**
  * @name sgxSSSSharesUpload
- * @summary             TODO
- * @param shares       TODO
- * @param nftId       TODO
- * @param keyring       TODO
- * @returns             TODO
+ * @summary           Upload secret shares to SGX enclaves with retry.
+ * @param clusterId   The SGX Cluster id to upload shares to.
+ * @param payloads    Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
+ * @returns           SGX enclave response.
  */
-export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyring: IKeyringPair) => {
-  const sgxEnclaves = await getSgxEnclaves()
+export const sgxSSSSharesUpload = async (clusterId = 0, payloads: SecretPayloadType[]) => {
+  if (payloads.length !== SSSA_NUMSHARES)
+    throw new Error(`${Errors.NOT_CORRECT_AMOUNT_SGX_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
+  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
+  if (sgxEnclaves.length !== SSSA_NUMSHARES)
+    throw new Error(
+      `${Errors.NOT_CORRECT_AMOUNT_SGX_ENCLAVES} - Got: ${sgxEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
+    )
   const sgxRes = await Promise.all(
-    shares.map(async (share, idx) => {
-      const secretPayload = formatPayload(nftId, share, keyring)
-
-      const enclaveUrl = `${sgxEnclaves[idx]}${SGX_STORE_ENDPOINT}`
-      const post = () => sgxApiPost(enclaveUrl, secretPayload)
-      return await retryPost<SgxResDataType | Error>(post, 3)
+    payloads.map(async (payload, idx) => {
+      const baseUrl = sgxEnclaves[idx]
+      const http = new HttpClient(baseUrl)
+      const post = () => sgxUpload(http, SGX_STORE_ENDPOINT, payload)
+      return await retryPost<SgxDataResponseType | Error>(post, 3)
     }),
   )
 
@@ -137,39 +136,26 @@ export const sgxSSSSharesUpload = async (shares: string[], nftId: number, keyrin
 
 /**
  * @name sgxSSSSharesRetrieve
- * @summary             TODO
- * @param nftId       TODO
- * @param keyring       TODO
- * @returns             TODO
+ * @summary           Get secret data shares from SGX enclaves.
+ * @param clusterId   The SGX Cluster id to upload shares to.
+ * @param payloads    Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
+ * @returns           SGX enclave response.
  */
-export const sgxSSSSharesRetrieve = async (nftId: number, keyring: IKeyringPair) => {
-  const sgxEnclaves = await getSgxEnclaves()
+export const sgxSSSSharesRetrieve = async (clusterId = 0, payloads: SecretPayloadType[]) => {
+  if (payloads.length !== SSSA_NUMSHARES)
+    throw new Error(`${Errors.NOT_CORRECT_AMOUNT_SGX_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
+  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
+  if (sgxEnclaves.length !== SSSA_NUMSHARES)
+    throw new Error(
+      `${Errors.NOT_CORRECT_AMOUNT_SGX_ENCLAVES} - Got: ${sgxEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
+    )
   const shares = await Promise.all(
-    sgxEnclaves.map(async (sgxEnclaveBaseUrl) => {
-      const secretPayload = formatPayload(nftId, null, keyring)
-      const enclaveUrl = `${sgxEnclaveBaseUrl}${SGX_RETRIEVE_ENDPOINT}`
-      const res = await sgxApiPost(enclaveUrl, secretPayload)
+    sgxEnclaves.map(async (baseUrl, idx) => {
+      const payload = payloads[idx]
+      const http = new HttpClient(baseUrl)
+      const res = await sgxUpload(http, SGX_RETRIEVE_ENDPOINT, payload)
       return res.secret_data?.split("_")[1]
     }),
   )
   return shares
-}
-
-//nftID, pgpPrivateKey, addressPubTernoa, keyring
-{
-  // generateSSSShares
-  // getSgxEnclaves
-  // getSignature <- Keyring
-  // formatterPostData
-  // const encryptedSGXData = await cryptData(sgxData, serverPGPKey) ?????
-  // sgxSSSSharesUpload
-}
-
-//nftID, pgpPrivateKey, addressPubTernoa, signature
-{
-  // generateSSSShares
-  // getSgxEnclaves
-  // getSignature
-  // formatterPostData
-  // sgxSSSSharesUpload
 }

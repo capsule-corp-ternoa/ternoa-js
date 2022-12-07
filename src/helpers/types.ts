@@ -3,6 +3,12 @@ export type PGPKeysType = {
   publicKey: string
 }
 
+export type SecretPayloadType = {
+  account_address: string
+  secret_data: string
+  signature: string
+}
+
 export interface IServiceIPFS {
   apiKey?: string
   apiUrl: URL
@@ -34,7 +40,7 @@ export type MarketplaceMetadataType<T> = T & {
   name: string
 }
 
-export type SgxResDataType = {
+export type SgxDataResponseType = {
   status: number
   nft_id: number
   cluster_id: number

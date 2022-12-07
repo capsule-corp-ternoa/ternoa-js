@@ -8,6 +8,7 @@ export enum txPallets {
   balances = "balances",
   associatedAccounts = "associatedAccounts",
   system = "system",
+  tee = "tee",
 }
 
 export enum txActions {
@@ -100,6 +101,10 @@ export enum chainQuery {
   contracts = "contracts",
   queues = "queues",
   offers = "offers",
+
+  // tee
+  clusterRegistry = "clusterRegistry",
+  enclaveRegistry = "enclaveRegistry",
 }
 
 export enum chainConstants {
@@ -159,4 +164,10 @@ export enum Errors {
   BLOCK_NOT_FOUND_ON_CHAIN = "BLOCK_NOT_FOUND_ON_CHAIN",
   AUCTION_NFT_CONVERSION_ERROR = "AUCTION_NFT_CONVERSION_ERROR",
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
+  CLUSTER_CONVERSION_ERROR = "CLUSTER_CONVERSION_ERROR",
+  ENCLAVE_CONVERSION_ERROR = "ENCLAVE_CONVERSION_ERROR",
+  SGX_CLUSTER_NOT_FOUND = "SGX_CLUSTER_NOT_FOUND",
+  SGX_ENCLAVE_NOT_FOUND = "SGX_ENCLAVE_NOT_FOUND",
+  NOT_CORRECT_AMOUNT_SGX_PAYLOADS = "NOT_CORRECT_AMOUNT_SGX_PAYLOADS",
+  NOT_CORRECT_AMOUNT_SGX_ENCLAVES = "NOT_CORRECT_AMOUNT_SGX_ENCLAVES",
 }

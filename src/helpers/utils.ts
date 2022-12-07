@@ -3,7 +3,6 @@ import { File } from "formdata-node"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
-import { SgxResDataType } from "./types"
 
 /**
  * @name convertFileToBuffer
