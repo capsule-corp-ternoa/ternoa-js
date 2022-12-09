@@ -190,8 +190,8 @@ export class TernoaIPFS {
     if (!bannerRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload collection's banner asset`)
     const collectionMetadata = {
       ...metadata,
-      profileImage: profileRes.Hash,
-      bannerImage: bannerRes.Hash,
+      profile_image: profileRes.Hash,
+      banner_image: bannerRes.Hash,
     }
     const metadataBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
     const metadataFile = new File([metadataBlob], "Collection metadata")
