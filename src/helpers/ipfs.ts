@@ -155,12 +155,12 @@ export class TernoaIPFS {
     const secretNFTMetadata = {
       ...(metadata && metadata),
       properties: {
-        encryptedMedia: {
+        encrypted_media: {
           hash: secretNFTHash,
           type: encryptedFileType ?? file.type,
           size: secretNFTSize,
         },
-        ...(nftPublicKeyHash && { nftPublicKey: nftPublicKeyHash }),
+        ...(nftPublicKeyHash && { public_key: nftPublicKeyHash }),
       },
     }
     const secretNFTMetadataBlob = new Blob([JSON.stringify(secretNFTMetadata)], { type: "application/json" })
