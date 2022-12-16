@@ -9,15 +9,15 @@ export const formatRentContractFee = async (fee: any) => {
   //RentFeeType | CancellationFeeType instead of any in params
   if (typeof fee === "object") {
     if (typeof fee.tokens === "number") {
-      const tokensFee = await numberToBalance(fee.tokens)
+      const tokensFee = numberToBalance(fee.tokens)
       fee.tokens = tokensFee
     }
     if (typeof fee.fixedTokens === "number") {
-      const fixedTokensFee = await numberToBalance(fee.fixedTokens)
+      const fixedTokensFee = numberToBalance(fee.fixedTokens)
       fee.fixedTokens = fixedTokensFee
     }
     if (typeof fee.flexibleTokens === "number") {
-      const flexibleTokensFee = await numberToBalance(fee.flexibleTokens)
+      const flexibleTokensFee = numberToBalance(fee.flexibleTokens)
       fee.flexibleTokens = flexibleTokensFee
     }
   }

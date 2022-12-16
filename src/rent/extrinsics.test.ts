@@ -58,8 +58,8 @@ describe("Testing Rent extrinsics", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const rentFee = (await numberToBalance(1)).toString()
-    const cancellationFee = (await numberToBalance(1)).toString()
+    const rentFee = numberToBalance(1).toString()
+    const cancellationFee = numberToBalance(1).toString()
     expect(
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.renter === testAccount.address &&
@@ -120,7 +120,7 @@ describe("Testing to update and revoke a subscription contract", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const rentFee = (await numberToBalance(3)).toString()
+    const rentFee = numberToBalance(3).toString()
     expect(
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.period === 10 &&

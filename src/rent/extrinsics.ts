@@ -279,7 +279,7 @@ export const changeSubscriptionTermsTx = async (
   maxDuration: number | null = null,
   isChangeable: boolean,
 ): Promise<TransactionHashType> => {
-  const formattedFee = typeof rentFee === "number" ? await numberToBalance(rentFee) : rentFee
+  const formattedFee = typeof rentFee === "number" ? numberToBalance(rentFee) : rentFee
   return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [
     nftId,
     formattedFee,

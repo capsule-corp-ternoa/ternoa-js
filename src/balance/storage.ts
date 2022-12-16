@@ -52,7 +52,7 @@ export const getTransferrableBalance = async (address: string): Promise<BN> => {
  * @param value         Token amount to check before transfer.
  */
 export const checkBalanceForTransfer = async (address: string, value: number | BN): Promise<boolean> => {
-  const amount = typeof value === "number" ? await numberToBalance(value) : value
+  const amount = typeof value === "number" ? numberToBalance(value) : value
   const { free } = await getBalances(address)
 
   return free.gt(amount)

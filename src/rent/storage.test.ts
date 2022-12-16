@@ -48,8 +48,8 @@ describe("Testing contracts in queue and getting contract datas", (): void => {
   it("Should return the rent contract data when an NFT ID with a rent contract exists", async () => {
     const { test: testAccount } = await createTestPairs()
     const contract = await getRentalContractData(TEST_DATA.nftId)
-    const rentFee = (await numberToBalance(1)).toString()
-    const cancellationFee = (await numberToBalance(1)).toString()
+    const rentFee = numberToBalance(1).toString()
+    const cancellationFee = numberToBalance(1).toString()
     expect(
       contract?.startBlock == null &&
         contract?.startBlockDate == null &&

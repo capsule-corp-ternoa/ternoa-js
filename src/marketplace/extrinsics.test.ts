@@ -52,7 +52,7 @@ describe("Testing Marketplace extrinsics", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const listingFee = (await numberToBalance(100)).toString()
+    const listingFee = numberToBalance(100).toString()
     expect(
       mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
         mpEvent.commissionFee === "10" &&
@@ -130,7 +130,7 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
     TEST_DATA.nftId = nEvent.nftId
     const mpEvent = await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    const price = (await numberToBalance(10)).toString()
+    const price = numberToBalance(10).toString()
     expect(
       mpEvent.nftId === TEST_DATA.nftId &&
         mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
@@ -155,9 +155,9 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
     await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
     const mpEvent = await buyNft(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
-    const listedPrice = (await numberToBalance(10)).toString()
-    const marketplaceCut = (await numberToBalance(1)).toString()
-    const royaltyCut = (await numberToBalance(0)).toString()
+    const listedPrice = numberToBalance(10).toString()
+    const marketplaceCut = numberToBalance(1).toString()
+    const royaltyCut = numberToBalance(0).toString()
     expect(
       mpEvent.nftId === TEST_DATA.nftId &&
         mpEvent.marketplaceId === TEST_DATA.marketplaceId &&
