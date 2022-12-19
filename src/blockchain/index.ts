@@ -485,6 +485,7 @@ export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): str
  * @returns           BN output
  */
 export const numberToBalance = (_input: number, chainDecimals = TERNOA_CHAIN_DECIMALS): BN => {
+  if (typeof _input !== "number") throw new Error(`${Errors.MUST_BE_A_NUMBER} - Amount must be a number.`)
   const input = String(_input)
   const siPower = new BN(chainDecimals)
   const basePower = chainDecimals

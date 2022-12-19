@@ -80,7 +80,7 @@ export const formatRentFee = (type: "tokens" | "nft", value: number): RentFeeTyp
 
   return type === "tokens"
     ? {
-        [RentFeeAction.Tokens]: numberToBalance(value),
+        [RentFeeAction.Tokens]: value,
       }
     : {
         [RentFeeAction.NFT]: value,
@@ -109,11 +109,11 @@ export const formatCancellationFee = (
   switch (type) {
     case "fixed":
       return {
-        [CancellationFeeAction.FixedTokens]: numberToBalance(value),
+        [CancellationFeeAction.FixedTokens]: value,
       }
     case "flexible":
       return {
-        [CancellationFeeAction.FlexibleTokens]: numberToBalance(value),
+        [CancellationFeeAction.FlexibleTokens]: value,
       }
     case "nft":
       return {
@@ -122,4 +122,29 @@ export const formatCancellationFee = (
     default:
       return CancellationFeeAction.None
   }
+}
+
+/**
+ * @name validateTransformContractFee
+ * @summary         Validates the type fee and format it accordingly. Numbers are formatted into BN.
+ * @param fee       The fee to format : It can only be a RentFeeType or CancellationFeeType.
+ * @returns         The formatted fee.
+ */
+export const validateTransformContractFee = async (fee: any) => {
+  //RentFeeType | CancellationFeeType instead of any in params
+  if (typeof fee === "object") {
+    if (typeof fee.tokens === "number") {
+      const tokensFee = numberToBalance(fee.tokens)
+      fee.tokens = tokensFee
+    }
+    if (typeof fee.fixedTokens === "number") {
+      const fixedTokensFee = numberToBalance(fee.fixedTokens)
+      fee.fixedTokens = fixedTokensFee
+    }
+    if (typeof fee.flexibleTokens === "number") {
+      const flexibleTokensFee = numberToBalance(fee.flexibleTokens)
+      fee.flexibleTokens = flexibleTokensFee
+    }
+  }
+  return fee
 }
