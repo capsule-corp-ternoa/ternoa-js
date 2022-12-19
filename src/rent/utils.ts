@@ -26,8 +26,12 @@ export const formatDuration = (
   duration: number,
   maxDuration?: number,
   isChangeable = false,
-): DurationType =>
-  type === "fixed"
+): DurationType => {
+  if (type !== "fixed" && type !== "subscription")
+    throw new Error("INCORRECT_TYPE: type has to be either 'fixed' or 'subscription'.")
+  if (typeof duration !== "number") throw new Error("MUST_BE_A_NUMBER: duration must be a number.")
+
+  return type === "fixed"
     ? {
         [DurationAction.Fixed]: duration,
       }
@@ -38,6 +42,7 @@ export const formatDuration = (
           [SubscriptionActionDetails.IsChangeable]: isChangeable,
         },
       }
+}
 
 /**
  * @name formatAcceptanceType
@@ -48,14 +53,17 @@ export const formatDuration = (
  *
  * @returns An object representing the acceptance type of a contract.
  */
-export const formatAcceptanceType = (type: "auto" | "manual", list?: string[] | null): AcceptanceType =>
-  type === "auto"
+export const formatAcceptanceType = (type: "auto" | "manual", list?: string[] | null): AcceptanceType => {
+  if (type !== "auto" && type !== "manual") throw new Error("INCORRECT_TYPE: type has to be either 'auto' or 'manual'.")
+
+  return type === "auto"
     ? {
         [AcceptanceAction.AutoAcceptance]: list ?? null,
       }
     : {
         [AcceptanceAction.ManualAcceptance]: list ?? null,
       }
+}
 
 /**
  * @name formatRentFee
@@ -66,14 +74,18 @@ export const formatAcceptanceType = (type: "auto" | "manual", list?: string[] | 
  *
  * @returns An object representing the rent fee of a contract.
  */
-export const formatRentFee = (type: "tokens" | "nft", value: number): RentFeeType =>
-  type === "tokens"
+export const formatRentFee = (type: "tokens" | "nft", value: number): RentFeeType => {
+  if (type !== "tokens" && type !== "nft") throw new Error("INCORRECT_TYPE: type has to be either 'tokens' or 'nft'.")
+  if (typeof value !== "number") throw new Error("MUST_BE_A_NUMBER: value must be a number.")
+
+  return type === "tokens"
     ? {
         [RentFeeAction.Tokens]: numberToBalance(value),
       }
     : {
         [RentFeeAction.NFT]: value,
       }
+}
 
 /**
  * @name formatCancellationFee
@@ -89,6 +101,9 @@ export const formatCancellationFee = (
   type: "fixed" | "flexible" | "nft" | "none",
   value?: number,
 ): CancellationFeeType => {
+  if (type !== "fixed" && type !== "flexible" && type !== "nft" && type !== "none")
+    throw new Error("INCORRECT_TYPE: type has to be either 'fixed', 'flexible', 'nft' or 'none'.")
+
   if (type === "none") return CancellationFeeAction.None
   if (value === undefined) throw new Error(`${Errors.VALUE_MUST_BE_DEFINED}`)
   switch (type) {
