@@ -14,7 +14,7 @@ import { AssetTransferredEvent } from "../events"
  * @returns             Unsigned unsubmitted Assets-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const assetTransferTx = async (id: number, to: string, amount: number | BN): Promise<TransactionHashType> => {
-  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  const formattedAmount = typeof amount === "number" ? numberToBalance(amount) : amount
   return await createTxHex(txPallets.assets, txActions.transfer, [id, to, formattedAmount])
 }
 

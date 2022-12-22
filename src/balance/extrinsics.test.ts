@@ -11,7 +11,7 @@ beforeAll(async () => {
 describe("Testing balance transfers", (): void => {
   it("Transfer 1 CAPS from the testing account", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const oneCapsAmount = await numberToBalance(1)
+    const oneCapsAmount = numberToBalance(1)
     const event = await balancesTransfer(destAccount.address, oneCapsAmount, testAccount, WaitUntil.BlockInclusion)
     expect(
       event.from === testAccount.address &&
@@ -23,7 +23,7 @@ describe("Testing balance transfers", (): void => {
 
   it("Transfer 1 CAPS from the testing account using balancesTransferKeepAlive", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const oneCapsAmount = await numberToBalance(1)
+    const oneCapsAmount = numberToBalance(1)
     const event = await balancesTransferKeepAlive(
       destAccount.address,
       oneCapsAmount,

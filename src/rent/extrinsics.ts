@@ -1,8 +1,6 @@
-import BN from "bn.js"
 import { IKeyringPair } from "@polkadot/types/types"
 
 import { AcceptanceType, CancellationFeeType, DurationType, RentFeeType } from "./types"
-import { formatRentContractFee } from "./utils"
 
 import { createTxHex, numberToBalance, submitTxBlocking, TransactionHashType } from "../blockchain"
 import { txActions, txPallets, WaitUntil } from "../constants"
@@ -16,6 +14,7 @@ import {
   ContractSubscriptionTermsAcceptedEvent,
   ContractSubscriptionTermsChangedEvent,
 } from "../events"
+import { validateTransformContractFee } from "./utils"
 
 /**
  * @name createContractTx
@@ -38,9 +37,9 @@ export const createContractTx = async (
   renterCancellationFee: CancellationFeeType,
   renteeCancellationFee: CancellationFeeType,
 ): Promise<TransactionHashType> => {
-  await formatRentContractFee(rentFee)
-  if (renterCancellationFee) await formatRentContractFee(renterCancellationFee)
-  if (renteeCancellationFee) await formatRentContractFee(renteeCancellationFee)
+  await validateTransformContractFee(rentFee)
+  await validateTransformContractFee(renterCancellationFee)
+  await validateTransformContractFee(renteeCancellationFee)
   return await createTxHex(txPallets.rent, txActions.createContract, [
     nftId,
     duration,
@@ -274,15 +273,14 @@ export const acceptRentOffer = async (
 
 export const changeSubscriptionTermsTx = async (
   nftId: number,
-  rentFee: BN | number,
+  rentFee: number,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
 ): Promise<TransactionHashType> => {
-  const formattedFee = typeof rentFee === "number" ? await numberToBalance(rentFee) : rentFee
   return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [
     nftId,
-    formattedFee,
+    numberToBalance(rentFee),
     period,
     maxDuration,
     isChangeable,
@@ -303,7 +301,7 @@ export const changeSubscriptionTermsTx = async (
  */
 export const changeSubscriptionTerms = async (
   nftId: number,
-  rentFee: BN | number,
+  rentFee: number,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
