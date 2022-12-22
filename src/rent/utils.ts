@@ -130,20 +130,21 @@ export const formatCancellationFee = (
  * @param fee       The fee to format : It can only be a RentFeeType or CancellationFeeType.
  * @returns         The formatted fee.
  */
-export const validateTransformContractFee = async (fee: any) => {
-  //RentFeeType | CancellationFeeType instead of any in params
+export const validateTransformContractFee = <T extends RentFeeType | CancellationFeeType>(
+  fee: T,
+): RentFeeType | CancellationFeeType => {
   if (typeof fee === "object") {
-    if (typeof fee.tokens === "number") {
+    if ("tokens" in fee && typeof fee.tokens === "number") {
       const tokensFee = numberToBalance(fee.tokens)
       fee.tokens = tokensFee
     }
-    if (typeof fee.fixedTokens === "number") {
-      const fixedTokensFee = numberToBalance(fee.fixedTokens)
-      fee.fixedTokens = fixedTokensFee
+    if ("fixedTokens" in fee && typeof fee.fixedTokens === "number") {
+      const tokensFee = numberToBalance(fee.fixedTokens)
+      fee.fixedTokens = tokensFee
     }
-    if (typeof fee.flexibleTokens === "number") {
-      const flexibleTokensFee = numberToBalance(fee.flexibleTokens)
-      fee.flexibleTokens = flexibleTokensFee
+    if ("flexibleTokens" in fee && typeof fee.flexibleTokens === "number") {
+      const tokensFee = numberToBalance(fee.flexibleTokens)
+      fee.flexibleTokens = tokensFee
     }
   }
   return fee
