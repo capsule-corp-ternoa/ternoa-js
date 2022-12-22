@@ -52,7 +52,7 @@ describe("Testing getting Auction data", (): void => {
   it("Should return the Auction Data when the NFT ID exists", async () => {
     const { test: testAccount } = await createTestPairs()
     const auction = await getAuctionData(TEST_DATA.nftId)
-    const startPrice = (await numberToBalance(1)).toString()
+    const startPrice = numberToBalance(1).toString()
 
     expect(
       auction?.creator === testAccount.address &&

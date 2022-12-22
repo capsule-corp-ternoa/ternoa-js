@@ -205,7 +205,7 @@ export const listNftTx = async (
   marketplaceId: number,
   price: number | BN,
 ): Promise<TransactionHashType> => {
-  const formattedPrice = typeof price === "number" ? await numberToBalance(price) : price
+  const formattedPrice = typeof price === "number" ? numberToBalance(price) : price
   return await createTxHex(txPallets.marketplace, txActions.listNft, [nftId, marketplaceId, formattedPrice])
 }
 
@@ -290,7 +290,7 @@ export const buyNft = async (nftId: number, keyring: IKeyringPair, waitUntil: Wa
  * @returns               Unsigned unsubmitted Set-Marketplace-Mint-Fee Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setMarketplaceMintFeeTx = async (fee: number | BN): Promise<TransactionHashType> => {
-  const formattedPrice = typeof fee === "number" ? await numberToBalance(fee) : fee
+  const formattedPrice = typeof fee === "number" ? numberToBalance(fee) : fee
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceMintFee, [formattedPrice])
 }
 
