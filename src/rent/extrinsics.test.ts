@@ -1,12 +1,4 @@
-import BN from "bn.js"
-
-import {
-  AcceptanceAction,
-  CancellationFeeAction,
-  DurationAction,
-  RentFeeAction,
-  SubscriptionActionDetails,
-} from "./enum"
+import { AcceptanceAction, CancellationFeeAction, DurationAction, RentFeeAction } from "./enum"
 import {
   acceptRentOffer,
   acceptSubscriptionTerms,
@@ -18,6 +10,7 @@ import {
   retractRentOffer,
   revokeContract,
 } from "./extrinsics"
+import { formatAcceptanceType, formatCancellationFee, formatDuration, formatRentFee } from "./utils"
 
 import { initializeApi, numberToBalance } from "../blockchain"
 import { createNft } from "../nft"
@@ -39,27 +32,22 @@ beforeAll(async () => {
 describe("Testing Rent extrinsics", (): void => {
   it("Testing to create a rent contract", async (): Promise<void> => {
     const { dest: destAccount, test: testAccount } = await createTestPairs()
+    const duration = formatDuration("subscription", 30, 100, true)
+    const acceptanceType = formatAcceptanceType("manual", [destAccount.address])
+    const rentFee = formatRentFee("tokens", 1)
+    const renterCancellationFee = formatCancellationFee("fixed", 1)
+    const renteeCancellationFee = formatCancellationFee("none")
     const contractEvent = await createContract(
       TEST_DATA.nftId,
-      {
-        [DurationAction.Subscription]: {
-          [SubscriptionActionDetails.PeriodLength]: 30,
-          [SubscriptionActionDetails.MaxDuration]: 100,
-          [SubscriptionActionDetails.IsChangeable]: true,
-        },
-      },
-      {
-        [AcceptanceAction.ManualAcceptance]: [destAccount.address],
-      },
+      duration,
+      acceptanceType,
       true,
-      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-      { [CancellationFeeAction.FixedTokens]: new BN("1000000000000000000") },
-      CancellationFeeAction.None,
+      rentFee,
+      renterCancellationFee,
+      renteeCancellationFee,
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const rentFee = (await numberToBalance(1)).toString()
-    const cancellationFee = (await numberToBalance(1)).toString()
     expect(
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.renter === testAccount.address &&
@@ -72,10 +60,10 @@ describe("Testing Rent extrinsics", (): void => {
         contractEvent.acceptanceList?.length === 1 &&
         contractEvent.renterCanRevoke === true &&
         contractEvent.rentFeeType === RentFeeAction.Tokens &&
-        contractEvent.rentFee === rentFee &&
+        contractEvent.rentFee === numberToBalance(1).toString() &&
         contractEvent.rentFeeRounded === 1 &&
         contractEvent.renterCancellationFeeType === CancellationFeeAction.FixedTokens &&
-        contractEvent.renterCancellationFee === cancellationFee &&
+        contractEvent.renterCancellationFee === numberToBalance(1).toString() &&
         contractEvent.renterCancellationFeeRounded === 1 &&
         contractEvent.renteeCancellationFeeType === CancellationFeeAction.None &&
         contractEvent.renteeCancellationFee === null &&
@@ -120,7 +108,7 @@ describe("Testing to update and revoke a subscription contract", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const rentFee = (await numberToBalance(3)).toString()
+    const rentFee = numberToBalance(3).toString()
     expect(
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.period === 10 &&
@@ -147,22 +135,19 @@ describe("Testing to update and revoke a subscription contract", (): void => {
 describe("Testing to rent or cancel a contract", (): void => {
   it("Should return the nftId of the rented contract", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const duration = formatDuration("subscription", 5, 10)
+    const acceptanceType = formatAcceptanceType("auto")
+    const rentFee = formatRentFee("tokens", 1)
+    const renterCancellationFee = formatCancellationFee("none")
+    const renteeCancellationFee = formatCancellationFee("none")
     await createContract(
       TEST_DATA.nftId,
-      {
-        [DurationAction.Subscription]: {
-          [SubscriptionActionDetails.PeriodLength]: 5,
-          [SubscriptionActionDetails.MaxDuration]: 10,
-          [SubscriptionActionDetails.IsChangeable]: false,
-        },
-      },
-      {
-        [AcceptanceAction.AutoAcceptance]: null,
-      },
+      duration,
+      acceptanceType,
       true,
-      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-      CancellationFeeAction.None,
-      CancellationFeeAction.None,
+      rentFee,
+      renterCancellationFee,
+      renteeCancellationFee,
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -172,18 +157,19 @@ describe("Testing to rent or cancel a contract", (): void => {
   it("Should return the nftId of the cancelled contract", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     await revokeContract(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const duration = formatDuration("fixed", 1000)
+    const acceptanceType = formatAcceptanceType("auto")
+    const rentFee = formatRentFee("tokens", 1)
+    const renterCancellationFee = formatCancellationFee("none")
+    const renteeCancellationFee = formatCancellationFee("none")
     await createContract(
       TEST_DATA.nftId,
-      {
-        [DurationAction.Fixed]: 1000,
-      },
-      {
-        [AcceptanceAction.AutoAcceptance]: null,
-      },
+      duration,
+      acceptanceType,
       true,
-      { [RentFeeAction.Tokens]: new BN("1000000000000000000") },
-      CancellationFeeAction.None,
-      CancellationFeeAction.None,
+      rentFee,
+      renterCancellationFee,
+      renteeCancellationFee,
       testAccount,
       WaitUntil.BlockInclusion,
     )

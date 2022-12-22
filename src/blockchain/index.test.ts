@@ -158,7 +158,7 @@ describe("Balance formatting", (): void => {
     expect(res).toBe("123.4321 MCAPS")
   })
   it("Should unformat a number into a BN", async () => {
-    const res = await numberToBalance(123.4321)
+    const res = numberToBalance(123.4321)
     expect(res).toEqual(new BN("123432100000000000000"))
   })
 })

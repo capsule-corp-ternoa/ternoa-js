@@ -1,4 +1,3 @@
-import BN from "bn.js"
 import {
   AcceptanceAction,
   CancellationFeeAction,
@@ -21,12 +20,12 @@ export type AutoAcceptanceType = { [AcceptanceAction.AutoAcceptance]: string[] |
 export type ManualAcceptanceType = { [AcceptanceAction.ManualAcceptance]: string[] | null }
 export type AcceptanceType = AutoAcceptanceType | ManualAcceptanceType
 
-export type RentFeeTokensType = { [RentFeeAction.Tokens]: BN | number }
+export type RentFeeTokensType = { [RentFeeAction.Tokens]: number }
 export type RentFeeNFTType = { [RentFeeAction.NFT]: number }
 export type RentFeeType = RentFeeTokensType | RentFeeNFTType
 
-export type CancellationFeeFixedTokensType = { [CancellationFeeAction.FixedTokens]: BN | number }
-export type CancellationFeeFlexibleTokensType = { [CancellationFeeAction.FlexibleTokens]: BN | number }
+export type CancellationFeeFixedTokensType = { [CancellationFeeAction.FixedTokens]: number }
+export type CancellationFeeFlexibleTokensType = { [CancellationFeeAction.FlexibleTokens]: number }
 export type CancellationFeeNFTType = { [CancellationFeeAction.NFT]: number }
 export type CancellationFeeType =
   | CancellationFeeAction.None
