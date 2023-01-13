@@ -1,9 +1,11 @@
-// import { encryptAndUploadFile, generatePGPKeys, secretNftIpfsUpload } from "./helpers/encryption"
-// import { generateSSSShares, sgxSSSSharesUpload } from "./helpers/sgx"
+// import { generatePGPKeys, secretNftEncryptAndUploadFile } from "./helpers/encryption"
+// import { formatPayload, generateSSSShares, sgxSSSSharesUpload } from "./helpers/sgx"
 // import { initializeApi } from "./blockchain"
-// import { createSecretNft, nftIpfsUpload } from "./nft"
+// import { createSecretNft } from "./nft"
 // import { getKeyringFromSeed } from "./account"
 // import { WaitUntil } from "./constants"
+// import { getEnclaveHealthStatus, TernoaIPFS } from "./helpers"
+// import { File } from "formdata-node"
 
 export * from "./account"
 export * from "./assets"
@@ -32,45 +34,57 @@ export * as TernoaConstants from "./constants"
 export { hexToString, hexToU8a, stringToHex, u8aToHex } from "@polkadot/util"
 export { Blob, File, FormData } from "formdata-node"
 
+// const NFT_FILE = new File(["Random datas"], "Fake File") as File
 // const NFT_METADATA = {
-//   file: new File(["Random datas"], "Fake File"),
 //   title: "Title",
 //   description: "Description",
 // }
+// const SECRET_NFT_FILE = new File(["Random secret datas"], "Fake Secret File") as File
+
 // const SECRET_NFT_METADATA = {
-//   file: new File(["Random secret datas"], "Fake Secret File"),
 //   title: "Secret Title",
 //   description: "Secret Description",
 // }
 // const main = async () => {
-//   await initializeApi("wss://dev-1.ternoa.network")
-//   const keyring = await getKeyringFromSeed("broccoli tornado verb crane mandate wise gap shop mad quarter jar snake")
-//   // 0- generate keys
-//   const { privateKey, publicKey } = await generatePGPKeys()
-//   console.log(privateKey, publicKey)
-//   // 1.1- Encrypt and upload
-//   const { hash: secretOffchainDataHash } = await secretNftIpfsUpload(publicKey, SECRET_NFT_METADATA)
-//   console.log(secretOffchainDataHash)
-//   const { hash: offchainDataHash } = await nftIpfsUpload(NFT_METADATA)
-//   console.log(offchainDataHash)
+//   try {
+//     await initializeApi("wss://dev-0.ternoa.network")
+//     const keyring = await getKeyringFromSeed("broccoli tornado verb crane mandate wise gap shop mad quarter jar snake")
+//     const { privateKey, publicKey } = await generatePGPKeys()
+//     const ipfsClient = new TernoaIPFS(new URL("https://ipfs-dev.trnnfr.com"), "98791fae-d947-450b-a457-12ecf5d9b858")
 
-//   const { nftId } = await createSecretNft(
-//     offchainDataHash,
-//     secretOffchainDataHash,
-//     0,
-//     undefined,
-//     false,
-//     keyring,
-//     WaitUntil.BlockInclusion,
-//   )
-//   console.log(nftId)
+//     await getEnclaveHealthStatus()
 
-//   // 2.1- Generate SSS Shares
-//   const shares = generateSSSShares(privateKey)
-//   console.log(shares)
+//     const { Hash: offchainDataHash } = await ipfsClient.storeNFT(NFT_FILE, NFT_METADATA)
+//     console.log(offchainDataHash)
+//     const { Hash: secretOffchainDataHash } = await secretNftEncryptAndUploadFile(
+//       SECRET_NFT_FILE,
+//       publicKey,
+//       ipfsClient,
+//       SECRET_NFT_METADATA,
+//     )
+//     console.log(secretOffchainDataHash)
 
-//   const sgxResponse = await sgxSSSSharesUpload(shares, nftId, keyring)
-//   console.log(sgxResponse)
-//   //return sgxResponse
+//     const { nftId } = await createSecretNft(
+//       offchainDataHash,
+//       secretOffchainDataHash,
+//       0,
+//       undefined,
+//       false,
+//       keyring,
+//       WaitUntil.BlockInclusion,
+//     )
+//     console.log(nftId)
+
+//     //SGX
+//     const shares = generateSSSShares(privateKey)
+//     const payloads = shares.map((share: string) => formatPayload(nftId, share, keyring))
+
+//     const res = await sgxSSSSharesUpload(0, payloads)
+//     console.log("res", res)
+//   } catch (error) {
+//     console.log(error)
+//   } finally {
+//     process.exit()
+//   }
 // }
 // main()

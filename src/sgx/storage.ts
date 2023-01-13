@@ -7,17 +7,17 @@ import { ClusterDataType, EnclaveDataType } from "./types"
  * @name getClusterData
  * @summary            Provides the data related to a cluster.
  * @param clusterId    The Cluster id.
- * @returns            A JSON object with the cluster data. ex:{enclaves, (...)}
+ * @returns            An array containing the cluster data: the list of enclaves
  */
-export const getClusterData = async (clusterId: number): Promise<ClusterDataType | null> => {
-  const data = await query(txPallets.tee, chainQuery.clusterRegistry, [clusterId])
+export const getClusterData = async (clusterId: number): Promise<string[] | null> => {
+  const data = await query(txPallets.tee, chainQuery.clusterData, [clusterId])
   if (data.isEmpty == true) {
-    return null
+    throw new Error(`${Errors.SGX_CLUSTER_NOT_FOUND}: ${clusterId}`)
   }
 
   try {
-    const result = data.toJSON() as any
-    return result
+    const result = data.toJSON() as ClusterDataType
+    return result.enclaves
   } catch (error) {
     throw new Error(`${Errors.CLUSTER_CONVERSION_ERROR}`)
   }
@@ -27,16 +27,16 @@ export const getClusterData = async (clusterId: number): Promise<ClusterDataType
  * @name getEnclaveData
  * @summary            Provides the data related to an enclave.
  * @param enclaveId    The Enclave id.
- * @returns            A JSON object with the enclave data. ex:{api_url, (...)}
+ * @returns            A JSON object with the enclave data. ex:{enclaveAddress, apiUri (...)}
  */
-export const getEnclaveData = async (enclaveId: number): Promise<EnclaveDataType | null> => {
-  const data = await query(txPallets.tee, chainQuery.enclaveRegistry, [enclaveId])
+export const getEnclaveData = async (enclaveId: string): Promise<EnclaveDataType | null> => {
+  const data = await query(txPallets.tee, chainQuery.enclaveData, [enclaveId])
   if (data.isEmpty == true) {
-    return null
+    throw new Error(`${Errors.SGX_ENCLAVE_NOT_FOUND}: ${enclaveId}`)
   }
 
   try {
-    const result = data.toJSON() as any
+    const result = data.toJSON() as EnclaveDataType
     return result
   } catch (error) {
     throw new Error(`${Errors.ENCLAVE_CONVERSION_ERROR}`)

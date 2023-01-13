@@ -2,20 +2,23 @@
 // @ts-ignore
 import { combine, split } from "shamirs-secret-sharing"
 import { IKeyringPair } from "@polkadot/types/types"
-
-import { Errors } from "../constants"
+import { hexToString } from "@polkadot/util"
 
 import { getSignature } from "./crypto"
 import { HttpClient } from "./http"
-import { getClusterData, getEnclaveData } from "../sgx"
 import { SecretPayloadType, SgxDataResponseType } from "./types"
-import { retryPost } from "./utils"
+import { removeURLSlash, retryPost } from "./utils"
 
-export const SSSA_NUMSHARES = 6
-export const SSSA_THRESHOLD = 4
+import { getClusterData, getEnclaveData } from "../sgx"
+import { Errors } from "../constants"
+import { EnclaveHealthType } from "sgx/types"
+
+export const SSSA_NUMSHARES = 5
+export const SSSA_THRESHOLD = 3
 
 export const SGX_STORE_ENDPOINT = "/api/nft/storeSecretShares"
 export const SGX_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
+export const SGX_HEALTH_ENDPOINT = "/health"
 
 /**
  * @name generateSSSShares
@@ -46,24 +49,42 @@ export const combineSSSShares = (shares: string[]): string => {
 }
 
 /**
+ * @name getEnclaveHealthStatus
+ * @summary           Check that all SGX enclaves from a cluster are ready to be used.
+ * @param clusterId   The SGX Cluster id.
+ * @returns           Besoin de retourner quelque chose ? Un boolean ? Les status 200 ?
+ */
+export const getEnclaveHealthStatus = async (clusterId = 0) => {
+  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
+  const clusterHealthCheck = await Promise.all(
+    sgxEnclaves.map(async (enclaveUrl, idx) => {
+      const http = new HttpClient(enclaveUrl)
+      const enclaveData: EnclaveHealthType = await http.get(SGX_HEALTH_ENDPOINT)
+      if (enclaveData.status !== 200) {
+        throw new Error(`${Errors.SGX_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH ENCLAVE ${idx}: ${enclaveUrl}`)
+      }
+      return enclaveData
+    }),
+  )
+  return clusterHealthCheck
+}
+
+/**
  * @name getSgxEnclavesBaseUrl
  * @summary           Retrieves the SGX enclaves urls stored on-chain.
  * @param clusterId   The SGX Cluster id.
  * @returns           An array of the SGX enclaves urls available.
  */
 export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
-  // TODO: check query storage to chain
   const clusterData = await getClusterData(clusterId)
   if (!clusterData) throw new Error(Errors.SGX_CLUSTER_NOT_FOUND)
-
   const urls: string[] = await Promise.all(
-    clusterData.map(async ({ enclaveId }) => {
-      const enclaveData = await getEnclaveData(enclaveId)
+    clusterData.map(async (enclave) => {
+      const enclaveData = await getEnclaveData(enclave)
       if (!enclaveData) throw new Error(Errors.SGX_ENCLAVE_NOT_FOUND)
-      return enclaveData.apiUrl
+      return removeURLSlash(hexToString(enclaveData.apiUri))
     }),
   )
-
   return urls
 }
 
@@ -126,7 +147,7 @@ export const sgxSSSSharesUpload = async (clusterId = 0, payloads: SecretPayloadT
     payloads.map(async (payload, idx) => {
       const baseUrl = sgxEnclaves[idx]
       const http = new HttpClient(baseUrl)
-      const post = () => sgxUpload(http, SGX_STORE_ENDPOINT, payload)
+      const post = async () => await sgxUpload(http, SGX_STORE_ENDPOINT, payload)
       return await retryPost<SgxDataResponseType | Error>(post, 3)
     }),
   )

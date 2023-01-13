@@ -103,8 +103,8 @@ export enum chainQuery {
   offers = "offers",
 
   // tee
-  clusterRegistry = "clusterRegistry",
-  enclaveRegistry = "enclaveRegistry",
+  clusterData = "clusterData",
+  enclaveData = "enclaveData",
 }
 
 export enum chainConstants {
@@ -168,6 +168,7 @@ export enum Errors {
   ENCLAVE_CONVERSION_ERROR = "ENCLAVE_CONVERSION_ERROR",
   SGX_CLUSTER_NOT_FOUND = "SGX_CLUSTER_NOT_FOUND",
   SGX_ENCLAVE_NOT_FOUND = "SGX_ENCLAVE_NOT_FOUND",
+  SGX_ENCLAVE_NOT_AVAILBLE = "SGX_ENCLAVE_NOT_AVAILBLE",
   NOT_CORRECT_AMOUNT_SGX_PAYLOADS = "NOT_CORRECT_AMOUNT_SGX_PAYLOADS",
   NOT_CORRECT_AMOUNT_SGX_ENCLAVES = "NOT_CORRECT_AMOUNT_SGX_ENCLAVES",
 }

@@ -49,7 +49,9 @@ export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T
 
   for (let i = 0; i < n; i++) {
     try {
-      console.log("RETRY:", i)
+      if (i >= 1) {
+        console.log("RETRY:", i)
+      }
       return await fn()
     } catch (e) {
       lastError = {
