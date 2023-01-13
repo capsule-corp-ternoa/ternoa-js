@@ -11,8 +11,8 @@ import { getClusterData, getEnclaveData } from "../sgx"
 import { SecretPayloadType, SgxDataResponseType } from "./types"
 import { retryPost } from "./utils"
 
-export const SSSA_NUMSHARES = 6
-export const SSSA_THRESHOLD = 4
+export const SSSA_NUMSHARES = 5
+export const SSSA_THRESHOLD = 3
 
 export const SGX_STORE_ENDPOINT = "/api/nft/storeSecretShares"
 export const SGX_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
@@ -54,15 +54,22 @@ export const combineSSSShares = (shares: string[]): string => {
 export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
   // TODO: check query storage to chain
   const clusterData = await getClusterData(clusterId)
-  if (!clusterData) throw new Error(Errors.SGX_CLUSTER_NOT_FOUND)
 
-  const urls: string[] = await Promise.all(
-    clusterData.map(async ({ enclaveId }) => {
-      const enclaveData = await getEnclaveData(enclaveId)
-      if (!enclaveData) throw new Error(Errors.SGX_ENCLAVE_NOT_FOUND)
-      return enclaveData.apiUrl
-    }),
-  )
+  if (!clusterData) throw new Error(Errors.SGX_CLUSTER_NOT_FOUND)
+  let urls=[]
+  for (let i = 0; i < clusterData.length; i++) {
+    const enclaveData = await getEnclaveData(clusterData[i])
+    if(enclaveData){
+      urls.push(enclaveData)
+    }
+  }
+  // const urls: string[] = await Promise.all(
+  //   clusterData.map(async ({enclaveAddressId}) => {
+  //     const enclaveData = await getEnclaveData(enclaveAddressId)
+  //     if (!enclaveData) throw new Error(Errors.SGX_ENCLAVE_NOT_FOUND)
+  //     return enclaveData.apiUri
+  //   }),
+  // )
 
   return urls
 }

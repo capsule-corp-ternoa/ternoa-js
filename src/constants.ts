@@ -103,8 +103,9 @@ export enum chainQuery {
   offers = "offers",
 
   // tee
-  clusterRegistry = "clusterRegistry",
-  enclaveRegistry = "enclaveRegistry",
+  clusterData = "clusterData",
+  enclaveData = "enclaveData",
+
 }
 
 export enum chainConstants {

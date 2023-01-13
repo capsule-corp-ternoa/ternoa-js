@@ -1,5 +1,3 @@
-export type EnclaveDataType = {
-  apiUrl: string
-}
+export type EnclaveDataType = string
 
-export type ClusterDataType = { enclaveId: number }[]
+export type ClusterDataType = string[]
