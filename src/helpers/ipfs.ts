@@ -125,7 +125,7 @@ export class TernoaIPFS {
    * @param service
    * @param encryptedFile     NFT's encrypted asset.
    * @param publicKey         Public key used to encrypt the Secret NFT.
-   * @param metadata          Ternoa secret NFT metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
+   * @param metadata          Ternoa secret NFT metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-520-Secret-nft.md here}.
    * @param encryptedFileType The original encrypted file type.
    * @returns                 IPFS data (Hash, Size, Name).
    */

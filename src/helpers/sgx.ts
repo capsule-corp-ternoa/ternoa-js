@@ -61,7 +61,7 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
       const http = new HttpClient(enclaveUrl)
       const enclaveData: EnclaveHealthType = await http.get(SGX_HEALTH_ENDPOINT)
       if (enclaveData.status !== 200) {
-        throw new Error(`${Errors.SGX_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH ENCLAVE ${idx}: ${enclaveUrl}`)
+        throw new Error(`${Errors.SGX_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE ${idx}: ${enclaveUrl}`)
       }
       return enclaveData
     }),
@@ -97,7 +97,7 @@ export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
  * @returns         Payload ready to be submitted to SGX enclaves.
  */
 export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayloadType => {
-  const secretData = `${nftId}_${share ? share : "0"}` //TODO: remove null type allowance once SGX API supports '_...'
+  const secretData = `${nftId}_${share}` //TODO: remove null type allowance once SGX API supports '_...' => this should be ok now
   const signature = getSignature(keyring, secretData)
 
   return {
@@ -130,13 +130,24 @@ export const sgxUpload = async (
 
 /**
  * @name sgxSSSSharesUpload
- * @summary           Upload secret shares to SGX enclaves with retry.
- * @param clusterId   The SGX Cluster id to upload shares to.
- * @param payloads    Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
- * @returns           SGX enclave response.
+ * @summary               Upload secret shares to SGX enclaves with retry.
+ * @param clusterId       The SGX Cluster id to upload shares to.
+ * @param payloads        Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
+ * @param nbRetry         The number of retry that need to be proceeded in case of fail during a share upload. Default is 3.
+ * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
+ * @returns               SGX enclave response including both the payload and the enclave response.
  */
-export const sgxSSSSharesUpload = async (clusterId = 0, payloads: SecretPayloadType[]) => {
-  if (payloads.length !== SSSA_NUMSHARES)
+export const sgxSSSSharesUpload = async (
+  clusterId = 0,
+  payloads: SecretPayloadType[],
+  nbRetry = 3,
+  enclavesIndex?: number[],
+) => {
+  const nbShares =
+    enclavesIndex && enclavesIndex.length > 0 && enclavesIndex.length <= SSSA_NUMSHARES
+      ? enclavesIndex.length
+      : SSSA_NUMSHARES
+  if (payloads.length !== nbShares)
     throw new Error(`${Errors.NOT_CORRECT_AMOUNT_SGX_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
   const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
   if (sgxEnclaves.length !== SSSA_NUMSHARES)
@@ -145,37 +156,40 @@ export const sgxSSSSharesUpload = async (clusterId = 0, payloads: SecretPayloadT
     )
   const sgxRes = await Promise.all(
     payloads.map(async (payload, idx) => {
-      const baseUrl = sgxEnclaves[idx]
+      const baseUrl = sgxEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
       const http = new HttpClient(baseUrl)
       const post = async () => await sgxUpload(http, SGX_STORE_ENDPOINT, payload)
-      return await retryPost<SgxDataResponseType | Error>(post, 3)
+      return await retryPost<SgxDataResponseType | Error>(post, nbRetry)
     }),
   )
 
-  return sgxRes
+  return sgxRes.map((enclaveRes, i) => {
+    return {
+      ...payloads[i],
+      ...enclaveRes,
+    }
+  })
 }
 
 /**
  * @name sgxSSSSharesRetrieve
  * @summary           Get secret data shares from SGX enclaves.
  * @param clusterId   The SGX Cluster id to upload shares to.
- * @param payloads    Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
+ * @param payload     The payload containing secret NFT data, the keyring address and the signature. You can use our formatPayload() function.
  * @returns           SGX enclave response.
  */
-export const sgxSSSSharesRetrieve = async (clusterId = 0, payloads: SecretPayloadType[]) => {
-  if (payloads.length !== SSSA_NUMSHARES)
-    throw new Error(`${Errors.NOT_CORRECT_AMOUNT_SGX_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
+export const sgxSSSSharesRetrieve = async (clusterId: number, payload: SecretPayloadType): Promise<string[]> => {
   const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
   if (sgxEnclaves.length !== SSSA_NUMSHARES)
     throw new Error(
       `${Errors.NOT_CORRECT_AMOUNT_SGX_ENCLAVES} - Got: ${sgxEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
   const shares = await Promise.all(
-    sgxEnclaves.map(async (baseUrl, idx) => {
-      const payload = payloads[idx]
+    sgxEnclaves.map(async (baseUrl) => {
+      const secretPayload = payload
       const http = new HttpClient(baseUrl)
-      const res = await sgxUpload(http, SGX_RETRIEVE_ENDPOINT, payload)
-      return res.secret_data?.split("_")[1]
+      const res = await sgxUpload(http, SGX_RETRIEVE_ENDPOINT, secretPayload)
+      return res.secret_data?.split("_")[1] as string
     }),
   )
   return shares
