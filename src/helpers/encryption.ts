@@ -1,10 +1,13 @@
 import * as openpgp from "openpgp"
 import { File } from "formdata-node"
+import { IKeyringPair } from "@polkadot/types/types"
 
-import { PGPKeysType, SecretNftMetadataType } from "./types"
+import { NftMetadataType, PGPKeysType, SecretNftMetadataType } from "./types"
 import { convertFileToBuffer } from "./utils"
 import { TernoaIPFS } from "./ipfs"
-import { Errors } from "../constants"
+import { formatPayload, generateSSSShares, getEnclaveHealthStatus, sgxSSSSharesUpload } from "./sgx"
+import { Errors, WaitUntil } from "../constants"
+import { createSecretNft } from "../nft"
 
 /**
  * @name generatePGPKeys
@@ -101,4 +104,38 @@ export const secretNftEncryptAndUploadFile = async <T>(
   const ipfsRes = await ipfsClient.storeSecretNFT(encryptedFile, publicPGPKey, metadata, file.type)
 
   return ipfsRes
+}
+
+//TODO : Add doc -
+
+export const mintAndUpload = async <T>(
+  nftFile: File,
+  nftMetadata: NftMetadataType<T>,
+  secretNftFile: File,
+  secretNftMetadata: NftMetadataType<T>,
+  ipfsClient: TernoaIPFS,
+  keyring: IKeyringPair,
+) => {
+  const { privateKey, publicKey } = await generatePGPKeys()
+  await getEnclaveHealthStatus()
+  const { Hash: offchainDataHash } = await ipfsClient.storeNFT(nftFile, nftMetadata)
+  const { Hash: secretOffchainDataHash } = await secretNftEncryptAndUploadFile(
+    secretNftFile,
+    publicKey,
+    ipfsClient,
+    secretNftMetadata,
+  )
+  const { nftId } = await createSecretNft(
+    offchainDataHash,
+    secretOffchainDataHash,
+    0,
+    undefined,
+    false,
+    keyring,
+    WaitUntil.BlockInclusion,
+  )
+  const shares = generateSSSShares(privateKey)
+  const payloads = shares.map((share: string) => formatPayload(nftId, share, keyring))
+  const sgxRes = await sgxSSSSharesUpload(0, payloads)
+  return sgxRes
 }

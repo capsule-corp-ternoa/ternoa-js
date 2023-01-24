@@ -1,4 +1,4 @@
-import { decryptFile, generatePGPKeys, secretNftEncryptAndUploadFile } from "./helpers/encryption"
+import { decryptFile, generatePGPKeys, mintAndUpload, secretNftEncryptAndUploadFile } from "./helpers/encryption"
 import {
   combineSSSShares,
   formatPayload,
@@ -53,12 +53,22 @@ const SECRET_NFT_METADATA = {
 }
 let NFT_ID: number
 
-const mintAndUpload = async () => {
+const mint = async () => {
   try {
     await initializeApi("wss://dev-0.ternoa.network")
     const keyring = await getKeyringFromSeed("broccoli tornado verb crane mandate wise gap shop mad quarter jar snake")
-    const { privateKey, publicKey } = await generatePGPKeys()
     const ipfsClient = new TernoaIPFS(new URL("https://ipfs-dev.trnnfr.com"), "98791fae-d947-450b-a457-12ecf5d9b858")
+    // const mintAndUploadNFT = await mintAndUpload(
+    //   NFT_FILE,
+    //   NFT_METADATA,
+    //   SECRET_NFT_FILE,
+    //   SECRET_NFT_METADATA,
+    //   ipfsClient,
+    //   keyring,
+    // )
+    // console.log("SGX_UPLOAD_RES", mintAndUploadNFT)
+
+    const { privateKey, publicKey } = await generatePGPKeys()
 
     await getEnclaveHealthStatus()
 
@@ -88,7 +98,7 @@ const mintAndUpload = async () => {
     const payloads = shares.map((share: string) => formatPayload(nftId, share, keyring))
 
     const res = await sgxSSSSharesUpload(0, payloads)
-    console.log("SGX_UPLOAD_RES", res)
+    // console.log("SGX_UPLOAD_RES", res)
   } catch (error) {
     console.log(error)
   } finally {
@@ -112,7 +122,7 @@ const show = async (NFT_ID: number) => {
 
     const payload: SecretPayloadType = formatPayload(NFT_ID, null, keyring)
     const shares = await sgxSSSSharesRetrieve(0, payload)
-    console.log("showSecretNFT shares", shares)
+    // console.log("showSecretNFT shares", shares)
 
     const privatePGPKey = combineSSSShares(shares)
     // console.log("showSecretNFT privatePGPKey", privatePGPKey)
@@ -126,4 +136,4 @@ const show = async (NFT_ID: number) => {
   }
 }
 
-mintAndUpload()
+mint()
