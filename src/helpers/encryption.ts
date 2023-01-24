@@ -5,7 +5,7 @@ import { IKeyringPair } from "@polkadot/types/types"
 import { NftMetadataType, PGPKeysType, SecretNftMetadataType } from "./types"
 import { convertFileToBuffer } from "./utils"
 import { TernoaIPFS } from "./ipfs"
-import { formatPayload, generateSSSShares, getEnclaveHealthStatus, sgxSSSSharesUpload } from "./sgx"
+import { formatPayload, generateSSSShares, getEnclaveHealthStatus, teeSSSSharesUpload } from "./tee"
 import { Errors, WaitUntil } from "../constants"
 import { createSecretNft } from "../nft"
 
@@ -136,6 +136,6 @@ export const mintAndUpload = async <T>(
   )
   const shares = generateSSSShares(privateKey)
   const payloads = shares.map((share: string) => formatPayload(nftId, share, keyring))
-  const sgxRes = await sgxSSSSharesUpload(0, payloads)
-  return sgxRes
+  const teeRes = await teeSSSSharesUpload(0, payloads)
+  return teeRes
 }

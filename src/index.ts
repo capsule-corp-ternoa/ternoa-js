@@ -3,9 +3,9 @@ import {
   combineSSSShares,
   formatPayload,
   generateSSSShares,
-  sgxSSSSharesRetrieve,
-  sgxSSSSharesUpload,
-} from "./helpers/sgx"
+  teeSSSSharesRetrieve,
+  teeSSSSharesUpload,
+} from "./helpers/tee"
 import { initializeApi } from "./blockchain"
 import { createSecretNft, getSecretNftOffchainData } from "./nft"
 import { getKeyringFromSeed } from "./account"
@@ -66,7 +66,7 @@ const mint = async () => {
     //   ipfsClient,
     //   keyring,
     // )
-    // console.log("SGX_UPLOAD_RES", mintAndUploadNFT)
+    // console.log("TEE_UPLOAD_RES", mintAndUploadNFT)
 
     const { privateKey, publicKey } = await generatePGPKeys()
 
@@ -93,12 +93,12 @@ const mint = async () => {
 
     NFT_ID = nftId
 
-    //SGX
+    //TEE
     const shares = generateSSSShares(privateKey)
     const payloads = shares.map((share: string) => formatPayload(nftId, share, keyring))
 
-    const res = await sgxSSSSharesUpload(0, payloads)
-    // console.log("SGX_UPLOAD_RES", res)
+    const res = await teeSSSSharesUpload(0, payloads)
+    // console.log("TEE_UPLOAD_RES", res)
   } catch (error) {
     console.log(error)
   } finally {
@@ -121,7 +121,7 @@ const show = async (NFT_ID: number) => {
     )) as string
 
     const payload: SecretPayloadType = formatPayload(NFT_ID, null, keyring)
-    const shares = await sgxSSSSharesRetrieve(0, payload)
+    const shares = await teeSSSSharesRetrieve(0, payload)
     // console.log("showSecretNFT shares", shares)
 
     const privatePGPKey = combineSSSShares(shares)

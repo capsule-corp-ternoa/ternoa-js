@@ -6,19 +6,19 @@ import { hexToString } from "@polkadot/util"
 
 import { getSignature } from "./crypto"
 import { HttpClient } from "./http"
-import { SecretPayloadType, SgxDataResponseType } from "./types"
+import { SecretPayloadType, TeeDataResponseType } from "./types"
 import { removeURLSlash, retryPost } from "./utils"
 
-import { getClusterData, getEnclaveData } from "../sgx"
+import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
-import { EnclaveHealthType } from "sgx/types"
+import { EnclaveHealthType } from "tee/types"
 
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
 
-export const SGX_STORE_ENDPOINT = "/api/nft/storeSecretShares"
-export const SGX_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
-export const SGX_HEALTH_ENDPOINT = "/health"
+export const TEE_STORE_ENDPOINT = "/api/nft/storeSecretShares"
+export const TEE_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
+export const TEE_HEALTH_ENDPOINT = "/health"
 
 /**
  * @name generateSSSShares
@@ -50,18 +50,18 @@ export const combineSSSShares = (shares: string[]): string => {
 
 /**
  * @name getEnclaveHealthStatus
- * @summary           Check that all SGX enclaves from a cluster are ready to be used.
- * @param clusterId   The SGX Cluster id.
+ * @summary           Check that all TEE enclaves from a cluster are ready to be used.
+ * @param clusterId   The TEE Cluster id.
  * @returns           Besoin de retourner quelque chose ? Un boolean ? Les status 200 ?
  */
 export const getEnclaveHealthStatus = async (clusterId = 0) => {
-  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
+  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   const clusterHealthCheck = await Promise.all(
-    sgxEnclaves.map(async (enclaveUrl, idx) => {
+    teeEnclaves.map(async (enclaveUrl, idx) => {
       const http = new HttpClient(enclaveUrl)
-      const enclaveData: EnclaveHealthType = await http.get(SGX_HEALTH_ENDPOINT)
+      const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
       if (enclaveData.status !== 200) {
-        throw new Error(`${Errors.SGX_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE ${idx}: ${enclaveUrl}`)
+        throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE ${idx}: ${enclaveUrl}`)
       }
       return enclaveData
     }),
@@ -70,18 +70,18 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
 }
 
 /**
- * @name getSgxEnclavesBaseUrl
- * @summary           Retrieves the SGX enclaves urls stored on-chain.
- * @param clusterId   The SGX Cluster id.
- * @returns           An array of the SGX enclaves urls available.
+ * @name getTeeEnclavesBaseUrl
+ * @summary           Retrieves the TEE enclaves urls stored on-chain.
+ * @param clusterId   The TEE Cluster id.
+ * @returns           An array of the TEE enclaves urls available.
  */
-export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
+export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
   const clusterData = await getClusterData(clusterId)
-  if (!clusterData) throw new Error(Errors.SGX_CLUSTER_NOT_FOUND)
+  if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
   const urls: string[] = await Promise.all(
     clusterData.map(async (enclave) => {
       const enclaveData = await getEnclaveData(enclave)
-      if (!enclaveData) throw new Error(Errors.SGX_ENCLAVE_NOT_FOUND)
+      if (!enclaveData) throw new Error(Errors.TEE_ENCLAVE_NOT_FOUND)
       return removeURLSlash(hexToString(enclaveData.apiUri))
     }),
   )
@@ -90,14 +90,14 @@ export const getSgxEnclavesBaseUrl = async (clusterId = 0) => {
 
 /**
  * @name formatPayload
- * @summary         Prepares post request payload to store secret NFT data into SGX enclaves.
+ * @summary         Prepares post request payload to store secret NFT data into TEE enclaves.
  * @param nftId     The ID of the secret NFT.
  * @param share     A share of the private key used to decrypt the secret NFT.
  * @param keyring   Account of the secret NFT's owner.
- * @returns         Payload ready to be submitted to SGX enclaves.
+ * @returns         Payload ready to be submitted to TEE enclaves.
  */
 export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayloadType => {
-  const secretData = `${nftId}_${share}` //TODO: remove null type allowance once SGX API supports '_...' => this should be ok now
+  const secretData = `${nftId}_${share}` //TODO: remove null type allowance once TEE API supports '_...' => this should be ok now
   const signature = getSignature(keyring, secretData)
 
   return {
@@ -108,36 +108,36 @@ export const formatPayload = (nftId: number, share: string | null, keyring: IKey
 }
 
 /**
- * @name sgxUpload
- * @summary               Upload secret payload data to an SGX enclave.
+ * @name teeUpload
+ * @summary               Upload secret payload data to an TEE enclave.
  * @param http            HttpClient instance.
- * @param endpoint        SGX enclave endpoint.
+ * @param endpoint        TEE enclave endpoint.
  * @param secretPayload   Payload formatted with the required secret NFT's data.
- * @returns               SGX enclave response.
+ * @returns               TEE enclave response.
  */
-export const sgxUpload = async (
+export const teeUpload = async (
   http: HttpClient,
   endpoint: string,
   secretPayload: SecretPayloadType,
-): Promise<SgxDataResponseType> => {
+): Promise<TeeDataResponseType> => {
   const headers = {
     "Content-Type": "application/json",
   }
-  return http.post<SgxDataResponseType>(endpoint, secretPayload, {
+  return http.post<TeeDataResponseType>(endpoint, secretPayload, {
     headers,
   })
 }
 
 /**
- * @name sgxSSSSharesUpload
- * @summary               Upload secret shares to SGX enclaves with retry.
- * @param clusterId       The SGX Cluster id to upload shares to.
+ * @name teeSSSSharesUpload
+ * @summary               Upload secret shares to TEE enclaves with retry.
+ * @param clusterId       The TEE Cluster id to upload shares to.
  * @param payloads        Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
  * @param nbRetry         The number of retry that need to be proceeded in case of fail during a share upload. Default is 3.
  * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
- * @returns               SGX enclave response including both the payload and the enclave response.
+ * @returns               TEE enclave response including both the payload and the enclave response.
  */
-export const sgxSSSSharesUpload = async (
+export const teeSSSSharesUpload = async (
   clusterId = 0,
   payloads: SecretPayloadType[],
   nbRetry = 3,
@@ -148,22 +148,22 @@ export const sgxSSSSharesUpload = async (
       ? enclavesIndex.length
       : SSSA_NUMSHARES
   if (payloads.length !== nbShares)
-    throw new Error(`${Errors.NOT_CORRECT_AMOUNT_SGX_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
-  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
-  if (sgxEnclaves.length !== SSSA_NUMSHARES)
+    throw new Error(`${Errors.NOT_CORRECT_AMOUNT_TEE_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
+  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  if (teeEnclaves.length !== SSSA_NUMSHARES)
     throw new Error(
-      `${Errors.NOT_CORRECT_AMOUNT_SGX_ENCLAVES} - Got: ${sgxEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
+      `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
-  const sgxRes = await Promise.all(
+  const teeRes = await Promise.all(
     payloads.map(async (payload, idx) => {
-      const baseUrl = sgxEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
+      const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
       const http = new HttpClient(baseUrl)
-      const post = async () => await sgxUpload(http, SGX_STORE_ENDPOINT, payload)
-      return await retryPost<SgxDataResponseType | Error>(post, nbRetry)
+      const post = async () => await teeUpload(http, TEE_STORE_ENDPOINT, payload)
+      return await retryPost<TeeDataResponseType | Error>(post, nbRetry)
     }),
   )
 
-  return sgxRes.map((enclaveRes, i) => {
+  return teeRes.map((enclaveRes, i) => {
     return {
       ...payloads[i],
       ...enclaveRes,
@@ -172,23 +172,23 @@ export const sgxSSSSharesUpload = async (
 }
 
 /**
- * @name sgxSSSSharesRetrieve
- * @summary           Get secret data shares from SGX enclaves.
- * @param clusterId   The SGX Cluster id to upload shares to.
+ * @name teeSSSSharesRetrieve
+ * @summary           Get secret data shares from TEE enclaves.
+ * @param clusterId   The TEE Cluster id to upload shares to.
  * @param payload     The payload containing secret NFT data, the keyring address and the signature. You can use our formatPayload() function.
- * @returns           SGX enclave response.
+ * @returns           TEE enclave response.
  */
-export const sgxSSSSharesRetrieve = async (clusterId: number, payload: SecretPayloadType): Promise<string[]> => {
-  const sgxEnclaves = await getSgxEnclavesBaseUrl(clusterId)
-  if (sgxEnclaves.length !== SSSA_NUMSHARES)
+export const teeSSSSharesRetrieve = async (clusterId: number, payload: SecretPayloadType): Promise<string[]> => {
+  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  if (teeEnclaves.length !== SSSA_NUMSHARES)
     throw new Error(
-      `${Errors.NOT_CORRECT_AMOUNT_SGX_ENCLAVES} - Got: ${sgxEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
+      `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
   const shares = await Promise.all(
-    sgxEnclaves.map(async (baseUrl) => {
+    teeEnclaves.map(async (baseUrl) => {
       const secretPayload = payload
       const http = new HttpClient(baseUrl)
-      const res = await sgxUpload(http, SGX_RETRIEVE_ENDPOINT, secretPayload)
+      const res = await teeUpload(http, TEE_RETRIEVE_ENDPOINT, secretPayload)
       return res.secret_data?.split("_")[1] as string
     }),
   )
