@@ -1,4 +1,9 @@
-import { decryptFile, generatePGPKeys, mintAndUpload, secretNftEncryptAndUploadFile } from "./helpers/encryption"
+import {
+  decryptFile,
+  generatePGPKeys,
+  mintSecretNFTAndTEEUpload,
+  secretNftEncryptAndUploadFile,
+} from "./helpers/encryption"
 import {
   combineSSSShares,
   formatPayload,
@@ -58,7 +63,7 @@ const mint = async () => {
     await initializeApi("wss://dev-0.ternoa.network")
     const keyring = await getKeyringFromSeed("broccoli tornado verb crane mandate wise gap shop mad quarter jar snake")
     const ipfsClient = new TernoaIPFS(new URL("https://ipfs-dev.trnnfr.com"), "98791fae-d947-450b-a457-12ecf5d9b858")
-    // const mintAndUploadNFT = await mintAndUpload(
+    // const mintAndUploadNFT = await mintSecretNFTAndTEEUpload(
     //   NFT_FILE,
     //   NFT_METADATA,
     //   SECRET_NFT_FILE,

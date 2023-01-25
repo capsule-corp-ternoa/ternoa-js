@@ -106,9 +106,18 @@ export const secretNftEncryptAndUploadFile = async <T>(
   return ipfsRes
 }
 
-//TODO : Add doc -
-
-export const mintAndUpload = async <T>(
+/**
+ * @name mintSecretNFTAndTEEUpload
+ * @summary                  Encrypts your data to create a secret NFT and uploads your key's shards on a TEE.
+ * @param file               File to upload as the preview of the encrypted NFT.
+ * @param nftMetadata        NFT metadata (Title, Description).
+ * @param secretNftFile      File to encrypt and then upload on IPFS.
+ * @param secretNftMetadata  Secret NFT metadata (Title, Description).
+ * @param ipfsClient         A TernoaIPFS instance.
+ * @param keyring            Account of the secret NFT's owner.
+ * @returns                  TEE enclave response including both the shards datas, and the enclave response.
+ */
+export const mintSecretNFTAndTEEUpload = async <T>(
   nftFile: File,
   nftMetadata: NftMetadataType<T>,
   secretNftFile: File,
