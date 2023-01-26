@@ -92,6 +92,10 @@ export enum chainQuery {
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
 
+  // capsule
+  capsuleMintFee = "capsuleMintFee",
+  capsuleOffchainData = "capsuleOffchainData",
+
   // auction
   auctions = "auctions",
   deadlines = "deadlines",

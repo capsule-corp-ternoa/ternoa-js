@@ -26,6 +26,16 @@ export const getSecretNftMintFee = async (): Promise<BN> => {
 }
 
 /**
+ * @name getCapsuleMintFee
+ * @summary Fee to mint a Capsule. (extra fee on top of the tx fees).
+ * @returns Capsule NFT mint fee.
+ */
+export const getCapsuleMintFee = async (): Promise<BN> => {
+  const fee = await query(txPallets.nft, chainQuery.capsuleMintFee)
+  return fee as any as BN
+}
+
+/**
  * @name getSecretNftOffchainData
  * @summary Get the secret offchain data of a Secret NFT.
  * @returns Secret NFT secret offchain data.
@@ -33,6 +43,16 @@ export const getSecretNftMintFee = async (): Promise<BN> => {
 export const getSecretNftOffchainData = async (nftId: number | string): Promise<string> => {
   const secretOffchainData = await query(txPallets.nft, chainQuery.secretNftsOffchainData, [nftId])
   return secretOffchainData.toHuman() as string
+}
+
+/**
+ * @name getCapsuleOffchainData
+ * @summary Get the capsule offchain data.
+ * @returns The capsule offchain data.
+ */
+export const getCapsuleOffchainData = async (nftId: number | string): Promise<string> => {
+  const capsuleOffchainData = await query(txPallets.nft, chainQuery.capsuleOffchainData, [nftId])
+  return capsuleOffchainData.toHuman() as string
 }
 
 /**

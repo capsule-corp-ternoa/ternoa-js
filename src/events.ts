@@ -30,6 +30,12 @@ export enum EventType {
   NFTTransferred = "nft.NFTTransferred",
   NFTAddedToCollection = "nft.NFTAddedToCollection",
 
+  //NFT Capsule
+  NFTConvertedToCapsule = "nft.NFTConvertedToCapsule",
+  CapsuleOffchainDataSet = "nft.CapsuleOffchainDataSet",
+  CapsuleKeyUpdateNotified = "nft.CapsuleKeyUpdateNotified",
+  CapsuleReverted = "nft.CapsuleReverted",
+
   // NFT Collections
   CollectionCreated = "nft.CollectionCreated",
   CollectionLimited = "nft.CollectionLimited",
@@ -137,6 +143,15 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
+      // Capsule
+      case EventType.NFTConvertedToCapsule:
+        return new NFTConvertedToCapsuleEvent(event)
+      case EventType.CapsuleOffchainDataSet:
+        return new CapsuleOffchainDataSetEvent(event)
+      case EventType.CapsuleKeyUpdateNotified:
+        return new CapsuleKeyUpdateNotifiedEvent(event)
+      case EventType.CapsuleReverted:
+        return new CapsuleRevertedEvent(event)
       // Rent
       case EventType.ContractCreated:
         return new ContractCreatedEvent(event)
@@ -575,6 +590,74 @@ export class CollectionBurnedEvent extends BlockchainEvent {
     const [collectionId] = event.data
 
     this.collectionId = Number.parseInt(collectionId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain NFTConvertedToCapsuleEvent event.
+ */
+export class NFTConvertedToCapsuleEvent extends BlockchainEvent {
+  nftId: number
+  offchainData: string
+  /**
+   * Construct the data object from the NFTConvertedToCapsuleEvent event
+   * @param event The NFTConvertedToCapsuleEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.NFTConvertedToCapsule)
+    const [nftId, offchainData] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.offchainData = hexToString(offchainData.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleOffchainDataSetEvent event.
+ */
+export class CapsuleOffchainDataSetEvent extends BlockchainEvent {
+  nftId: number
+  offchainData: string
+  /**
+   * Construct the data object from the CapsuleOffchainDataSetEvent event
+   * @param event The CapsuleOffchainDataSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleOffchainDataSet)
+    const [nftId, offchainData] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.offchainData = hexToString(offchainData.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleKeyUpdateNotifiedEvent event.
+ */
+export class CapsuleKeyUpdateNotifiedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the CapsuleKeyUpdateNotifiedEvent event
+   * @param event The CapsuleKeyUpdateNotifiedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleKeyUpdateNotified)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleRevertedEvent event.
+ */
+export class CapsuleRevertedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the CapsuleRevertedEvent event
+   * @param event The CapsuleRevertedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleReverted)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
   }
 }
 
