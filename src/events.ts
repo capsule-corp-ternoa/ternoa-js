@@ -30,7 +30,7 @@ export enum EventType {
   NFTTransferred = "nft.NFTTransferred",
   NFTAddedToCollection = "nft.NFTAddedToCollection",
 
-  //NFT Capsule
+  // NFT Capsule
   NFTConvertedToCapsule = "nft.NFTConvertedToCapsule",
   CapsuleOffchainDataSet = "nft.CapsuleOffchainDataSet",
   CapsuleKeyUpdateNotified = "nft.CapsuleKeyUpdateNotified",

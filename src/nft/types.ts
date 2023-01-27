@@ -29,6 +29,13 @@ export type SecretNftData = {
   isSoulbound: boolean
 }
 
+export type CapsuleNFTData<T extends NftData> = Omit<T, "collectionId" | "state"> & {
+  nftId: number
+  capsuleOffchainData: string
+  collectionId: number | null
+  isSoulbound: boolean
+}
+
 export type CollectionData = {
   owner: string
   offchainData: string

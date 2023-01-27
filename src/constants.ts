@@ -35,6 +35,13 @@ export enum txActions {
   burnCollection = "burnCollection",
   setNftMintFee = "setNftMintFee",
 
+  // capsule
+  convertToCapsule = "convertToCapsule",
+  createCapsule = "createCapsule",
+  revertCapsule = "revertCapsule",
+  setCapsuleOffchaindata = "setCapsuleOffchaindata",
+  notifyEnclaveKeyUpdate = "notifyEnclaveKeyUpdate",
+
   // rent
   createContract = "createContract",
   cancelContract = "cancelContract",

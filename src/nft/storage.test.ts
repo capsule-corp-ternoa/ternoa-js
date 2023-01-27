@@ -12,7 +12,7 @@ import {
   getSecretNftOffchainData,
 } from "./storage"
 import { createTestPairs } from "../_misc/testingPairs"
-import { createCollection, createNft, createSecretNft } from "./extrinsics"
+import { createCapsule, createCollection, createNft, createSecretNft } from "./extrinsics"
 import { WaitUntil } from "../constants"
 
 const TEST_DATA = {
@@ -39,20 +39,20 @@ beforeAll(async () => {
     testAccount,
     WaitUntil.BlockInclusion,
   )
-  // const capsuleNft = await createCapsule(
-  //   "Test NFT offchainData",
-  //   "Test Capsule NFT offchainData",
-  //   0,
-  //   undefined,
-  //   false,
-  //   testAccount,
-  //   WaitUntil.BlockInclusion,
-  //)
+  const capsuleNft = await createCapsule(
+    "Test NFT offchainData",
+    "Test Capsule NFT offchainData",
+    0,
+    undefined,
+    false,
+    testAccount,
+    WaitUntil.BlockInclusion,
+  )
 
   TEST_DATA.collectionId = cEvent.collectionId
   TEST_DATA.nftId = nEvent.nftId
   TEST_DATA.secretNftId = secretNft.nftId
-  //TEST_DATA.capsuleNftId = capsuleNft.nftId
+  TEST_DATA.capsuleNftId = capsuleNft.nftId
 })
 
 it("NFT Mint Fee storage should exist and it should not be null", async () => {
