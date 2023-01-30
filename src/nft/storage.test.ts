@@ -100,7 +100,7 @@ describe("Testing getting NFT data", (): void => {
     expect(actual != undefined).toBe(true)
   })
   it("Should return the capsule offchain data when the NFT ID exists and is a Capsule NFT", async () => {
-    const actual = await getCapsuleOffchainData(TEST_DATA.secretNftId)
+    const actual = await getCapsuleOffchainData(TEST_DATA.capsuleNftId)
     expect(actual != undefined).toBe(true)
   })
 })
