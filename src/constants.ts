@@ -9,6 +9,7 @@ export enum txPallets {
   associatedAccounts = "associatedAccounts",
   system = "system",
   tee = "tee",
+  transmissionProtocols = "transmissionProtocols",
 }
 
 export enum txActions {
@@ -142,6 +143,11 @@ export enum chainConstants {
   maximumContractAvailabilityLimit = "maximumContractAvailabilityLimit",
   maximumContractDurationLimit = "maximumContractDurationLimit",
   simultaneousContractLimit = "simultaneousContractLimit",
+
+  // transmissionProtocols
+  simultaneousTransmissionLimit = "simultaneousTransmissionLimit",
+  maxConsentListSize = "maxConsentListSize",
+  maxBlockDuration = "maxBlockDuration",
 }
 
 export enum WaitUntil {

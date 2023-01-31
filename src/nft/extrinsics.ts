@@ -418,7 +418,6 @@ export const createCapsule = async (
     collectionId: nftCreatedEvent.collectionId,
     isSoulbound: nftCreatedEvent.isSoulbound,
   }
-  // Does not provie the full event info as not in our standard event format ??
 }
 
 // /**
