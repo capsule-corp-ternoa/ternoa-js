@@ -137,7 +137,7 @@ export const addConsentToOnConsentProtocol = async (
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ConsentAddedEvent> => {
-  const tx = await removeTransmissionProtocolTx(nftId)
+  const tx = await addConsentToOnConsentProtocolTx(nftId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ConsentAddedEvent)
 }

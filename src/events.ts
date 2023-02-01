@@ -7,6 +7,7 @@ import { Errors } from "./constants"
 import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
 import { AcceptanceAction, CancellationFeeAction, RentFeeAction } from "./rent/enum"
 import { DurationType } from "./rent/types"
+import { Protocols, TransmissionCancellation } from "./protocols"
 
 export enum EventType {
   //Assets
@@ -688,8 +689,8 @@ export class CapsuleRevertedEvent extends BlockchainEvent {
 export class ProtocolSetEvent extends BlockchainEvent {
   nftId: number
   recipient: string
-  protocol: string // TODO
-  cancellation: string // TODO
+  protocol: Protocols
+  cancellation: TransmissionCancellation
   /**
    * Construct the data object from the ProtocolSetEvent event
    * @param event The ProtocolSetEvent event
@@ -699,8 +700,8 @@ export class ProtocolSetEvent extends BlockchainEvent {
     const [nftId, recipient, protocol, cancellation] = event.data
     this.nftId = Number.parseInt(nftId.toString())
     this.recipient = recipient.toString()
-    this.protocol = protocol.toString() // TODO
-    this.cancellation = cancellation.toString() // TODO
+    this.protocol = protocol.toJSON() as Protocols
+    this.cancellation = cancellation.toJSON() as TransmissionCancellation
   }
 }
 
