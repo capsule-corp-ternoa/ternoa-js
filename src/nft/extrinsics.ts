@@ -374,10 +374,11 @@ export const createCapsuleTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHashType> => {
+  const formatedRoyalty = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createCapsule, [
     offchainData,
     capsuleOffchainData,
-    royalty,
+    formatedRoyalty,
     collectionId,
     isSoulbound,
   ])

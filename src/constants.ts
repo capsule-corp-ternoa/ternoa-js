@@ -54,6 +54,12 @@ export enum txActions {
   retractRentOffer = "retractRentOffer",
   revokeContract = "revokeContract",
 
+  // transmission protocols
+  addConsent = "addConsent",
+  removeTransmissionProtocol = "removeTransmissionProtocol",
+  resetTimer = "resetTimer",
+  setTransmissionProtocol = "setTransmissionProtocol",
+
   // marketplace
   buyNft = "buyNft",
   createMarketplace = "createMarketplace",
@@ -103,6 +109,15 @@ export enum chainQuery {
   // capsule
   capsuleMintFee = "capsuleMintFee",
   capsuleOffchainData = "capsuleOffchainData",
+
+  // transmissionProtocols
+  atBlockFee = "atBlockFee",
+  atBlockWithResetFee = "atBlockWithResetFee",
+  onConsentFee = "onConsentFee",
+  onConsentAtBlockFee = "onConsentAtBlockFee",
+  atBlockQueue = "atBlockQueue",
+  transmissions = "transmissions",
+  onConsentData = "onConsentData",
 
   // auction
   auctions = "auctions",
@@ -183,6 +198,7 @@ export enum Errors {
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
   CLUSTER_CONVERSION_ERROR = "CLUSTER_CONVERSION_ERROR",
   ENCLAVE_CONVERSION_ERROR = "ENCLAVE_CONVERSION_ERROR",
+  TRANSMISSION_PROTOCOL_CONVERSION_ERROR = "TRANSMISSION_PROTOCOL_CONVERSION_ERROR",
   TEE_CLUSTER_NOT_FOUND = "TEE_CLUSTER_NOT_FOUND",
   TEE_ENCLAVE_NOT_FOUND = "TEE_ENCLAVE_NOT_FOUND",
   TEE_ENCLAVE_NOT_AVAILBLE = "TEE_ENCLAVE_NOT_AVAILBLE",

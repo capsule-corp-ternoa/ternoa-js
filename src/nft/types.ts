@@ -7,6 +7,7 @@ export type NftState = {
   isRented: boolean
   isSyncingSecret: boolean
   isSyncingCapsule: boolean
+  isTransmission: boolean
 }
 
 export type NftData = {
