@@ -12,7 +12,7 @@ import { ClusterDataType, EnclaveDataType } from "./types"
 export const getClusterData = async (clusterId: number): Promise<string[] | null> => {
   const data = await query(txPallets.tee, chainQuery.clusterData, [clusterId])
   if (data.isEmpty == true) {
-    throw new Error(`${Errors.SGX_CLUSTER_NOT_FOUND}: ${clusterId}`)
+    throw new Error(`${Errors.TEE_CLUSTER_NOT_FOUND}: ${clusterId}`)
   }
 
   try {
@@ -32,7 +32,7 @@ export const getClusterData = async (clusterId: number): Promise<string[] | null
 export const getEnclaveData = async (enclaveId: string): Promise<EnclaveDataType | null> => {
   const data = await query(txPallets.tee, chainQuery.enclaveData, [enclaveId])
   if (data.isEmpty == true) {
-    throw new Error(`${Errors.SGX_ENCLAVE_NOT_FOUND}: ${enclaveId}`)
+    throw new Error(`${Errors.TEE_ENCLAVE_NOT_FOUND}: ${enclaveId}`)
   }
 
   try {

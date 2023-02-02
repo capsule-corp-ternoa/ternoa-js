@@ -7,6 +7,7 @@ import { Errors } from "./constants"
 import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
 import { AcceptanceAction, CancellationFeeAction, RentFeeAction } from "./rent/enum"
 import { DurationType } from "./rent/types"
+import { Protocols, TransmissionCancellation } from "./protocols"
 
 export enum EventType {
   //Assets
@@ -30,11 +31,25 @@ export enum EventType {
   NFTTransferred = "nft.NFTTransferred",
   NFTAddedToCollection = "nft.NFTAddedToCollection",
 
+  // NFT Capsule
+  NFTConvertedToCapsule = "nft.NFTConvertedToCapsule",
+  CapsuleOffchainDataSet = "nft.CapsuleOffchainDataSet",
+  CapsuleKeyUpdateNotified = "nft.CapsuleKeyUpdateNotified",
+  CapsuleReverted = "nft.CapsuleReverted",
+
   // NFT Collections
   CollectionCreated = "nft.CollectionCreated",
   CollectionLimited = "nft.CollectionLimited",
   CollectionClosed = "nft.CollectionClosed",
   CollectionBurned = "nft.CollectionBurned",
+
+  //Transmission Protocols
+  ProtocolSet = "transmissionProtocols.ProtocolSet",
+  ProtocolRemoved = "transmissionProtocols.ProtocolRemoved",
+  TimerReset = "transmissionProtocols.TimerReset",
+  ConsentAdded = "transmissionProtocols.ConsentAdded",
+  ThresholdReached = "transmissionProtocols.ThresholdReached",
+  Transmitted = "transmissionProtocols.Transmitted",
 
   //Rent
   ContractCreated = "rent.ContractCreated",
@@ -137,6 +152,28 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
+      // Capsule
+      case EventType.NFTConvertedToCapsule:
+        return new NFTConvertedToCapsuleEvent(event)
+      case EventType.CapsuleOffchainDataSet:
+        return new CapsuleOffchainDataSetEvent(event)
+      case EventType.CapsuleKeyUpdateNotified:
+        return new CapsuleKeyUpdateNotifiedEvent(event)
+      case EventType.CapsuleReverted:
+        return new CapsuleRevertedEvent(event)
+      // Transmission Protocols
+      case EventType.ProtocolSet:
+        return new ProtocolSetEvent(event)
+      case EventType.ProtocolRemoved:
+        return new ProtocolRemovedEvent(event)
+      case EventType.TimerReset:
+        return new TimerResetEvent(event)
+      case EventType.ConsentAdded:
+        return new ConsentAddedEvent(event)
+      case EventType.ThresholdReached:
+        return new ThresholdReachedEvent(event)
+      case EventType.Transmitted:
+        return new TransmittedEvent(event)
       // Rent
       case EventType.ContractCreated:
         return new ContractCreatedEvent(event)
@@ -575,6 +612,180 @@ export class CollectionBurnedEvent extends BlockchainEvent {
     const [collectionId] = event.data
 
     this.collectionId = Number.parseInt(collectionId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain NFTConvertedToCapsuleEvent event.
+ */
+export class NFTConvertedToCapsuleEvent extends BlockchainEvent {
+  nftId: number
+  offchainData: string
+  /**
+   * Construct the data object from the NFTConvertedToCapsuleEvent event
+   * @param event The NFTConvertedToCapsuleEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.NFTConvertedToCapsule)
+    const [nftId, offchainData] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.offchainData = hexToString(offchainData.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleOffchainDataSetEvent event.
+ */
+export class CapsuleOffchainDataSetEvent extends BlockchainEvent {
+  nftId: number
+  offchainData: string
+  /**
+   * Construct the data object from the CapsuleOffchainDataSetEvent event
+   * @param event The CapsuleOffchainDataSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleOffchainDataSet)
+    const [nftId, offchainData] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.offchainData = hexToString(offchainData.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleKeyUpdateNotifiedEvent event.
+ */
+export class CapsuleKeyUpdateNotifiedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the CapsuleKeyUpdateNotifiedEvent event
+   * @param event The CapsuleKeyUpdateNotifiedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleKeyUpdateNotified)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CapsuleRevertedEvent event.
+ */
+export class CapsuleRevertedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the CapsuleRevertedEvent event
+   * @param event The CapsuleRevertedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CapsuleReverted)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain ProtocolSetEvent event.
+ */
+export class ProtocolSetEvent extends BlockchainEvent {
+  nftId: number
+  recipient: string
+  protocol: Protocols
+  cancellation: TransmissionCancellation
+  /**
+   * Construct the data object from the ProtocolSetEvent event
+   * @param event The ProtocolSetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ProtocolSet)
+    const [nftId, recipient, protocol, cancellation] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.recipient = recipient.toString()
+    this.protocol = protocol.toJSON() as Protocols
+    this.cancellation = cancellation.toJSON() as TransmissionCancellation
+  }
+}
+
+/**
+ * This class represents the on-chain ProtocolRemovedEvent event.
+ */
+export class ProtocolRemovedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the ProtocolRemovedEvent event
+   * @param event The ProtocolRemovedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ProtocolRemoved)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain TimerResetEvent event.
+ */
+export class TimerResetEvent extends BlockchainEvent {
+  nftId: number
+  newBlockNumber: number
+  /**
+   * Construct the data object from the TimerResetEvent event
+   * @param event The TimerResetEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.TimerReset)
+    const [nftId, newBlockNumber] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.newBlockNumber = Number.parseInt(newBlockNumber.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain ConsentAddedEvent event.
+ */
+export class ConsentAddedEvent extends BlockchainEvent {
+  nftId: number
+  from: string
+  /**
+   * Construct the data object from the ConsentAddedEvent event
+   * @param event The ConsentAddedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ConsentAdded)
+    const [nftId, from] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+    this.from = from.toString()
+  }
+}
+
+/**
+ * This class represents the on-chain ThresholdReachedEvent event.
+ */
+export class ThresholdReachedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the ThresholdReachedEvent event
+   * @param event The ThresholdReachedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.ThresholdReached)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain TransmittedEvent event.
+ */
+export class TransmittedEvent extends BlockchainEvent {
+  nftId: number
+  /**
+   * Construct the data object from the TransmittedEvent event
+   * @param event The TransmittedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.Transmitted)
+    const [nftId] = event.data
+    this.nftId = Number.parseInt(nftId.toString())
   }
 }
 

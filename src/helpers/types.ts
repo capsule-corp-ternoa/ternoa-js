@@ -40,7 +40,7 @@ export type MarketplaceMetadataType<T> = T & {
   name: string
 }
 
-export type SgxDataResponseType = {
+export type TeeDataResponseType = {
   status: number
   nft_id: number
   cluster_id: number
