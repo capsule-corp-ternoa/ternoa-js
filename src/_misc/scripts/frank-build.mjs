@@ -22,6 +22,7 @@ async function createPackageFile() {
         helpers: ["./helpers/index.d.ts"],
         nft: ["./nft/index.d.ts"],
         rent: ["./rent/index.d.ts"],
+        tee: ["./tee/index.d.ts"],
         marketplace: ["./marketplace/index.d.ts"],
         protocols: ["./protocols/index.d.ts"],
         events: ["./events.d.ts"],

@@ -54,9 +54,9 @@ export const setTransmissionProtocol = async (
 
 /**
  * @name removeTransmissionProtocolTx
- * @summary    		              Creates an unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash for a tansmission protocol.
- * @param nftId		              The NFT Id to remove the transmission protocol.
- * @returns  		                Unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash. The Hash is only valid for 5 minutes.
+ * @summary    		               Creates an unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash for a tansmission protocol.
+ * @param nftId		               The NFT Id to remove the transmission protocol.
+ * @returns  		                 Unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const removeTransmissionProtocolTx = async (nftId: number): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.transmissionProtocols, txActions.removeTransmissionProtocol, [nftId])
@@ -64,11 +64,11 @@ export const removeTransmissionProtocolTx = async (nftId: number): Promise<Trans
 
 /**
  * @name removeTransmissionProtocol
- * @summary    		                Remove a transmission protocol from an NFT.
- * @param nftId		                The NFT Id to remove the transmission protocol.
- * @param keyring                 Account that will sign the transaction.
- * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
- * @returns  		                  ProtocolRemovedEvent Blockchain event.
+ * @summary    		               Removes a transmission protocol from an NFT.
+ * @param nftId		               The NFT Id to remove the transmission protocol.
+ * @param keyring                Account that will sign the transaction.
+ * @param waitUntil              Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                 ProtocolRemovedEvent Blockchain event.
  */
 export const removeTransmissionProtocol = async (
   nftId: number,
@@ -96,7 +96,7 @@ export const resetTranmissionProtocolTimerTx = async (
 
 /**
  * @name resetTranmissionProtocolTimer
- * @summary    		                Remove a transmission protocol from an NFT.
+ * @summary    		                Resets the block execusion of the transmission protocol.
  * @param nftId		                The NFT Id to remove the transmission protocol.
  * @param blockNumber 	          The new blockNumber to execute the AtBlockWithReset protocol.
  * @param keyring                 Account that will sign the transaction.
