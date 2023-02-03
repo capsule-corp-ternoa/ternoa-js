@@ -31,8 +31,8 @@ export const createAuctionTx = async (
   startPrice: number | BN,
   buyItPrice: number | BN | undefined = undefined,
 ): Promise<TransactionHashType> => {
-  const formattedStartPrice = typeof startPrice === "number" ? await numberToBalance(startPrice) : startPrice
-  const formattedBuyItPrice = typeof buyItPrice === "number" ? await numberToBalance(buyItPrice) : buyItPrice
+  const formattedStartPrice = typeof startPrice === "number" ? numberToBalance(startPrice) : startPrice
+  const formattedBuyItPrice = typeof buyItPrice === "number" ? numberToBalance(buyItPrice) : buyItPrice
   return await createTxHex(txPallets.auction, txActions.createAuction, [
     nftId,
     marketplaceId,
@@ -135,7 +135,7 @@ export const endAuction = async (
  * @returns       Unsigned unsubmitted Add-Bid Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const addBidTx = async (nftId: number, amount: number | BN): Promise<TransactionHashType> => {
-  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  const formattedAmount = typeof amount === "number" ? numberToBalance(amount) : amount
   return await createTxHex(txPallets.auction, txActions.addBid, [nftId, formattedAmount])
 }
 

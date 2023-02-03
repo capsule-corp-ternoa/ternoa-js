@@ -34,8 +34,8 @@ describe("Testing to create an auction & buy NFT directly with buyItNow", (): vo
     const auctionMinDuration = getMinAuctionDuration()
     const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 1
     const auctionEndBlock = auctionStartBlock + auctionMinDuration
-    const startPrice = await numberToBalance(1)
-    const buyItPrice = await numberToBalance(10)
+    const startPrice = numberToBalance(1)
+    const buyItPrice = numberToBalance(10)
     const aEvent = await createAuction(
       TEST_DATA.nftId,
       TEST_DATA.marketplaceId,
@@ -66,8 +66,8 @@ describe("Testing to create an auction & buy NFT directly with buyItNow", (): vo
   it("Testing to buy an auctionned NFT directly with buyItNow", async (): Promise<void> => {
     const { dest: destAccount } = await createTestPairs()
     const buyItPrice = 10
-    const buyItPriceBN = await numberToBalance(10)
-    const zeroBN = await numberToBalance(0)
+    const buyItPriceBN = numberToBalance(10)
+    const zeroBN = numberToBalance(0)
     const aEvent = await buyItNow(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
 
     expect(
@@ -91,8 +91,8 @@ it("Testing to cancel an auction", async (): Promise<void> => {
   const auctionMinDuration = getMinAuctionDuration()
   const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 10
   const auctionEndBlock = auctionStartBlock + auctionMinDuration
-  const startPrice = await numberToBalance(1)
-  const buyItPrice = await numberToBalance(10)
+  const startPrice = numberToBalance(1)
+  const buyItPrice = numberToBalance(10)
   await createAuction(
     nEvent.nftId,
     TEST_DATA.marketplaceId,
@@ -116,8 +116,8 @@ describe("Testing to create an auction & add/update/remove bids", (): void => {
     const auctionMinDuration = getMinAuctionDuration()
     const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 1
     const auctionEndBlock = auctionStartBlock + auctionMinDuration * 2
-    const startPrice = await numberToBalance(1)
-    const buyItPrice = await numberToBalance(10)
+    const startPrice = numberToBalance(1)
+    const buyItPrice = numberToBalance(10)
     await createAuction(
       nEvent.nftId,
       TEST_DATA.marketplaceId,
@@ -131,7 +131,7 @@ describe("Testing to create an auction & add/update/remove bids", (): void => {
     TEST_DATA.nftId = nEvent.nftId
 
     const bidAmount = 10
-    const bidAmountBN = await numberToBalance(10)
+    const bidAmountBN = numberToBalance(10)
     const aEvent = await addBid(nEvent.nftId, bidAmount, destAccount, WaitUntil.BlockInclusion)
 
     expect(
@@ -146,7 +146,7 @@ describe("Testing to create an auction & add/update/remove bids", (): void => {
   it("Testing to remove a bid", async (): Promise<void> => {
     const { dest: destAccount } = await createTestPairs()
     const bidAmount = 10
-    const bidAmountBN = await numberToBalance(bidAmount)
+    const bidAmountBN = numberToBalance(bidAmount)
     const aEvent = await removeBid(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
 
     expect(

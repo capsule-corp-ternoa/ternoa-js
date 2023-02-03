@@ -12,7 +12,7 @@ import { numberToBalance } from "../blockchain"
 export const formatMarketplaceFee = async (fee: CommissionFeeType | ListingFeeType) => {
   if (typeof fee === "object") {
     if (typeof fee.set.flat === "number") {
-      const flatFee = await numberToBalance(fee.set.flat)
+      const flatFee = numberToBalance(fee.set.flat)
       fee.set.flat = flatFee
     }
     if (fee.set.percentage) {

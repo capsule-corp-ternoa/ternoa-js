@@ -31,6 +31,7 @@ import {
 import { BlockInfo, ConditionalVariable } from "./utils"
 
 const DEFAULT_CHAIN_ENDPOINT = "wss://alphanet.ternoa.com"
+const TERNOA_CHAIN_DECIMALS = 18
 
 let api: ApiPromise
 let chainEndpoint = DEFAULT_CHAIN_ENDPOINT
@@ -478,15 +479,16 @@ export const balanceToNumber = (input: BN, options?: IFormatBalanceOptions): str
 
 /**
  * @name numberToBalance
- * @summary       Format balance from number to BN.
- * @param _input  Number input
- * @returns       BN output
+ * @summary           Format balance from number to BN according to chain decimals.
+ * @param _input      Number input
+ * @param basePower   Number input
+ * @returns           BN output
  */
-export const numberToBalance = async (_input: number): Promise<BN> => {
+export const numberToBalance = (_input: number, chainDecimals = TERNOA_CHAIN_DECIMALS): BN => {
+  if (typeof _input !== "number") throw new Error(`${Errors.MUST_BE_A_NUMBER} - Amount must be a number.`)
   const input = String(_input)
-  const api = getRawApi()
-  const siPower = new BN(api.registry.chainDecimals[0])
-  const basePower = api.registry.chainDecimals[0]
+  const siPower = new BN(chainDecimals)
+  const basePower = chainDecimals
   const siUnitPower = 0
   const isDecimalValue = input.match(/^(\d+)\.(\d+)$/)
   let result

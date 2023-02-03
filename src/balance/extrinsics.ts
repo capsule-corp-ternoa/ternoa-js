@@ -13,7 +13,7 @@ import { BalancesTransferEvent } from "../events"
  * @returns             Unsigned unsubmitted Balance-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const balancesTransferTx = async (to: string, amount: number | BN): Promise<TransactionHashType> => {
-  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  const formattedAmount = typeof amount === "number" ? numberToBalance(amount) : amount
   return await createTxHex(txPallets.balances, txActions.transfer, [to, formattedAmount])
 }
 
@@ -76,7 +76,7 @@ export const balancesTransferAll = async (
  * @returns             Unsigned unsubmitted Balance-TransfertKeepAlive Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const balancesTransferKeepAliveTx = async (to: string, amount: number | BN): Promise<TransactionHashType> => {
-  const formattedAmount = typeof amount === "number" ? await numberToBalance(amount) : amount
+  const formattedAmount = typeof amount === "number" ? numberToBalance(amount) : amount
   return await createTxHex(txPallets.balances, txActions.transferKeepAlive, [to, formattedAmount])
 }
 
