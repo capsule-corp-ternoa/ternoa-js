@@ -7,6 +7,7 @@ import {
   getTransmissionOnConsentFee,
   getTransmissions,
 } from "./storage"
+import { formatAtBlockProtocol, formatOnConsentAtBlockProtocol, formatProtocolCancellation } from "./utils"
 import { addConsentToOnConsentProtocol, removeTransmissionProtocol, setTransmissionProtocol } from "./extrinsics"
 import { getRawApi, initializeApi } from "../blockchain"
 import { createTestPairs } from "../_misc/testingPairs"
@@ -31,17 +32,19 @@ beforeAll(async () => {
   const lastBlockData = await api.rpc.chain.getBlock()
   const lastBlockNumber = Number(lastBlockData.block.header.number.toString())
   TEST_DATA.transmissionBlock = lastBlockNumber + 100
+  const consentList = [destAccount.address, `${process.env.SEED_TEST_FUNDS_PUBLIC}`]
+  const protocol = formatOnConsentAtBlockProtocol(
+    "onConsentAtBlock",
+    consentList,
+    TEST_DATA.transmissonThreshold,
+    TEST_DATA.transmissionBlock,
+  )
+  const cancellation = formatProtocolCancellation("anytime")
   await setTransmissionProtocol(
     nEvent.nftId,
     destAccount.address,
-    {
-      [ProtocolAction.OnConsentAtBlock]: {
-        consentList: [destAccount.address, `${process.env.SEED_TEST_FUNDS_PUBLIC}`],
-        threshold: TEST_DATA.transmissonThreshold,
-        block: TEST_DATA.transmissionBlock,
-      },
-    },
-    { [TransmissionCancellationAction.Anytime]: null },
+    protocol,
+    cancellation,
     testAccount,
     WaitUntil.BlockInclusion,
   )
@@ -93,13 +96,13 @@ describe("Testing to get transmission protocols data", (): void => {
   it("Transmission protocol At Block fee should exist and it should not be null", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     await removeTransmissionProtocol(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
+    const protocol = formatAtBlockProtocol("atBlock", TEST_DATA.transmissionBlock)
+    const cancellation = formatProtocolCancellation("anytime")
     await setTransmissionProtocol(
       TEST_DATA.nftId,
       destAccount.address,
-      {
-        [ProtocolAction.AtBlock]: TEST_DATA.transmissionBlock,
-      },
-      { [TransmissionCancellationAction.Anytime]: null },
+      protocol,
+      cancellation,
       testAccount,
       WaitUntil.BlockInclusion,
     )
