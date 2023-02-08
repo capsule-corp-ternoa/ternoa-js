@@ -9,7 +9,7 @@ import { createTestPairs } from "../_misc/testingPairs"
 import { WaitUntil } from "../constants"
 import { createNft } from "../nft"
 import { ProtocolAction, TransmissionCancellationAction } from "./enums"
-import { getTransmissionOnConsentData } from "."
+import { formatAtBlockWithResetProtocol, formatOnConsentProtocol, formatProtocolCancellation } from "./utils"
 
 const TEST_DATA = {
   nftId: 0,
@@ -39,13 +39,13 @@ describe("Testing transmission protocols extrinsics", (): void => {
     const lastBlockData = await api.rpc.chain.getBlock()
     const lastBlockNumber = Number(lastBlockData.block.header.number.toString())
     TEST_DATA.transmissionBlock = lastBlockNumber + 100
+    const protocol = formatAtBlockWithResetProtocol("atBlockWithReset", TEST_DATA.transmissionBlock)
+    const cancellation = formatProtocolCancellation("anytime")
     const tEvent = await setTransmissionProtocol(
       TEST_DATA.nftId,
       destAccount.address,
-      {
-        [ProtocolAction.AtBlockWithReset]: TEST_DATA.transmissionBlock,
-      },
-      { [TransmissionCancellationAction.Anytime]: null },
+      protocol,
+      cancellation,
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -78,19 +78,16 @@ describe("Testing transmission protocols extrinsics", (): void => {
     expect(tEvent?.nftId === TEST_DATA.nftId).toBe(true)
   })
 
-  // addConsentToOnConsentProtocol : set Transmission on consent
   it("Should return the ConsentAddedEvent data: NFT id and user that gave his consent to a protocol", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
+    const consentList = [destAccount.address, `${process.env.SEED_TEST_FUNDS_PUBLIC}`]
+    const protocol = formatOnConsentProtocol("onConsent", consentList, TEST_DATA.transmissonThreshold)
+    const cancellation = formatProtocolCancellation("anytime")
     await setTransmissionProtocol(
       TEST_DATA.nftId,
       destAccount.address,
-      {
-        [ProtocolAction.OnConsent]: {
-          consentList: [destAccount.address, `${process.env.SEED_TEST_FUNDS_PUBLIC}`],
-          threshold: TEST_DATA.transmissonThreshold,
-        },
-      },
-      { [TransmissionCancellationAction.Anytime]: null },
+      protocol,
+      cancellation,
       testAccount,
       WaitUntil.BlockInclusion,
     )
