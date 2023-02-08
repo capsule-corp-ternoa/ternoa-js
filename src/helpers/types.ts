@@ -21,24 +21,30 @@ export type IpfsAddDataResponseType = {
   Size: string
 }
 
-export type NftMetadataType<T> = T & {
+export type NftMetadataType<T> = {
   title: string
   description: string
-}
+} & T
 
-export type SecretNftMetadataType<T> = T & {
-  title?: string
+export type MediaMetadataType<T> = {
+  name?: string
   description?: string
-}
+} & T
 
-export type CollectionMetadataType<T> = T & {
-  name: string
-  description: string
-}
+export type CollectionMetadataType<T> = Required<MediaMetadataType<T>>
 
-export type MarketplaceMetadataType<T> = T & {
-  name: string
-}
+export type MarketplaceMetadataType<T> = Omit<Required<MediaMetadataType<T>>, "description">
+
+export type CapsuleMedia<T> = {
+  encryptedFile: string
+  type: string
+} & T
+
+export type CapsuleEncryptedMedia<T> = {
+  hash: string
+  type: string
+  size: number
+} & T
 
 export type TeeDataResponseType = {
   status: number

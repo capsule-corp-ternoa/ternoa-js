@@ -2,7 +2,7 @@ import * as openpgp from "openpgp"
 import { File } from "formdata-node"
 import { IKeyringPair } from "@polkadot/types/types"
 
-import { NftMetadataType, PGPKeysType, SecretNftMetadataType } from "./types"
+import { MediaMetadataType, NftMetadataType, PGPKeysType } from "./types"
 import { convertFileToBuffer } from "./utils"
 import { TernoaIPFS } from "./ipfs"
 import { formatPayload, generateSSSShares, getEnclaveHealthStatus, teeSSSSharesUpload } from "./tee"
@@ -90,18 +90,20 @@ export const decryptFile = async (encryptedMessage: string, privatePGPKey: strin
  * @param file              File to encrypt and then upload on IPFS.
  * @param publicPGPKey      Public Key to encrypt the file.
  * @param ipfsClient        A TernoaIPFS instance.
- * @param metadata          Optional secret NFT metadata (Title, Description) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
+ * @param nftMetadata       Optional secret NFT metadata (Title, Description, (...)) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
+ * @param mediaMetadata     Optional asset NFT metadata (Name, Description, (...)) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
  * @returns                 The data object with the secret NFT IPFS hash (ex: to add as offchain secret metadatas in the extrinsic).
  */
-export const secretNftEncryptAndUploadFile = async <T>(
+export const secretNftEncryptAndUploadFile = async <TNFT, TMedia>(
   file: File,
   publicPGPKey: string,
   ipfsClient: TernoaIPFS,
-  metadata?: SecretNftMetadataType<T>,
+  nftMetadata?: Partial<NftMetadataType<TNFT>>,
+  mediaMetadata?: MediaMetadataType<TMedia>,
 ) => {
   if (!file) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - File undefined`)
   const encryptedFile = (await encryptFile(file, publicPGPKey)) as string
-  const ipfsRes = await ipfsClient.storeSecretNFT(encryptedFile, publicPGPKey, metadata, file.type)
+  const ipfsRes = await ipfsClient.storeSecretNFT(encryptedFile, file.type, publicPGPKey, nftMetadata, mediaMetadata)
 
   return ipfsRes
 }
