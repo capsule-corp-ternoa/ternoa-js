@@ -62,3 +62,9 @@ export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T
 
   return lastError
 }
+
+export const ensureHttps = (url: string) => {
+  if (url.indexOf("https://") === 0) return url
+  else if (url.indexOf("http://") === 0) return url.replace("http://", "https://")
+  else return "https://" + url
+}

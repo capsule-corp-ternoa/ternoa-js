@@ -7,7 +7,7 @@ import { hexToString } from "@polkadot/util"
 import { getSignature } from "./crypto"
 import { HttpClient } from "./http"
 import { SecretPayloadType, TeeDataResponseType } from "./types"
-import { removeURLSlash, retryPost } from "./utils"
+import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
 import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
@@ -19,6 +19,8 @@ export const SSSA_THRESHOLD = 3
 export const TEE_STORE_ENDPOINT = "/api/nft/storeSecretShares"
 export const TEE_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
 export const TEE_HEALTH_ENDPOINT = "/health"
+
+export const SIGNER_BLOCK_VALIDITY = 100
 
 /**
  * @name generateSSSShares
@@ -58,7 +60,7 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   const clusterHealthCheck = await Promise.all(
     teeEnclaves.map(async (enclaveUrl, idx) => {
-      const http = new HttpClient(enclaveUrl)
+      const http = new HttpClient(ensureHttps(enclaveUrl))
       const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
       if (enclaveData.status !== 200) {
         throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE ${idx}: ${enclaveUrl}`)
@@ -96,14 +98,28 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
  * @param keyring   Account of the secret NFT's owner.
  * @returns         Payload ready to be submitted to TEE enclaves.
  */
-export const formatPayload = (nftId: number, share: string | null, keyring: IKeyringPair): SecretPayloadType => {
-  const secretData = `${nftId}_${share}` //TODO: remove null type allowance once TEE API supports '_...' => this should be ok now
-  const signature = getSignature(keyring, secretData)
+export const formatPayload = (
+  owner: IKeyringPair,
+  signer: IKeyringPair,
+  nftId: number,
+  share: string,
+  blockId: number,
+  blockValidity = SIGNER_BLOCK_VALIDITY,
+): SecretPayloadType => {
+  const targetBlockId = blockId + blockValidity
+
+  const signerAddressToSign = `<Bytes>${signer.address}_${targetBlockId}</Bytes>` // todo: removed <Bytes> when the API is clean
+  const signersig = getSignature(owner, signerAddressToSign)
+
+  const secretData = `<Bytes>${nftId}_${share}_${blockId}_${blockValidity}</Bytes>` // todo: removed <Bytes> when the API is clean + blockId & blockValidity merged into targetBlockId like in signerAddressToSign
+  const signature = getSignature(signer, secretData)
 
   return {
-    account_address: keyring.address,
+    owner_address: owner.address,
+    signer_address: signerAddressToSign,
     secret_data: secretData,
     signature,
+    signersig,
   }
 }
 
@@ -157,7 +173,7 @@ export const teeSSSSharesUpload = async (
   const teeRes = await Promise.all(
     payloads.map(async (payload, idx) => {
       const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
-      const http = new HttpClient(baseUrl)
+      const http = new HttpClient(ensureHttps(baseUrl))
       const post = async () => await teeUpload(http, TEE_STORE_ENDPOINT, payload)
       return await retryPost<TeeDataResponseType | Error>(post, nbRetry)
     }),

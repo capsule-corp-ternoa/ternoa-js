@@ -4,9 +4,11 @@ export type PGPKeysType = {
 }
 
 export type SecretPayloadType = {
-  account_address: string
+  owner_address: string
+  signer_address: string
   secret_data: string
   signature: string
+  signersig: string
 }
 
 export interface IServiceIPFS {

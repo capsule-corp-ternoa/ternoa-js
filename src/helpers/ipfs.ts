@@ -87,7 +87,7 @@ export class TernoaIPFS {
    */
   static storeFile = async (service: IServiceIPFS, file: File) => {
     const form = new FormData()
-    form.set("file", file)
+    form.append("file", file)
     return await TernoaIPFS.upload(service, form)
   }
 

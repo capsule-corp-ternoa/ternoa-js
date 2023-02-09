@@ -39,7 +39,7 @@ export const encryptContent = async (content: string, publicPGPKey: string) => {
     encryptionKeys: [publicKey],
   })
 
-  return encryptedContent
+  return encryptedContent as string
 }
 
 /**
