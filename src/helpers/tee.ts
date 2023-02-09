@@ -203,7 +203,7 @@ export const teeSSSSharesRetrieve = async (clusterId: number, payload: SecretPay
   const shares = await Promise.all(
     teeEnclaves.map(async (baseUrl) => {
       const secretPayload = payload
-      const http = new HttpClient(baseUrl)
+      const http = new HttpClient(ensureHttps(baseUrl))
       const res = await teeUpload(http, TEE_RETRIEVE_ENDPOINT, secretPayload)
       return res.secret_data?.split("_")[1] as string
     }),

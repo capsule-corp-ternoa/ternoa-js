@@ -5,11 +5,18 @@ import { File } from "formdata-node"
 import { getKeyringFromSeed } from "../account"
 import { getRawApi } from "../blockchain"
 import { Errors, WaitUntil } from "../constants"
-import { createSecretNft } from "../nft"
+import { createSecretNft, getSecretNftOffchainData } from "../nft"
 
 import { TernoaIPFS } from "./ipfs"
-import { encryptFile, generatePGPKeys } from "./encryption"
-import { formatPayload, generateSSSShares, getEnclaveHealthStatus, teeSSSSharesUpload } from "./tee"
+import { decryptFile, encryptFile, generatePGPKeys } from "./encryption"
+import {
+  combineSSSShares,
+  formatPayload,
+  generateSSSShares,
+  getEnclaveHealthStatus,
+  teeSSSSharesRetrieve,
+  teeSSSSharesUpload,
+} from "./tee"
 import { MediaMetadataType, NftMetadataType } from "./types"
 
 /**
@@ -98,4 +105,28 @@ export const mintSecretNFT = async <T>(
   // 6. request to store a batch of secret shares to the enclave
   const teeRes = await teeSSSSharesUpload(0, payloads)
   return teeRes
+}
+
+export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner: IKeyringPair, clusterId = 0) => {
+  await getEnclaveHealthStatus(clusterId)
+
+  const api = getRawApi()
+  const lastBlockDatas = await api.rpc.chain.getBlock()
+  const lastBlockId = Number(lastBlockDatas.block.header.number.toString()) - 3
+
+  const tmpSignerMnemonic = mnemonicGenerate()
+  const tmpSigner = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${owner.address}`)
+
+  const secretNftOffchainData = await getSecretNftOffchainData(nftId)
+  const secretNftData = (await ipfsClient.getFile(secretNftOffchainData)) as any
+  const encryptedSecretOffchainData = (await ipfsClient.getFile(
+    secretNftData.properties.encrypted_media.hash,
+  )) as string
+
+  const payload = formatPayload(owner, tmpSigner, nftId, "0", lastBlockId)
+  const shares = await teeSSSSharesRetrieve(clusterId, payload)
+  const privatePGPKey = combineSSSShares(shares)
+
+  const decryptedBase64 = await decryptFile(encryptedSecretOffchainData, privatePGPKey)
+  return decryptedBase64
 }

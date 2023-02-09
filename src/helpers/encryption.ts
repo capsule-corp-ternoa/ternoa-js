@@ -76,5 +76,5 @@ export const decryptFile = async (encryptedMessage: string, privatePGPKey: strin
     decryptionKeys: privateKey,
   })
 
-  return decryptedMessage
+  return decryptedMessage as string
 }
