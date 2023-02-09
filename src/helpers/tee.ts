@@ -16,9 +16,11 @@ import { EnclaveHealthType } from "tee/types"
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
 
-export const TEE_STORE_ENDPOINT = "/api/nft/storeSecretShares"
-export const TEE_RETRIEVE_ENDPOINT = "/api/nft/retrieveSecretShares"
 export const TEE_HEALTH_ENDPOINT = "/health"
+export const TEE_STORE_NFT_ENDPOINT = "/api/nft/storeSecretShares"
+export const TEE_RETRIEVE_NFT_ENDPOINT = "/api/nft/retrieveSecretShares"
+export const TEE_STORE_CAPSULE_ENDPOINT = "/api/capsule/setSecretShares"
+export const TEE_RETRIEVE_CAPSULE_ENDPOINT = "/api/capsule/retrieveSecretShares"
 
 export const SIGNER_BLOCK_VALIDITY = 100
 
@@ -148,17 +150,22 @@ export const teeUpload = async (
  * @name teeSSSSharesUpload
  * @summary               Upload secret shares to TEE enclaves with retry.
  * @param clusterId       The TEE Cluster id to upload shares to.
- * @param payloads        Array of payloads containing secret NFT data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
+ * @param kind            The kind of nft linked to the key uploaded: "nft" or "capsule"
+ * @param payloads        Array of payloads containing secret data and each share of the private key. Should contain *SSSA_NUMSHARES* payloads.
  * @param nbRetry         The number of retry that need to be proceeded in case of fail during a share upload. Default is 3.
  * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
  * @returns               TEE enclave response including both the payload and the enclave response.
  */
 export const teeSSSSharesUpload = async (
   clusterId = 0,
+  kind: "nft" | "capsule",
   payloads: SecretPayloadType[],
   nbRetry = 3,
   enclavesIndex?: number[],
 ) => {
+  if (kind !== ("nft" || "capsule")) {
+    throw new Error(`${Errors.TEE_UPLOAD_ERROR} : Kind must be either "nft" or "capsule"`)
+  }
   const nbShares =
     enclavesIndex && enclavesIndex.length > 0 && enclavesIndex.length <= SSSA_NUMSHARES
       ? enclavesIndex.length
@@ -174,7 +181,8 @@ export const teeSSSSharesUpload = async (
     payloads.map(async (payload, idx) => {
       const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
       const http = new HttpClient(ensureHttps(baseUrl))
-      const post = async () => await teeUpload(http, TEE_STORE_ENDPOINT, payload)
+      const endpoint = kind === "nft" ? TEE_STORE_NFT_ENDPOINT : TEE_STORE_CAPSULE_ENDPOINT
+      const post = async () => await teeUpload(http, endpoint, payload)
       return await retryPost<TeeDataResponseType | Error>(post, nbRetry)
     }),
   )
@@ -191,10 +199,18 @@ export const teeSSSSharesUpload = async (
  * @name teeSSSSharesRetrieve
  * @summary           Get secret data shares from TEE enclaves.
  * @param clusterId   The TEE Cluster id to upload shares to.
+ * @param kind        The kind of nft linked to the key being retrieved: "nft" or "capsule"
  * @param payload     The payload containing secret NFT data, the keyring address and the signature. You can use our formatPayload() function.
  * @returns           TEE enclave response.
  */
-export const teeSSSSharesRetrieve = async (clusterId: number, payload: SecretPayloadType): Promise<string[]> => {
+export const teeSSSSharesRetrieve = async (
+  clusterId: number,
+  kind: "nft" | "capsule",
+  payload: SecretPayloadType,
+): Promise<string[]> => {
+  if (kind !== ("nft" || "capsule")) {
+    throw new Error(`${Errors.TEE_RETRIEVE_ERROR} : Kind must be either "nft" or "capsule"`)
+  }
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   if (teeEnclaves.length !== SSSA_NUMSHARES)
     throw new Error(
@@ -204,7 +220,8 @@ export const teeSSSSharesRetrieve = async (clusterId: number, payload: SecretPay
     teeEnclaves.map(async (baseUrl) => {
       const secretPayload = payload
       const http = new HttpClient(ensureHttps(baseUrl))
-      const res = await teeUpload(http, TEE_RETRIEVE_ENDPOINT, secretPayload)
+      const endpoint = kind === "nft" ? TEE_RETRIEVE_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_ENDPOINT
+      const res = await teeUpload(http, endpoint, secretPayload)
       return res.secret_data?.split("_")[1] as string
     }),
   )

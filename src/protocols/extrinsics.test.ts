@@ -4,13 +4,13 @@ import {
   resetTranmissionProtocolTimer,
   setTransmissionProtocol,
 } from "./extrinsics"
-import { getRawApi, initializeApi } from "../blockchain"
+import { initializeApi } from "../blockchain"
 import { createTestPairs } from "../_misc/testingPairs"
 import { WaitUntil } from "../constants"
 import { createNft } from "../nft"
 import { ProtocolAction, TransmissionCancellationAction } from "./enums"
 import { formatAtBlockWithResetProtocol, formatOnConsentProtocol, formatProtocolCancellation } from "./utils"
-
+import { getLastBlock } from "../helpers/crypto"
 const TEST_DATA = {
   nftId: 0,
   transmissonThreshold: 2,
@@ -35,9 +35,7 @@ afterAll(async () => {
 describe("Testing transmission protocols extrinsics", (): void => {
   it("Should return the transmission protocol ProtocolSetEvent data", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const api = getRawApi()
-    const lastBlockData = await api.rpc.chain.getBlock()
-    const lastBlockNumber = Number(lastBlockData.block.header.number.toString())
+    const lastBlockNumber = await getLastBlock()
     TEST_DATA.transmissionBlock = lastBlockNumber + 100
     const protocol = formatAtBlockWithResetProtocol("atBlockWithReset", TEST_DATA.transmissionBlock)
     const cancellation = formatProtocolCancellation("anytime")
