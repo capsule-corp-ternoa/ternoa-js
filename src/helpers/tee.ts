@@ -163,7 +163,7 @@ export const teeSSSSharesUpload = async (
   nbRetry = 3,
   enclavesIndex?: number[],
 ) => {
-  if (kind !== ("nft" || "capsule")) {
+  if (kind !== "nft" && kind !== "capsule") {
     throw new Error(`${Errors.TEE_UPLOAD_ERROR} : Kind must be either "nft" or "capsule"`)
   }
   const nbShares =
@@ -208,7 +208,7 @@ export const teeSSSSharesRetrieve = async (
   kind: "nft" | "capsule",
   payload: SecretPayloadType,
 ): Promise<string[]> => {
-  if (kind !== ("nft" || "capsule")) {
+  if (kind !== "nft" && kind !== "capsule") {
     throw new Error(`${Errors.TEE_RETRIEVE_ERROR} : Kind must be either "nft" or "capsule"`)
   }
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
