@@ -47,6 +47,10 @@ export const generateSSSShares = (data: string): string[] => {
  * @returns       The original data reconstructed.
  */
 export const combineSSSShares = (shares: string[]): string => {
+  if (shares.length < SSSA_THRESHOLD)
+    throw new Error(
+      `${Errors.TEE_RETRIEVE_ERROR} - CANNOT_COMBINE_SHARES: expected a minimum of ${SSSA_THRESHOLD} shares.`,
+    )
   const hexShares = shares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("hex"))
   const combinedShares = combine(hexShares)
   return combinedShares.toString("utf8")
@@ -56,7 +60,7 @@ export const combineSSSShares = (shares: string[]): string => {
  * @name getEnclaveHealthStatus
  * @summary           Check that all TEE enclaves from a cluster are ready to be used.
  * @param clusterId   The TEE Cluster id.
- * @returns           Besoin de retourner quelque chose ? Un boolean ? Les status 200 ?
+ * @returns           An array of JSONs containing each enclave information (status, date, description, addresses)
  */
 export const getEnclaveHealthStatus = async (clusterId = 0) => {
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
