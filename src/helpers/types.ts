@@ -49,7 +49,7 @@ export type CapsuleEncryptedMedia<T> = {
 } & T
 
 export type TeeDataResponseType = SecretPayloadType & {
-  status: number
+  status: string
   nft_id: number
   enclave_id: number
   description: string

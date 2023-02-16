@@ -144,7 +144,7 @@ export const createSecretNft = async (
  * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
  * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const addSecretToNftTx = async (id: string, secretOffchainData: string): Promise<TransactionHashType> => {
+export const addSecretToNftTx = async (id: number, secretOffchainData: string): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.nft, txActions.addSecret, [id, secretOffchainData])
 }
 
@@ -158,7 +158,7 @@ export const addSecretToNftTx = async (id: string, secretOffchainData: string): 
  * @returns                   SecretAddedToNFTEvent Blockchain event.
  */
 export const addSecretToNft = async (
-  id: string,
+  id: number,
   secretOffchainData: string,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
