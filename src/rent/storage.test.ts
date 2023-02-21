@@ -65,7 +65,7 @@ describe("Testing contracts in queue and getting contract datas", (): void => {
     ).toBe(true)
   })
 
-  it("Should return nftId and expriationBlockId of the first available queue", async () => {
+  it("Should return nftId and expirationBlockId of the first available queue", async () => {
     const { availableQueue } = await getRentingQueues()
     const filteredContract = availableQueue.filter((x) => x.nftId === TEST_DATA.nftId)
     expect(filteredContract[0].nftId >= TEST_DATA.nftId && filteredContract[0].expirationBlockId >= 0).toBe(true)
