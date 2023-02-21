@@ -3,7 +3,7 @@ export type PGPKeysType = {
   publicKey: string
 }
 
-export type SecretPayloadType = {
+export type StorePayloadType = {
   owner_address: string
   signer_address: string
   secret_data: string
@@ -48,9 +48,24 @@ export type CapsuleEncryptedMedia<T> = {
   size: number
 } & T
 
-export type TeeDataResponseType = SecretPayloadType & {
+export type TeeStoreDataResponseType = StorePayloadType & {
   status: string
   nft_id: number
   enclave_id: number
+  description: string
+}
+
+export type RetrievePayloadType = {
+  owner_address: string
+  data: string
+  signature: string
+}
+
+export type TeeRetrieveDataResponseType = {
+  status: string
+  nft_id?: number
+  keyshare_data: string
+  secret_data: string
+  enclave_id: string
   description: string
 }

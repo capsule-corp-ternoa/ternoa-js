@@ -6,7 +6,8 @@ import { TernoaIPFS } from "./ipfs"
 import { decryptFile, encryptFile, generatePGPKeys } from "./encryption"
 import {
   combineSSSShares,
-  formatPayload,
+  formatStorePayload,
+  formatRetrievePayload,
   generateSSSShares,
   getEnclaveHealthStatus,
   teeSSSSharesRetrieve,
@@ -97,7 +98,7 @@ export const mintSecretNFT = async <T>(
   const shares = generateSSSShares(privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
-  const payloads = shares.map((share: string) => formatPayload(owner, tmpSigner, nftId, share, lastBlockId))
+  const payloads = shares.map((share: string) => formatStorePayload(owner, tmpSigner, nftId, share, lastBlockId))
 
   // 6. request to store a batch of secret shares to the enclave
   const teeRes = await teeSSSSharesUpload(0, "secret", payloads)
@@ -117,16 +118,13 @@ export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner
   await getEnclaveHealthStatus(clusterId)
 
   const lastBlockId = await getLastBlock()
-  const tmpSignerMnemonic = mnemonicGenerate()
-  const tmpSigner = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${owner.address}`)
-
   const secretNftOffchainData = await getSecretNftOffchainData(nftId)
   const secretNftData = (await ipfsClient.getFile(secretNftOffchainData)) as any
   const encryptedSecretOffchainData = (await ipfsClient.getFile(
     secretNftData.properties.encrypted_media.hash,
   )) as string
 
-  const payload = formatPayload(owner, tmpSigner, nftId, "0", lastBlockId)
+  const payload = formatRetrievePayload(owner, nftId, lastBlockId)
   const shares = await teeSSSSharesRetrieve(clusterId, "secret", payload)
   const privatePGPKey = combineSSSShares(shares)
 
@@ -188,7 +186,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   const shares = generateSSSShares(keys.privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
-  const payloads = shares.map((share: string) => formatPayload(owner, tmpSigner, nftId, share, lastBlockId))
+  const payloads = shares.map((share: string) => formatStorePayload(owner, tmpSigner, nftId, share, lastBlockId))
 
   // 6. request to store a batch of secret shares to the enclave
   const teeRes = await teeSSSSharesUpload(0, "capsule", payloads)
@@ -205,12 +203,8 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
  */
 export const getCapsuleNFTPrivateKey = async (nftId: number, owner: IKeyringPair, clusterId = 0): Promise<string> => {
   await getEnclaveHealthStatus(clusterId)
-
   const lastBlockId = await getLastBlock()
-  const tmpSignerMnemonic = mnemonicGenerate()
-  const tmpSigner = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${owner.address}`)
-
-  const payload = formatPayload(owner, tmpSigner, nftId, "0", lastBlockId)
+  const payload = formatRetrievePayload(owner, nftId, lastBlockId)
   const shares = await teeSSSSharesRetrieve(clusterId, "capsule", payload)
   return combineSSSShares(shares)
 }
