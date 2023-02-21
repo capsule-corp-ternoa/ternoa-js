@@ -38,7 +38,7 @@ beforeAll(async () => {
   )
 })
 
-describe("Testing contracts in queue and getting contract datas", (): void => {
+describe("Testing contracts in queue and getting contract data", (): void => {
   it("Should return the rent contract data when an NFT ID with a rent contract exists", async () => {
     const { test: testAccount } = await createTestPairs()
     const contract = await getRentalContractData(TEST_DATA.nftId)
