@@ -7,11 +7,11 @@ import { AssetTransferredEvent } from "../events"
 
 /**
  * @name assetTransferTx
- * @summary             Creates an unsigned unsubmitted Assets-Transfert Transaction Hash.
+ * @summary             Creates an unsigned unsubmitted Assets-Transfer Transaction Hash.
  * @param id            ID of the Asset
  * @param to            Public address of the account to transfer the amount to.
  * @param amount        Token amount to transfer.
- * @returns             Unsigned unsubmitted Assets-Transfert Transaction Hash. The Hash is only valid for 5 minutes.
+ * @returns             Unsigned unsubmitted Assets-Transfer Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const assetTransferTx = async (id: number, to: string, amount: number | BN): Promise<TransactionHashType> => {
   const formattedAmount = typeof amount === "number" ? numberToBalance(amount) : amount

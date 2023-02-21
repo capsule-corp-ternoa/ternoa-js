@@ -147,7 +147,7 @@ export const setMarketplaceOwnerTx = async (id: number, recipient: string): Prom
  * @name setMarketplaceOwner
  * @summary               Set the new marketplace owner on the chain.
  * @param id              Marketplace Id of the marketplace to be transferred.
- * @param recipient       Adress of the new marketplace owner.
+ * @param recipient       Address of the new marketplace owner.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               MarketplaceOwnerSetEvent Blockchain event.

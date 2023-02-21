@@ -1,7 +1,7 @@
 import {
   addConsentToOnConsentProtocol,
   removeTransmissionProtocol,
-  resetTranmissionProtocolTimer,
+  resetTransmissionProtocolTimer,
   setTransmissionProtocol,
 } from "./extrinsics"
 import { initializeApi } from "../blockchain"
@@ -13,7 +13,7 @@ import { formatAtBlockWithResetProtocol, formatOnConsentProtocol, formatProtocol
 import { getLastBlock } from "../helpers/crypto"
 const TEST_DATA = {
   nftId: 0,
-  transmissonThreshold: 2,
+  transmissionThreshold: 2,
   transmissionBlock: 0,
 }
 
@@ -59,7 +59,7 @@ describe("Testing transmission protocols extrinsics", (): void => {
   it("Should return the transmission protocol TimerResetEvent data", async () => {
     const { test: testAccount } = await createTestPairs()
     TEST_DATA.transmissionBlock = TEST_DATA.transmissionBlock + 100
-    const tEvent = await resetTranmissionProtocolTimer(
+    const tEvent = await resetTransmissionProtocolTimer(
       TEST_DATA.nftId,
       TEST_DATA.transmissionBlock,
       testAccount,
@@ -79,7 +79,7 @@ describe("Testing transmission protocols extrinsics", (): void => {
   it("Should return the ConsentAddedEvent data: NFT id and user that gave his consent to a protocol", async () => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     const consentList = [destAccount.address, `${process.env.SEED_TEST_FUNDS_PUBLIC}`]
-    const protocol = formatOnConsentProtocol("onConsent", consentList, TEST_DATA.transmissonThreshold)
+    const protocol = formatOnConsentProtocol("onConsent", consentList, TEST_DATA.transmissionThreshold)
     const cancellation = formatProtocolCancellation("anytime")
     await setTransmissionProtocol(
       TEST_DATA.nftId,
