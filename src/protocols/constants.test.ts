@@ -21,7 +21,7 @@ it("Maximum number of simultaneous transmission protocol should be defined", () 
   expect(actual).toBeDefined()
 })
 
-it("aximum size for the consent list should be defined", () => {
+it("Maximum size for the consent list should be defined", () => {
   const actual = getMaxConsentListSize()
   expect(actual).toBeDefined()
 })
