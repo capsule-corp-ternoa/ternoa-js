@@ -6,7 +6,13 @@ import { hexToString } from "@polkadot/util"
 
 import { getSignature } from "./crypto"
 import { HttpClient } from "./http"
-import { RetrievePayloadType, StorePayloadType, TeeStoreDataResponseType, TeeRetrieveDataResponseType } from "./types"
+import {
+  RetrievePayloadType,
+  StorePayloadType,
+  TeeStoreDataResponseType,
+  TeeRetrieveDataResponseType,
+  TeeSharesStoreType,
+} from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
 import { getClusterData, getEnclaveData } from "../tee"
@@ -16,6 +22,7 @@ import { EnclaveHealthType } from "tee/types"
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
 
+const TEE_STATUS_SUCCESS = "STORESUCCES"
 export const TEE_HEALTH_ENDPOINT = "/api/health"
 export const TEE_STORE_NFT_ENDPOINT = "/api/secret-nft/store-keyshare"
 export const TEE_RETRIEVE_NFT_ENDPOINT = "/api/secret-nft/retrieve-keyshare"
@@ -182,14 +189,13 @@ export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secret
  * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
  * @returns               TEE enclave response including both the payload and the enclave response.
  */
-export const teeSSSSharesUpload = async (
-  //todo: rename upload to store
+export const teeSSSSharesStore = async (
   clusterId = 0,
   kind: "secret" | "capsule",
   payloads: StorePayloadType[],
   nbRetry = 3,
   enclavesIndex?: number[],
-) => {
+): Promise<TeeSharesStoreType[]> => {
   if (kind !== "secret" && kind !== "capsule") {
     throw new Error(`${Errors.TEE_UPLOAD_ERROR} : Kind must be either "secret" or "capsule"`)
   }
@@ -210,14 +216,26 @@ export const teeSSSSharesUpload = async (
       const http = new HttpClient(ensureHttps(baseUrl))
       const endpoint = kind === "secret" ? TEE_STORE_NFT_ENDPOINT : TEE_STORE_CAPSULE_ENDPOINT
       const post = async () => await teeUpload<StorePayloadType, TeeStoreDataResponseType>(http, endpoint, payload)
-      return await retryPost<TeeStoreDataResponseType | Error>(post, nbRetry)
+      return await retryPost<TeeStoreDataResponseType>(post, nbRetry)
     }),
   )
 
   return teeRes.map((enclaveRes, i) => {
+    const payload = payloads[i]
+
+    if ("isRetryError" in enclaveRes)
+      return {
+        isError: true,
+        status: enclaveRes.status,
+        description: enclaveRes.message,
+        nft_id: Number(payload.secret_data.split("_")[0]),
+        ...payload,
+      }
+
     return {
-      ...payloads[i],
+      isError: enclaveRes.status !== TEE_STATUS_SUCCESS,
       ...enclaveRes,
+      ...payload,
     }
   })
 }

@@ -11,7 +11,7 @@ import {
   generateSSSShares,
   getEnclaveHealthStatus,
   teeSSSSharesRetrieve,
-  teeSSSSharesUpload,
+  teeSSSSharesStore,
   SIGNER_BLOCK_VALIDITY,
 } from "./tee"
 import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType } from "./types"
@@ -114,7 +114,7 @@ export const mintSecretNFT = async <T>(
   )
 
   // 6. request to store a batch of secret shares to the enclave
-  const teeRes = await teeSSSSharesUpload(0, "secret", payloads)
+  const teeRes = await teeSSSSharesStore(0, "secret", payloads)
   return teeRes
 }
 
@@ -214,7 +214,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   )
 
   // 6. request to store a batch of secret shares to the enclave
-  const teeRes = await teeSSSSharesUpload(0, "capsule", payloads)
+  const teeRes = await teeSSSSharesStore(0, "capsule", payloads)
   return teeRes
 }
 
