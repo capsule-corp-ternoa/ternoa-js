@@ -98,53 +98,59 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
 }
 
 /**
- * @name formatPayload
- * @summary         Prepares post request payload to store secret NFT data into TEE enclaves.
- * @param nftId     The ID of the secret NFT.
- * @param share     A share of the private key used to decrypt the secret NFT.
- * @param keyring   Account of the secret NFT's owner.
- * @returns         Payload ready to be submitted to TEE enclaves.
+ * @name formatStorePayload
+ * @summary                     Prepares post request payload to store secret/capsule NFT data into TEE enclaves.
+ * @param ownerAddress          Address of the NFT's owner.
+ * @param signerAuthMessage     The message to be signed by the owner to autenticate the tempory signer used to sign shares.
+ * @param signerAuthSignature   The signerAuthMessage message signed by the NFT owner.
+ * @param signerPair            The temporary signer account used to sign shares.
+ * @param nftId                 The ID of the NFT.
+ * @param share                 A share of the private key used to decrypt the NFT.
+ * @param blockId               The current block header id on-chain.
+ * @param blockValidity         A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
+ * @returns                     Payload object ready to be submitted to TEE enclaves.
  */
 export const formatStorePayload = (
-  owner: IKeyringPair,
-  signer: IKeyringPair,
+  ownerAddress: string,
+  signerAuthMessage: string,
+  signerAuthSignature: string,
+  signerPair: IKeyringPair,
   nftId: number,
   share: string,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): StorePayloadType => {
-  const signerAddressToSign = `<Bytes>${signer.address}_${blockId}_${blockValidity}</Bytes>` // todo: removed <Bytes> when the API is clean
-  const signersig = getSignature(owner, signerAddressToSign)
-  const secretData = `<Bytes>${nftId}_${share}_${blockId}_${blockValidity}</Bytes>` // todo: removed <Bytes> when the API is clean + blockId & blockValidity merged into targetBlockId like in signerAddressToSign
-  const signature = getSignature(signer, secretData)
+  const secretData = `${nftId}_${share}_${blockId}_${blockValidity}`
+  const secretDataSignature = getSignature(signerPair, secretData)
   return {
-    owner_address: owner.address,
-    signer_address: signerAddressToSign,
+    owner_address: ownerAddress,
+    signer_address: signerAuthMessage,
     secret_data: secretData,
-    signature,
-    signersig,
+    signature: secretDataSignature,
+    signersig: signerAuthSignature,
   }
 }
 
 /**
  * @name formatRetrievePayload
- * @summary         Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
- * @param nftId     The ID of the secret NFT.
- * @param share     A share of the private key used to decrypt the secret NFT.
- * @param keyring   Account of the secret NFT's owner.
- * @returns         Payload ready to be submitted to TEE enclaves.
+ * @summary               Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
+ * @param ownerPair       The NFT owner account used to sign data.
+ * @param nftId           The ID of the NFT.
+ * @param blockId         The current block header id on-chain.
+ * @param blockValidity   A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
+ * @returns               Payload ready to be submitted to TEE enclaves.
  */
 export const formatRetrievePayload = (
-  owner: IKeyringPair,
+  ownerPair: IKeyringPair,
   nftId: number,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): RetrievePayloadType => {
-  const secretData = `${nftId}_${blockId}_${blockValidity}`
-  const signature = getSignature(owner, secretData)
+  const data = `${nftId}_${blockId}_${blockValidity}`
+  const signature = getSignature(ownerPair, data)
   return {
-    owner_address: owner.address,
-    data: secretData,
+    owner_address: ownerPair.address,
+    data,
     signature,
   }
 }

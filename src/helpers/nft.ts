@@ -12,9 +12,10 @@ import {
   getEnclaveHealthStatus,
   teeSSSSharesRetrieve,
   teeSSSSharesUpload,
+  SIGNER_BLOCK_VALIDITY,
 } from "./tee"
 import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType } from "./types"
-import { getLastBlock } from "./crypto"
+import { getLastBlock, getSignature } from "./crypto"
 
 import { getKeyringFromSeed } from "../account"
 import { Errors, WaitUntil } from "../constants"
@@ -62,7 +63,7 @@ export const mintSecretNFT = async <T>(
   secretNftFile: File,
   secretNftMetadata: NftMetadataType<T>,
   ipfsClient: TernoaIPFS,
-  owner: IKeyringPair,
+  ownerPair: IKeyringPair,
   clusterId = 0,
 ) => {
   // 0. query Enclave with /Health API
@@ -71,7 +72,7 @@ export const mintSecretNFT = async <T>(
   // 1. generate a temporary signer account with soft-derivation
   const lastBlockId = await getLastBlock()
   const tmpSignerMnemonic = mnemonicGenerate()
-  const tmpSigner = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${owner.address}`)
+  const tmpSignerPair = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${ownerPair.address}`)
 
   // 2. media encryption and upload
   const { privateKey, publicKey } = await generatePGPKeys()
@@ -90,7 +91,7 @@ export const mintSecretNFT = async <T>(
     0,
     undefined,
     false,
-    owner,
+    ownerPair,
     WaitUntil.BlockInclusion,
   )
 
@@ -98,7 +99,19 @@ export const mintSecretNFT = async <T>(
   const shares = generateSSSShares(privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
-  const payloads = shares.map((share: string) => formatStorePayload(owner, tmpSigner, nftId, share, lastBlockId))
+  const signerAuthMessage = `${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}`
+  const signerAuthSignature = getSignature(ownerPair, signerAuthMessage)
+  const payloads = shares.map((share: string) =>
+    formatStorePayload(
+      ownerPair.address,
+      signerAuthMessage,
+      signerAuthSignature,
+      tmpSignerPair,
+      nftId,
+      share,
+      lastBlockId,
+    ),
+  )
 
   // 6. request to store a batch of secret shares to the enclave
   const teeRes = await teeSSSSharesUpload(0, "secret", payloads)
@@ -114,7 +127,7 @@ export const mintSecretNFT = async <T>(
  * @param clusterId          The TEE Cluster id.
  * @returns                  A string containing the secretNFT decrypted content.
  */
-export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner: IKeyringPair, clusterId = 0) => {
+export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, ownerPair: IKeyringPair, clusterId = 0) => {
   await getEnclaveHealthStatus(clusterId)
 
   const lastBlockId = await getLastBlock()
@@ -124,7 +137,7 @@ export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner
     secretNftData.properties.encrypted_media.hash,
   )) as string
 
-  const payload = formatRetrievePayload(owner, nftId, lastBlockId)
+  const payload = formatRetrievePayload(ownerPair, nftId, lastBlockId)
   const shares = await teeSSSSharesRetrieve(clusterId, "secret", payload)
   const privatePGPKey = combineSSSShares(shares)
 
@@ -146,7 +159,7 @@ export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner
  * @returns                  TEE enclave response including both the shards datas, and the enclave response.
  */
 export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
-  owner: IKeyringPair,
+  ownerPair: IKeyringPair,
   ipfsClient: TernoaIPFS,
   keys: PGPKeysType,
   nftFile: File,
@@ -161,7 +174,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   // 1. generate a temporary signer account with soft-derivation
   const lastBlockId = await getLastBlock()
   const tmpSignerMnemonic = mnemonicGenerate()
-  const tmpSigner = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${owner.address}`)
+  const tmpSignerPair = await getKeyringFromSeed(tmpSignerMnemonic, undefined, `${lastBlockId}_${ownerPair.address}`)
 
   // 2. media encryption and upload
   const { Hash: offchainDataHash } = await ipfsClient.storeNFT(nftFile, nftMetadata)
@@ -178,7 +191,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
     0,
     undefined,
     false,
-    owner,
+    ownerPair,
     WaitUntil.BlockInclusion,
   )
 
@@ -186,7 +199,19 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   const shares = generateSSSShares(keys.privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
-  const payloads = shares.map((share: string) => formatStorePayload(owner, tmpSigner, nftId, share, lastBlockId))
+  const signerAuthMessage = `${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}`
+  const signerAuthSignature = getSignature(ownerPair, signerAuthMessage)
+  const payloads = shares.map((share: string) =>
+    formatStorePayload(
+      ownerPair.address,
+      signerAuthMessage,
+      signerAuthSignature,
+      tmpSignerPair,
+      nftId,
+      share,
+      lastBlockId,
+    ),
+  )
 
   // 6. request to store a batch of secret shares to the enclave
   const teeRes = await teeSSSSharesUpload(0, "capsule", payloads)
