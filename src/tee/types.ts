@@ -13,4 +13,12 @@ export type EnclaveHealthType = {
   quote: Uint32Array
 }
 
-export type ClusterDataType = { enclaves: string[] }
+export type ClusterDataType = {
+  enclaves: string[]
+}
+
+export type NFTShareAvailableType = {
+  enclave_id: string
+  nft_id: number
+  exists: boolean
+}

@@ -54,7 +54,7 @@ export type RetrievePayloadType = {
   signature: string
 }
 
-export type TeeStoreDataResponseType = {
+export type TeeGenericDataResponseType = {
   status: string
   nft_id: number
   enclave_id: string
@@ -73,11 +73,16 @@ export type TeeRetrieveDataResponseType = {
 export type TeeSharesStoreType = {
   isError: boolean
   enclave_id?: string
-} & Omit<TeeStoreDataResponseType, "enclave_id"> &
+} & Omit<TeeGenericDataResponseType, "enclave_id"> &
   StorePayloadType
 
 export type RetryUploadErrorType = {
   isRetryError: boolean
   status: string
   message: string
+}
+
+export type TeeSharesRemoveType = {
+  owner_address: string
+  nft_id: number
 }
