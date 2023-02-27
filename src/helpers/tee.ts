@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { combine, split } from "shamirs-secret-sharing"
+import { create, combine } from "sssa-js"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
 
@@ -45,13 +45,8 @@ export const SIGNER_BLOCK_VALIDITY = 100
  * @returns     An array of stringified shares.
  */
 export const generateSSSShares = (data: string): string[] => {
-  const shares = split(data, {
-    shares: SSSA_NUMSHARES,
-    threshold: SSSA_THRESHOLD,
-  })
-  const base64shares: string[] = shares.map((bufferShare: any) => bufferShare.toString("base64"))
-
-  return base64shares
+  const shares = create(SSSA_THRESHOLD, SSSA_NUMSHARES, data)
+  return shares
 }
 
 /**
@@ -66,9 +61,8 @@ export const combineSSSShares = (shares: string[]): string => {
     throw new Error(
       `${Errors.TEE_RETRIEVE_ERROR} - CANNOT_COMBINE_SHARES: expected a minimum of ${SSSA_THRESHOLD} shares.`,
     )
-  const hexShares = filteredShares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("hex"))
-  const combinedShares = combine(hexShares)
-  return combinedShares.toString("utf8")
+  const combinedShares = combine(filteredShares)
+  return combinedShares
 }
 
 /**
