@@ -112,6 +112,26 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
 }
 
 /**
+ * @name getEnclaveSharesAvailablility
+ * @summary           Check that an enclave from a cluster have registered a Capsule NFT or a Secret NFT's key shares
+ * @param enclave     The enclave base url.
+ * @param nftId       The Capsule NFT id or Secret NFT id to check key registration on enclave.
+ * @param kind        The kind of NFT linked to the key being checked: "secret" or "capsule"
+ * @returns           A JSON containing the enclave share availability (enclave_id, nft_id, an exists status (boolean))
+ */
+export const getTeeEnclaveSharesAvailablility = async (enclave: string, nftId: number, kind: "secret" | "capsule") => {
+  if (kind !== "secret" && kind !== "capsule") {
+    throw new Error(`${Errors.TEE_ERROR}: Kind must be either "secret" or "capsule"`)
+  }
+  const http = new HttpClient(ensureHttps(enclave))
+  const endpoint =
+    kind === "secret"
+      ? TEE_AVAILABLE_SECRET_NFT_KEYSHARE_ENDPOINT(nftId)
+      : TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT(nftId)
+  return await http.get<NFTShareAvailableType>(endpoint)
+}
+
+/**
  * @name formatStorePayload
  * @summary                     Prepares post request payload to store secret/capsule NFT data into TEE enclaves.
  * @param ownerAddress          Address of the NFT's owner.
@@ -232,45 +252,45 @@ export const teeSSSSharesStore = async (
 
     if ("isRetryError" in enclaveRes)
       return {
-        isError: true,
         status: enclaveRes.status,
         description: enclaveRes.message,
         nft_id: Number(payload.secret_data.split("_")[0]),
+        isError: true,
         ...payload,
       }
 
     return {
-      isError: enclaveRes.status !== TEE_STATUS_SUCCESS,
       ...enclaveRes,
+      isError: enclaveRes.status !== TEE_STATUS_SUCCESS,
       ...payload,
     }
   })
 }
 
 /**
- * @name isTeeShareAvailable
+ * @name sharesAvailableOnTeeCluster
  * @summary           Check that all enclaves from a cluster have registered a the Capsule NFT or a Secret NFT's key shares
  * @param clusterId   The TEE Cluster id.
  * @param nftId       The Capsule NFT id or Secret NFT id to check key registration on enclaves.
  * @param kind        The kind of NFT linked to the key being checked: "secret" or "capsule"
  * @returns           An array of JSONs containing each enclave share check (enclave_id, nft_id, an exists status (boolean))
  */
-export const isTeeShareAvailable = async (clusterId = 0, nftId: number, kind: "secret" | "capsule") => {
+export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, kind: "secret" | "capsule") => {
   if (kind !== "secret" && kind !== "capsule") {
     throw new Error(`${Errors.TEE_ERROR}: Kind must be either "secret" or "capsule"`)
   }
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
-  const getSecretShare: NFTShareAvailableType[] = await Promise.all(
+  let isShareAvailable = false
+  await Promise.all(
     teeEnclaves.map(async (enclaveUrl) => {
-      const http = new HttpClient(ensureHttps(enclaveUrl))
-      const endpoint =
-        kind === "secret"
-          ? TEE_AVAILABLE_SECRET_NFT_KEYSHARE_ENDPOINT(nftId)
-          : TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT(nftId)
-      return await http.get(endpoint)
+      while (isShareAvailable !== true) {
+        const { exists } = await getTeeEnclaveSharesAvailablility(enclaveUrl, nftId, kind)
+        isShareAvailable = exists
+      }
     }),
   )
-  return getSecretShare
+
+  return isShareAvailable
 }
 
 /**
