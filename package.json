@@ -70,6 +70,7 @@
     "@polkadot/api": "9.14.2",
     "axios": "0.27.x",
     "bn.js": "5.2.x",
+    "buffer": "6.0.x",
     "form-data-encoder": "1.7.x",
     "formdata-node": "4.4.x",
     "openpgp": "5.7.0",
