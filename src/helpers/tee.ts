@@ -280,14 +280,12 @@ export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, 
   }
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   let isShareAvailable = false
-  await Promise.all(
-    teeEnclaves.map(async (enclaveUrl) => {
-      while (isShareAvailable !== true) {
-        const { exists } = await getTeeEnclaveSharesAvailablility(enclaveUrl, nftId, kind)
-        isShareAvailable = exists
-      }
-    }),
-  )
+  let i = 0
+  while (isShareAvailable !== true && i < teeEnclaves.length) {
+    const { exists } = await getTeeEnclaveSharesAvailablility(teeEnclaves[i], nftId, kind)
+    isShareAvailable = exists
+    i += 1
+  }
 
   return isShareAvailable
 }

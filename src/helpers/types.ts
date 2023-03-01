@@ -85,6 +85,6 @@ export type RetryUploadErrorType = {
 }
 
 export type TeeSharesRemoveType = {
-  owner_address: string
+  requester_address: string
   nft_id: number
 }
