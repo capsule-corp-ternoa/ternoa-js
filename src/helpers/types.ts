@@ -29,6 +29,8 @@ export type CollectionMetadataType<T> = Required<MediaMetadataType<T>>
 
 export type MarketplaceMetadataType<T> = Omit<Required<MediaMetadataType<T>>, "description">
 
+export type RequesterType = "OWNER" | "DELEGATEE" | "RENTEE"
+
 export type CapsuleMedia<T> = {
   encryptedFile: string
   type: string
@@ -43,13 +45,14 @@ export type CapsuleEncryptedMedia<T> = {
 export type StorePayloadType = {
   owner_address: string
   signer_address: string
-  secret_data: string
+  data: string
   signature: string
   signersig: string
 }
 
 export type RetrievePayloadType = {
-  owner_address: string
+  requester_address: string
+  requester_type: RequesterType
   data: string
   signature: string
 }
@@ -65,7 +68,6 @@ export type TeeRetrieveDataResponseType = {
   status: string
   nft_id?: number
   keyshare_data: string
-  secret_data: string
   enclave_id: string
   description: string
 }

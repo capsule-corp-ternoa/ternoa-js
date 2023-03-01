@@ -14,7 +14,7 @@ import {
   teeSSSSharesStore,
   SIGNER_BLOCK_VALIDITY,
 } from "./tee"
-import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType } from "./types"
+import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType, RequesterType } from "./types"
 import { getLastBlock, getSignature } from "./crypto"
 
 import { getKeyringFromSeed } from "../account"
@@ -127,7 +127,13 @@ export const mintSecretNFT = async <T>(
  * @param clusterId          The TEE Cluster id.
  * @returns                  A string containing the secretNFT decrypted content.
  */
-export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, ownerPair: IKeyringPair, clusterId = 0) => {
+export const viewSecretNFT = async (
+  nftId: number,
+  ipfsClient: TernoaIPFS,
+  requesterPair: IKeyringPair,
+  requesterRole: RequesterType,
+  clusterId = 0,
+) => {
   await getEnclaveHealthStatus(clusterId)
 
   const lastBlockId = await getLastBlock()
@@ -137,7 +143,7 @@ export const viewSecretNFT = async (nftId: number, ipfsClient: TernoaIPFS, owner
     secretNftData.properties.encrypted_media.hash,
   )) as string
 
-  const payload = formatRetrievePayload(ownerPair, nftId, lastBlockId)
+  const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
   const shares = await teeSSSSharesRetrieve(clusterId, "secret", payload)
   const privatePGPKey = combineSSSShares(shares)
 
@@ -226,10 +232,15 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
  * @param clusterId          The TEE Cluster id.
  * @returns                  A string containing the capsule NFT private key.
  */
-export const getCapsuleNFTPrivateKey = async (nftId: number, owner: IKeyringPair, clusterId = 0): Promise<string> => {
+export const getCapsuleNFTPrivateKey = async (
+  nftId: number,
+  requesterPair: IKeyringPair,
+  requesterRole: RequesterType,
+  clusterId = 0,
+): Promise<string> => {
   await getEnclaveHealthStatus(clusterId)
   const lastBlockId = await getLastBlock()
-  const payload = formatRetrievePayload(owner, nftId, lastBlockId)
+  const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
   const shares = await teeSSSSharesRetrieve(clusterId, "capsule", payload)
   return combineSSSShares(shares)
 }

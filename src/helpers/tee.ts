@@ -13,6 +13,7 @@ import {
   TeeRetrieveDataResponseType,
   TeeSharesStoreType,
   TeeSharesRemoveType,
+  RequesterType,
 } from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
@@ -46,7 +47,8 @@ export const SIGNER_BLOCK_VALIDITY = 100
  */
 export const generateSSSShares = (data: string): string[] => {
   const shares = create(SSSA_THRESHOLD, SSSA_NUMSHARES, data)
-  return shares
+  const base64shares: string[] = shares.map((share: string) => Buffer.from(share).toString("base64"))
+  return base64shares
 }
 
 /**
@@ -61,7 +63,8 @@ export const combineSSSShares = (shares: string[]): string => {
     throw new Error(
       `${Errors.TEE_RETRIEVE_ERROR} - CANNOT_COMBINE_SHARES: expected a minimum of ${SSSA_THRESHOLD} shares.`,
     )
-  const combinedShares = combine(filteredShares)
+  const hexShares = filteredShares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("utf-8"))
+  const combinedShares = combine(hexShares)
   return combinedShares
 }
 
@@ -148,13 +151,13 @@ export const formatStorePayload = (
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): StorePayloadType => {
-  const secretData = `${nftId}_${share}_${blockId}_${blockValidity}`
-  const secretDataSignature = getSignature(signerPair, secretData)
+  const data = `${nftId}_${share}_${blockId}_${blockValidity}`
+  const dataSignature = getSignature(signerPair, data)
   return {
     owner_address: ownerAddress,
     signer_address: signerAuthMessage,
-    secret_data: secretData,
-    signature: secretDataSignature,
+    data,
+    signature: dataSignature,
     signersig: signerAuthSignature,
   }
 }
@@ -169,15 +172,17 @@ export const formatStorePayload = (
  * @returns               Payload ready to be submitted to TEE enclaves.
  */
 export const formatRetrievePayload = (
-  ownerPair: IKeyringPair,
+  requesterPair: IKeyringPair,
+  requesterRole: RequesterType,
   nftId: number,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): RetrievePayloadType => {
   const data = `${nftId}_${blockId}_${blockValidity}`
-  const signature = getSignature(ownerPair, data)
+  const signature = getSignature(requesterPair, data)
   return {
-    owner_address: ownerPair.address,
+    requester_address: requesterPair.address,
+    requester_type: requesterRole,
     data,
     signature,
   }
@@ -248,7 +253,7 @@ export const teeSSSSharesStore = async (
       return {
         status: enclaveRes.status,
         description: enclaveRes.message,
-        nft_id: Number(payload.secret_data.split("_")[0]),
+        nft_id: Number(payload.data.split("_")[0]),
         isError: true,
         ...payload,
       }
@@ -308,14 +313,12 @@ export const teeSSSSharesRetrieve = async (
     throw new Error(
       `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
-  const dataFieldName = kind === "secret" ? "keyshare_data" : "secret_data"
   const shares = await Promise.all(
     teeEnclaves.map(async (baseUrl) => {
-      const secretPayload = payload
       const http = new HttpClient(ensureHttps(baseUrl))
       const endpoint = kind === "secret" ? TEE_RETRIEVE_SECRET_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT
-      const res = await teeUpload<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, secretPayload)
-      return res[dataFieldName]?.split("_")[1] ?? ""
+      const res = await teeUpload<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
+      return res.keyshare_data.split("_")[1] ?? ""
     }),
   )
   return shares.filter((x) => x)
