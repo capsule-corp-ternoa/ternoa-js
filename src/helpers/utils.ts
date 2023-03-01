@@ -1,5 +1,6 @@
 import BN from "bn.js"
 import { File } from "formdata-node"
+import { Buffer } from "buffer"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"

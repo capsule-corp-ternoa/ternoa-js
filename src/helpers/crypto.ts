@@ -1,6 +1,7 @@
 import { IKeyringPair } from "@polkadot/types/types"
 import { u8aToHex } from "@polkadot/util"
 import { getRawApi } from "../blockchain"
+import { Buffer } from "buffer"
 
 /**
  * @name getSignature
