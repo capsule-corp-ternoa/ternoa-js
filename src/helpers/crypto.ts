@@ -22,6 +22,8 @@ export const getSignature = (keyring: IKeyringPair, data: string) => {
  */
 export const getLastBlock = async () => {
   const api = getRawApi()
-  const lastBlockDatas = await api.rpc.chain.getBlock()
-  return Number(lastBlockDatas.block.header.number.toString())
+  const lastBlockHash = await api.rpc.chain.getFinalizedHead()
+  const lastBlock = await api.rpc.chain.getBlock(lastBlockHash)
+  const lastBlockId = Number(lastBlock.block.header.number.toString())
+  return lastBlockId
 }

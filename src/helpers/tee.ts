@@ -42,24 +42,24 @@ export const TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT = (nftId: number) =>
 export const SIGNER_BLOCK_VALIDITY = 100
 
 /**
- * @name generateSSSShares
+ * @name generateKeyShares
  * @summary     Generates an array of shares from the incoming parameter string.
  * @param data  The data to split into shares (e.g. private key).
  * @returns     An array of stringified shares.
  */
-export const generateSSSShares = (data: string): string[] => {
+export const generateKeyShares = (data: string): string[] => {
   const shares = create(SSSA_THRESHOLD, SSSA_NUMSHARES, data)
   const base64shares: string[] = shares.map((share: string) => Buffer.from(share).toString("base64"))
   return base64shares
 }
 
 /**
- * @name combineSSSShares
+ * @name combineKeyShares
  * @summary       Combines an array of shares to reconstruct data.
  * @param shares  Array of stringified shares.
  * @returns       The original data reconstructed.
  */
-export const combineSSSShares = (shares: string[]): string => {
+export const combineKeyShares = (shares: string[]): string => {
   const filteredShares = shares.filter((x) => x)
   if (filteredShares.length < SSSA_THRESHOLD)
     throw new Error(
@@ -208,7 +208,7 @@ export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secret
 }
 
 /**
- * @name teeSSSSharesUpload
+ * @name teeKeySharesStore
  * @summary               Upload secret shares to TEE enclaves with retry.
  * @param clusterId       The TEE Cluster id to upload shares to.
  * @param kind            The kind of nft linked to the key uploaded: "secret" or "capsule"
@@ -217,7 +217,7 @@ export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secret
  * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
  * @returns               TEE enclave response including both the payload and the enclave response.
  */
-export const teeSSSSharesStore = async (
+export const teeKeySharesStore = async (
   clusterId = 0,
   kind: "secret" | "capsule",
   payloads: StorePayloadType[],
@@ -293,14 +293,14 @@ export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, 
 }
 
 /**
- * @name teeSSSSharesRetrieve
+ * @name teeKeySharesRetrieve
  * @summary           Get secret data shares from TEE enclaves.
  * @param clusterId   The TEE Cluster id to upload shares to.
  * @param kind        The kind of nft linked to the key being retrieved: "secret" or "capsule"
  * @param payload     The payload containing secret NFT data, the keyring address and the signature. You can use our formatPayload() function.
  * @returns           TEE enclave response.
  */
-export const teeSSSSharesRetrieve = async (
+export const teeKeySharesRetrieve = async (
   clusterId: number,
   kind: "secret" | "capsule",
   payload: RetrievePayloadType,
@@ -339,7 +339,7 @@ export const teeSSSSharesRetrieve = async (
 }
 
 /**
- * @name teeSSSSharesRemove
+ * @name teeKeySharesRemove
  * @summary                 Remove the share of a burnt NFT from the enclaves.
  * @param clusterId         The TEE Cluster id to remove the shares of the burnt NFT.
  * @param kind              The kind of NFT linked to the key being deleted: "secret" or "capsule"
@@ -347,7 +347,7 @@ export const teeSSSSharesRetrieve = async (
  * @param nftId             The burnt NFT id to remove the key.
  * @returns                 An array of JSONs containing the TEE enclave result (status (boolean), enclave_id, nft_id, description)
  */
-export const teeSSSSharesRemove = async (
+export const teeKeySharesRemove = async (
   clusterId: number,
   kind: "secret" | "capsule",
   requesterAddress: string,

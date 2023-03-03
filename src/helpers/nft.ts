@@ -5,13 +5,13 @@ import { File } from "formdata-node"
 import { TernoaIPFS } from "./ipfs"
 import { decryptFile, encryptFile, generatePGPKeys } from "./encryption"
 import {
-  combineSSSShares,
+  combineKeyShares,
   formatStorePayload,
   formatRetrievePayload,
-  generateSSSShares,
+  generateKeyShares,
   getEnclaveHealthStatus,
-  teeSSSSharesRetrieve,
-  teeSSSSharesStore,
+  teeKeySharesRetrieve,
+  teeKeySharesStore,
   SIGNER_BLOCK_VALIDITY,
 } from "./tee"
 import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType, RequesterType } from "./types"
@@ -96,7 +96,7 @@ export const mintSecretNFT = async <T>(
   )
 
   // 4. generate secret shares from the private key
-  const shares = generateSSSShares(privateKey)
+  const shares = generateKeyShares(privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
   const signerAuthMessage = `${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}`
@@ -114,7 +114,7 @@ export const mintSecretNFT = async <T>(
   )
 
   // 6. request to store a batch of secret shares to the enclave
-  const teeRes = await teeSSSSharesStore(clusterId, "secret", payloads)
+  const teeRes = await teeKeySharesStore(clusterId, "secret", payloads)
   return {
     event: secretNftEvent,
     clusterResponse: teeRes,
@@ -147,8 +147,8 @@ export const viewSecretNFT = async (
   )) as string
 
   const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
-  const shares = await teeSSSSharesRetrieve(clusterId, "secret", payload)
-  const privatePGPKey = combineSSSShares(shares)
+  const shares = await teeKeySharesRetrieve(clusterId, "secret", payload)
+  const privatePGPKey = combineKeyShares(shares)
 
   const decryptedBase64 = await decryptFile(encryptedSecretOffchainData, privatePGPKey)
   return decryptedBase64
@@ -205,7 +205,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   )
 
   // 4. generate secret shares from the private key
-  const shares = generateSSSShares(keys.privateKey)
+  const shares = generateKeyShares(keys.privateKey)
 
   // 5. format payloads with signature of the public key of temporary signer account
   const signerAuthMessage = `${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}`
@@ -223,7 +223,7 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   )
 
   // 6. request to store a batch of secret shares to the enclave
-  const teeRes = await teeSSSSharesStore(clusterId, "capsule", payloads)
+  const teeRes = await teeKeySharesStore(clusterId, "capsule", payloads)
   return {
     event: capsuleEvent,
     clusterResponse: teeRes,
@@ -247,6 +247,6 @@ export const getCapsuleNFTPrivateKey = async (
   await getEnclaveHealthStatus(clusterId)
   const lastBlockId = await getLastBlock()
   const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
-  const shares = await teeSSSSharesRetrieve(clusterId, "capsule", payload)
-  return combineSSSShares(shares)
+  const shares = await teeKeySharesRetrieve(clusterId, "capsule", payload)
+  return combineKeyShares(shares)
 }
