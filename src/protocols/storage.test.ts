@@ -9,7 +9,7 @@ import {
 } from "./storage"
 import { formatAtBlockProtocol, formatOnConsentAtBlockProtocol, formatProtocolCancellation } from "./utils"
 import { addConsentToOnConsentProtocol, removeTransmissionProtocol, setTransmissionProtocol } from "./extrinsics"
-import { getRawApi, initializeApi } from "../blockchain"
+import { initializeApi } from "../blockchain"
 import { createTestPairs } from "../_misc/testingPairs"
 import { WaitUntil } from "../constants"
 import { createNft } from "../nft"
@@ -18,7 +18,7 @@ import { getLastBlock } from "../helpers/crypto"
 
 const TEST_DATA = {
   nftId: 0,
-  transmissonThreshold: 2,
+  transmissionThreshold: 2,
   transmissionBlock: 0,
 }
 
@@ -35,7 +35,7 @@ beforeAll(async () => {
   const protocol = formatOnConsentAtBlockProtocol(
     "onConsentAtBlock",
     consentList,
-    TEST_DATA.transmissonThreshold,
+    TEST_DATA.transmissionThreshold,
     TEST_DATA.transmissionBlock,
   )
   const cancellation = formatProtocolCancellation("anytime")
@@ -81,7 +81,7 @@ describe("Testing to get transmission protocols data", (): void => {
     expect(
       data?.recipient == destAccount.address &&
         data.protocol[ProtocolAction.OnConsentAtBlock].consentList.length == 2 &&
-        data.protocol[ProtocolAction.OnConsentAtBlock].threshold == TEST_DATA.transmissonThreshold &&
+        data.protocol[ProtocolAction.OnConsentAtBlock].threshold == TEST_DATA.transmissionThreshold &&
         data.protocol[ProtocolAction.OnConsentAtBlock].block == TEST_DATA.transmissionBlock &&
         data.cancellation[TransmissionCancellationAction.Anytime] == null,
     ).toBe(true)

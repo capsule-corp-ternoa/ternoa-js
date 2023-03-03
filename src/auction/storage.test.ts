@@ -22,7 +22,7 @@ beforeAll(async () => {
 
   // Create some Test NFT, Marketplace and Auction
   const { test: testAccount } = await createTestPairs()
-  const nEvent = await createNft("Test Auctionned NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+  const nEvent = await createNft("Test Auctioned  NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
   const mEvent = await createMarketplace(MarketplaceKind.Public, testAccount, WaitUntil.BlockInclusion)
   const currentBlock = await query(txPallets.system, chainQuery.number)
   const auctionMinDuration = getMinAuctionDuration()

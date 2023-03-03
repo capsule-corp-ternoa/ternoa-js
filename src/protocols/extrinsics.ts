@@ -54,7 +54,7 @@ export const setTransmissionProtocol = async (
 
 /**
  * @name removeTransmissionProtocolTx
- * @summary    		               Creates an unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash for a tansmission protocol.
+ * @summary    		               Creates an unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash for a transmission protocol.
  * @param nftId		               The NFT Id to remove the transmission protocol.
  * @returns  		                 Unsigned unsubmitted Remove-Transmission-Protocol Transaction Hash. The Hash is only valid for 5 minutes.
  */
@@ -81,13 +81,13 @@ export const removeTransmissionProtocol = async (
 }
 
 /**
- * @name resetTranmissionProtocolTimerTx
+ * @name resetTransmissionProtocolTimerTx
  * @summary    		                Creates an unsigned unsubmitted Reset-Timer Transaction Hash for an AtBlockWithReset protocol.
  * @param nftId		                The NFT Id to reset the timer for an AtBlockWithReset protocol.
  * @param blockNumber 	          The new blockNumber to execute the AtBlockWithReset protocol.
  * @returns  		                  Unsigned unsubmitted Reset-Timer Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const resetTranmissionProtocolTimerTx = async (
+export const resetTransmissionProtocolTimerTx = async (
   nftId: number,
   blockNumber: number,
 ): Promise<TransactionHashType> => {
@@ -95,21 +95,21 @@ export const resetTranmissionProtocolTimerTx = async (
 }
 
 /**
- * @name resetTranmissionProtocolTimer
- * @summary    		                Resets the block execusion of the transmission protocol.
+ * @name resetTransmissionProtocolTimer
+ * @summary    		                Resets the block execution of the transmission protocol.
  * @param nftId		                The NFT Id to remove the transmission protocol.
  * @param blockNumber 	          The new blockNumber to execute the AtBlockWithReset protocol.
  * @param keyring                 Account that will sign the transaction.
  * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns  		                  TimerResetEvent Blockchain event.
  */
-export const resetTranmissionProtocolTimer = async (
+export const resetTransmissionProtocolTimer = async (
   nftId: number,
   blockNumber: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<TimerResetEvent> => {
-  const tx = await resetTranmissionProtocolTimerTx(nftId, blockNumber)
+  const tx = await resetTransmissionProtocolTimerTx(nftId, blockNumber)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(TimerResetEvent)
 }

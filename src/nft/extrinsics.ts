@@ -5,7 +5,6 @@ import { txActions, txPallets, WaitUntil } from "../constants"
 import {
   CapsuleKeyUpdateNotifiedEvent,
   CapsuleOffchainDataSetEvent,
-  CapsuleRevertedEvent,
   CollectionBurnedEvent,
   CollectionClosedEvent,
   CollectionCreatedEvent,
@@ -40,10 +39,10 @@ export const createNftTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(royalty)
+  const formattedRoyality = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
-    formatedRoyalty,
+    formattedRoyality,
     collectionId,
     isSoulbound,
   ])
@@ -90,11 +89,11 @@ export const createSecretNftTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(royalty)
+  const formattedRoyality = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createSecretNft, [
     offchainData,
     secretOffchainData,
-    formatedRoyalty,
+    formattedRoyality,
     collectionId,
     isSoulbound,
   ])
@@ -234,8 +233,8 @@ export const delegateNft = async (
  * @returns       Unsigned unsubmitted Set-Royalty-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(amount)
-  return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
+  const formattedRoyality = formatPermill(amount)
+  return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formattedRoyality])
 }
 
 /**
@@ -374,11 +373,11 @@ export const createCapsuleTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(royalty)
+  const formattedRoyality = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createCapsule, [
     offchainData,
     capsuleOffchainData,
-    formatedRoyalty,
+    formattedRoyality,
     collectionId,
     isSoulbound,
   ])
