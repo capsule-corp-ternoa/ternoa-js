@@ -1,8 +1,10 @@
 import BN from "bn.js"
 import { File } from "formdata-node"
+import { Buffer } from "buffer"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
+import { RetryUploadErrorType } from "./types"
 
 /**
  * @name convertFileToBuffer
@@ -44,23 +46,22 @@ export const removeURLSlash = (url: string) => {
   }
 }
 
-export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T> => {
-  let lastError: any
+export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T | RetryUploadErrorType> => {
+  let lastError: RetryUploadErrorType | undefined
 
   for (let i = 0; i < n; i++) {
     try {
-      if (i >= 1) {
-        console.log("RETRY:", i)
-      }
       return await fn()
-    } catch (e) {
+    } catch (err: any) {
       lastError = {
-        ...(e as Error),
+        isRetryError: true,
+        status: "SDK_RETRY_POST_ERROR",
+        message: err?.message ? err.message : JSON.stringify(err),
       }
     }
   }
 
-  return lastError
+  return lastError as RetryUploadErrorType
 }
 
 export const ensureHttps = (url: string) => {

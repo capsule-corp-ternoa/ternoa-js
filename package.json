@@ -1,6 +1,6 @@
 {
   "name": "ternoa-js",
-  "version": "1.5.0-alpha1",
+  "version": "1.5.0-alpha6",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "engines": {
     "node": ">=14.13.1 || >=16.0.0"
@@ -10,6 +10,7 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "rimraf build && tsc && npm run build:frank-build",
+    "browserify": "browserify build/index.js -o build/bundle.js",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
     "docs": "typedoc ./src/index.ts",
     "lint": "eslint ./src --ext .js,.ts",
@@ -46,15 +47,15 @@
   "homepage": "https://github.com/capsule-corp-ternoa/ternoa-js#readme",
   "devDependencies": {
     "@babel/preset-env": "7.20.x",
-    "@babel/preset-typescript": "7.18.x",
+    "@babel/preset-typescript": "7.21.x",
     "@jest/test-sequencer": "29.4.x",
     "@types/jest": "29.4.x",
     "@types/mime-types": "2.1.x",
-    "@typescript-eslint/eslint-plugin": "5.50.x",
-    "@typescript-eslint/parser": "5.50.x",
+    "@typescript-eslint/eslint-plugin": "5.53.x",
+    "@typescript-eslint/parser": "5.53.x",
     "babel-jest": "29.4.x",
     "dotenv": "16.0.x",
-    "eslint": "8.33.x",
+    "eslint": "8.34.x",
     "eslint-config-prettier": "8.6.x",
     "eslint-plugin-jest": "27.2.x",
     "jest": "29.4.x",
@@ -63,16 +64,17 @@
     "ts-jest": "29.0.x",
     "ts-node": "10.9.x",
     "typedoc": "0.23.x",
-    "typescript": "4.9.x"
+    "typescript": "4.8.x"
   },
   "dependencies": {
-    "@polkadot/api": "9.13.5",
+    "@polkadot/api": "9.14.2",
     "axios": "0.27.x",
     "bn.js": "5.2.x",
+    "buffer": "6.0.x",
     "form-data-encoder": "1.7.x",
     "formdata-node": "4.4.x",
-    "stream": "0.0.x",
-    "openpgp": "5.5.0",
-    "shamirs-secret-sharing": "^1.0.1"
+    "openpgp": "5.7.0",
+    "sssa-js": "^0.0.1",
+    "stream": "0.0.x"
   }
 }

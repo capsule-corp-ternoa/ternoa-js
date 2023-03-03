@@ -1,60 +1,73 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { combine, split } from "shamirs-secret-sharing"
+import { create, combine } from "sssa-js"
+import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
 
 import { getSignature } from "./crypto"
 import { HttpClient } from "./http"
-import { RetrievePayloadType, StorePayloadType, TeeStoreDataResponseType, TeeRetrieveDataResponseType } from "./types"
+import {
+  RetrievePayloadType,
+  StorePayloadType,
+  TeeGenericDataResponseType,
+  TeeRetrieveDataResponseType,
+  TeeSharesStoreType,
+  TeeSharesRemoveType,
+  RequesterType,
+} from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
 import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
-import { EnclaveHealthType } from "tee/types"
+import { EnclaveHealthType, NFTShareAvailableType } from "tee/types"
 
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
 
+const TEE_STORE_STATUS_SUCCESS = "STORESUCCESS"
+const TEE_RETRIEVE_STATUS_SUCCESS = "RETRIEVESUCCESS"
 export const TEE_HEALTH_ENDPOINT = "/api/health"
-export const TEE_STORE_NFT_ENDPOINT = "/api/secret-nft/store-keyshare"
-export const TEE_RETRIEVE_NFT_ENDPOINT = "/api/secret-nft/retrieve-keyshare"
-export const TEE_STORE_CAPSULE_ENDPOINT = "/api/capsule-nft/set-keyshare"
-export const TEE_RETRIEVE_CAPSULE_ENDPOINT = "/api/capsule-nft/retrieve-keyshare"
+export const TEE_STORE_SECRET_NFT_ENDPOINT = "/api/secret-nft/store-keyshare"
+export const TEE_RETRIEVE_SECRET_NFT_ENDPOINT = "/api/secret-nft/retrieve-keyshare"
+export const TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT = "/api/secret-nft/remove-keyshare"
+export const TEE_AVAILABLE_SECRET_NFT_KEYSHARE_ENDPOINT = (nftId: number) =>
+  `/api/secret-nft/is-keyshare-available/${nftId}`
+export const TEE_STORE_CAPSULE_NFT_ENDPOINT = "/api/capsule-nft/set-keyshare"
+export const TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT = "/api/capsule-nft/retrieve-keyshare"
+export const TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT = "/api/capsule-nft/remove-keyshare"
+export const TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT = (nftId: number) =>
+  `/api/capsule-nft/is-keyshare-available/${nftId}`
 
 export const SIGNER_BLOCK_VALIDITY = 100
 
 /**
- * @name generateSSSShares
+ * @name generateKeyShares
  * @summary     Generates an array of shares from the incoming parameter string.
  * @param data  The data to split into shares (e.g. private key).
  * @returns     An array of stringified shares.
  */
-export const generateSSSShares = (data: string): string[] => {
-  const shares = split(data, {
-    shares: SSSA_NUMSHARES,
-    threshold: SSSA_THRESHOLD,
-  })
-  const base64shares: string[] = shares.map((bufferShare: any) => bufferShare.toString("base64"))
-
+export const generateKeyShares = (data: string): string[] => {
+  const shares = create(SSSA_THRESHOLD, SSSA_NUMSHARES, data)
+  const base64shares: string[] = shares.map((share: string) => Buffer.from(share).toString("base64"))
   return base64shares
 }
 
 /**
- * @name combineSSSShares
+ * @name combineKeyShares
  * @summary       Combines an array of shares to reconstruct data.
  * @param shares  Array of stringified shares.
  * @returns       The original data reconstructed.
  */
-export const combineSSSShares = (shares: string[]): string => {
+export const combineKeyShares = (shares: string[]): string => {
   const filteredShares = shares.filter((x) => x)
   if (filteredShares.length < SSSA_THRESHOLD)
     throw new Error(
       `${Errors.TEE_RETRIEVE_ERROR} - CANNOT_COMBINE_SHARES: expected a minimum of ${SSSA_THRESHOLD} shares.`,
     )
-  const hexShares = filteredShares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("hex"))
+  const hexShares = filteredShares.map((bufferShare) => Buffer.from(bufferShare, "base64").toString("utf-8"))
   const combinedShares = combine(hexShares)
-  return combinedShares.toString("utf8")
+  return combinedShares
 }
 
 /**
@@ -98,53 +111,81 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
 }
 
 /**
- * @name formatPayload
- * @summary         Prepares post request payload to store secret NFT data into TEE enclaves.
- * @param nftId     The ID of the secret NFT.
- * @param share     A share of the private key used to decrypt the secret NFT.
- * @param keyring   Account of the secret NFT's owner.
- * @returns         Payload ready to be submitted to TEE enclaves.
+ * @name getEnclaveSharesAvailablility
+ * @summary           Check that an enclave from a cluster have registered a Capsule NFT or a Secret NFT's key shares
+ * @param enclave     The enclave base url.
+ * @param nftId       The Capsule NFT id or Secret NFT id to check key registration on enclave.
+ * @param kind        The kind of NFT linked to the key being checked: "secret" or "capsule"
+ * @returns           A JSON containing the enclave share availability (enclave_id, nft_id, an exists status (boolean))
+ */
+export const getTeeEnclaveSharesAvailablility = async (enclave: string, nftId: number, kind: "secret" | "capsule") => {
+  if (kind !== "secret" && kind !== "capsule") {
+    throw new Error(`${Errors.TEE_ERROR}: Kind must be either "secret" or "capsule"`)
+  }
+  const http = new HttpClient(ensureHttps(enclave))
+  const endpoint =
+    kind === "secret"
+      ? TEE_AVAILABLE_SECRET_NFT_KEYSHARE_ENDPOINT(nftId)
+      : TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT(nftId)
+  return await http.get<NFTShareAvailableType>(endpoint)
+}
+
+/**
+ * @name formatStorePayload
+ * @summary                     Prepares post request payload to store secret/capsule NFT data into TEE enclaves.
+ * @param ownerAddress          Address of the NFT's owner.
+ * @param signerAuthMessage     The message to be signed by the owner to autenticate the tempory signer used to sign shares.
+ * @param signerAuthSignature   The signerAuthMessage message signed by the NFT owner.
+ * @param signerPair            The temporary signer account used to sign shares.
+ * @param nftId                 The ID of the NFT.
+ * @param share                 A share of the private key used to decrypt the NFT.
+ * @param blockId               The current block header id on-chain.
+ * @param blockValidity         A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
+ * @returns                     Payload object ready to be submitted to TEE enclaves.
  */
 export const formatStorePayload = (
-  owner: IKeyringPair,
-  signer: IKeyringPair,
+  ownerAddress: string,
+  signerAuthMessage: string,
+  signerAuthSignature: string,
+  signerPair: IKeyringPair,
   nftId: number,
   share: string,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): StorePayloadType => {
-  const signerAddressToSign = `<Bytes>${signer.address}_${blockId}_${blockValidity}</Bytes>` // todo: removed <Bytes> when the API is clean
-  const signersig = getSignature(owner, signerAddressToSign)
-  const secretData = `<Bytes>${nftId}_${share}_${blockId}_${blockValidity}</Bytes>` // todo: removed <Bytes> when the API is clean + blockId & blockValidity merged into targetBlockId like in signerAddressToSign
-  const signature = getSignature(signer, secretData)
+  const data = `${nftId}_${share}_${blockId}_${blockValidity}`
+  const dataSignature = getSignature(signerPair, data)
   return {
-    owner_address: owner.address,
-    signer_address: signerAddressToSign,
-    secret_data: secretData,
-    signature,
-    signersig,
+    owner_address: ownerAddress,
+    signer_address: signerAuthMessage,
+    data,
+    signature: dataSignature,
+    signersig: signerAuthSignature,
   }
 }
 
 /**
  * @name formatRetrievePayload
- * @summary         Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
- * @param nftId     The ID of the secret NFT.
- * @param share     A share of the private key used to decrypt the secret NFT.
- * @param keyring   Account of the secret NFT's owner.
- * @returns         Payload ready to be submitted to TEE enclaves.
+ * @summary               Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
+ * @param ownerPair       The NFT owner account used to sign data.
+ * @param nftId           The ID of the NFT.
+ * @param blockId         The current block header id on-chain.
+ * @param blockValidity   A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
+ * @returns               Payload ready to be submitted to TEE enclaves.
  */
 export const formatRetrievePayload = (
-  owner: IKeyringPair,
+  requesterPair: IKeyringPair,
+  requesterRole: RequesterType,
   nftId: number,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): RetrievePayloadType => {
-  const secretData = `${nftId}_${blockId}_${blockValidity}`
-  const signature = getSignature(owner, secretData)
+  const data = `${nftId}_${blockId}_${blockValidity}`
+  const signature = getSignature(requesterPair, data)
   return {
-    owner_address: owner.address,
-    data: secretData,
+    requester_address: requesterPair.address,
+    requester_type: requesterRole,
+    data,
     signature,
   }
 }
@@ -167,7 +208,7 @@ export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secret
 }
 
 /**
- * @name teeSSSSharesUpload
+ * @name teeKeySharesStore
  * @summary               Upload secret shares to TEE enclaves with retry.
  * @param clusterId       The TEE Cluster id to upload shares to.
  * @param kind            The kind of nft linked to the key uploaded: "secret" or "capsule"
@@ -176,14 +217,13 @@ export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secret
  * @param enclavesIndex   Optional: An Array of enclaves index. For example, some enclaves that previously failed that need to be uploaded again.
  * @returns               TEE enclave response including both the payload and the enclave response.
  */
-export const teeSSSSharesUpload = async (
-  //todo: rename upload to store
+export const teeKeySharesStore = async (
   clusterId = 0,
   kind: "secret" | "capsule",
   payloads: StorePayloadType[],
   nbRetry = 3,
   enclavesIndex?: number[],
-) => {
+): Promise<TeeSharesStoreType[]> => {
   if (kind !== "secret" && kind !== "capsule") {
     throw new Error(`${Errors.TEE_UPLOAD_ERROR} : Kind must be either "secret" or "capsule"`)
   }
@@ -202,29 +242,65 @@ export const teeSSSSharesUpload = async (
     payloads.map(async (payload, idx) => {
       const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
       const http = new HttpClient(ensureHttps(baseUrl))
-      const endpoint = kind === "secret" ? TEE_STORE_NFT_ENDPOINT : TEE_STORE_CAPSULE_ENDPOINT
-      const post = async () => await teeUpload<StorePayloadType, TeeStoreDataResponseType>(http, endpoint, payload)
-      return await retryPost<TeeStoreDataResponseType | Error>(post, nbRetry)
+      const endpoint = kind === "secret" ? TEE_STORE_SECRET_NFT_ENDPOINT : TEE_STORE_CAPSULE_NFT_ENDPOINT
+      const post = async () => await teeUpload<StorePayloadType, TeeGenericDataResponseType>(http, endpoint, payload)
+      return await retryPost<TeeGenericDataResponseType>(post, nbRetry)
     }),
   )
 
   return teeRes.map((enclaveRes, i) => {
+    const payload = payloads[i]
+
+    if ("isRetryError" in enclaveRes)
+      return {
+        status: enclaveRes.status,
+        description: enclaveRes.message,
+        nft_id: Number(payload.data.split("_")[0]),
+        isError: true,
+        ...payload,
+      }
+
     return {
-      ...payloads[i],
       ...enclaveRes,
+      isError: enclaveRes.status !== TEE_STORE_STATUS_SUCCESS,
+      ...payload,
     }
   })
 }
 
 /**
- * @name teeSSSSharesRetrieve
+ * @name sharesAvailableOnTeeCluster
+ * @summary           Check that all enclaves from a cluster have registered a the Capsule NFT or a Secret NFT's key shares
+ * @param clusterId   The TEE Cluster id.
+ * @param nftId       The Capsule NFT id or Secret NFT id to check key registration on enclaves.
+ * @param kind        The kind of NFT linked to the key being checked: "secret" or "capsule"
+ * @returns           A boolean status indicating if enclaves have stored the NFT shares.
+ */
+export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, kind: "secret" | "capsule") => {
+  if (kind !== "secret" && kind !== "capsule") {
+    throw new Error(`${Errors.TEE_ERROR}: Kind must be either "secret" or "capsule"`)
+  }
+  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  let isShareAvailable = false
+  let i = 0
+  while (isShareAvailable !== true && i <= teeEnclaves.length) {
+    const { exists } = await getTeeEnclaveSharesAvailablility(teeEnclaves[i], nftId, kind)
+    isShareAvailable = exists
+    i += 1
+  }
+
+  return isShareAvailable
+}
+
+/**
+ * @name teeKeySharesRetrieve
  * @summary           Get secret data shares from TEE enclaves.
  * @param clusterId   The TEE Cluster id to upload shares to.
  * @param kind        The kind of nft linked to the key being retrieved: "secret" or "capsule"
  * @param payload     The payload containing secret NFT data, the keyring address and the signature. You can use our formatPayload() function.
  * @returns           TEE enclave response.
  */
-export const teeSSSSharesRetrieve = async (
+export const teeKeySharesRetrieve = async (
   clusterId: number,
   kind: "secret" | "capsule",
   payload: RetrievePayloadType,
@@ -237,15 +313,73 @@ export const teeSSSSharesRetrieve = async (
     throw new Error(
       `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
-  const dataFieldName = kind === "secret" ? "keyshare_data" : "secret_data"
-  const shares = await Promise.all(
+  const errors: string[] = []
+  let shares = await Promise.all(
     teeEnclaves.map(async (baseUrl) => {
-      const secretPayload = payload
       const http = new HttpClient(ensureHttps(baseUrl))
-      const endpoint = kind === "secret" ? TEE_RETRIEVE_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_ENDPOINT
-      const res = await teeUpload<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, secretPayload)
-      return res[dataFieldName]?.split("_")[1] ?? ""
+      const endpoint = kind === "secret" ? TEE_RETRIEVE_SECRET_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT
+      try {
+        const res = await teeUpload<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
+        if (res.status !== TEE_RETRIEVE_STATUS_SUCCESS)
+          errors.push(res.description ? res.description.split(":")[1] : "Share could not be retrieved")
+        return res.status === TEE_RETRIEVE_STATUS_SUCCESS && res.keyshare_data
+          ? res.keyshare_data.split("_")[1]
+          : undefined
+      } catch {
+        errors.push("Enclave not available")
+      }
     }),
   )
-  return shares.filter((x) => x)
+
+  shares = shares.filter((x) => x !== undefined)
+  if (shares.length < SSSA_THRESHOLD) {
+    throw new Error(`${Errors.TEE_RETRIEVE_ERROR} - Shares could not be retrieved: ${errors[0]}`)
+  }
+  return shares as string[]
+}
+
+/**
+ * @name teeKeySharesRemove
+ * @summary                 Remove the share of a burnt NFT from the enclaves.
+ * @param clusterId         The TEE Cluster id to remove the shares of the burnt NFT.
+ * @param kind              The kind of NFT linked to the key being deleted: "secret" or "capsule"
+ * @param requesterAddress  The requester address who want to remove the NFT key share.
+ * @param nftId             The burnt NFT id to remove the key.
+ * @returns                 An array of JSONs containing the TEE enclave result (status (boolean), enclave_id, nft_id, description)
+ */
+export const teeKeySharesRemove = async (
+  clusterId: number,
+  kind: "secret" | "capsule",
+  requesterAddress: string,
+  nftId: number,
+): Promise<TeeGenericDataResponseType[]> => {
+  if (kind !== "secret" && kind !== "capsule") {
+    throw new Error(`${Errors.TEE_REMOVE_ERROR} : Kind must be either "secret" or "capsule"`)
+  }
+  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  const payload: TeeSharesRemoveType = {
+    requester_address: requesterAddress,
+    nft_id: nftId,
+  }
+
+  const shares = await Promise.all(
+    teeEnclaves.map(async (baseUrl) => {
+      const http = new HttpClient(ensureHttps(baseUrl))
+      const endpoint =
+        kind === "secret" ? TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT : TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT
+      try {
+        const res = await teeUpload<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
+        return res
+      } catch {
+        return {
+          status: Errors.TEE_REMOVE_ERROR,
+          nft_id: nftId,
+          enclave_id: baseUrl,
+          description: "Enclave not available",
+        }
+      }
+    }),
+  )
+
+  return shares
 }

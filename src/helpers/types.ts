@@ -3,14 +3,6 @@ export type PGPKeysType = {
   publicKey: string
 }
 
-export type StorePayloadType = {
-  owner_address: string
-  signer_address: string
-  secret_data: string
-  signature: string
-  signersig: string
-}
-
 export interface IServiceIPFS {
   apiKey?: string
   apiUrl: URL
@@ -37,6 +29,8 @@ export type CollectionMetadataType<T> = Required<MediaMetadataType<T>>
 
 export type MarketplaceMetadataType<T> = Omit<Required<MediaMetadataType<T>>, "description">
 
+export type RequesterType = "OWNER" | "DELEGATEE" | "RENTEE"
+
 export type CapsuleMedia<T> = {
   encryptedFile: string
   type: string
@@ -48,24 +42,49 @@ export type CapsuleEncryptedMedia<T> = {
   size: number
 } & T
 
-export type TeeStoreDataResponseType = StorePayloadType & {
-  status: string
-  nft_id: number
-  enclave_id: number
-  description: string
+export type StorePayloadType = {
+  owner_address: string
+  signer_address: string
+  data: string
+  signature: string
+  signersig: string
 }
 
 export type RetrievePayloadType = {
-  owner_address: string
+  requester_address: string
+  requester_type: RequesterType
   data: string
   signature: string
+}
+
+export type TeeGenericDataResponseType = {
+  status: string
+  nft_id: number
+  enclave_id: string
+  description: string
 }
 
 export type TeeRetrieveDataResponseType = {
   status: string
   nft_id?: number
   keyshare_data: string
-  secret_data: string
   enclave_id: string
   description: string
+}
+
+export type TeeSharesStoreType = {
+  isError: boolean
+  enclave_id?: string
+} & Omit<TeeGenericDataResponseType, "enclave_id"> &
+  StorePayloadType
+
+export type RetryUploadErrorType = {
+  isRetryError: boolean
+  status: string
+  message: string
+}
+
+export type TeeSharesRemoveType = {
+  requester_address: string
+  nft_id: number
 }
