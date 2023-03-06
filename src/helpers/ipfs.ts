@@ -11,6 +11,9 @@ import {
   CollectionMetadataType,
   NftMetadataType,
   MarketplaceMetadataType,
+  CapsuleEncryptedMedia,
+  CapsuleMedia,
+  MediaMetadataType,
 } from "./types"
 
 /**
@@ -84,7 +87,7 @@ export class TernoaIPFS {
    */
   static storeFile = async (service: IServiceIPFS, file: File) => {
     const form = new FormData()
-    form.set("file", file)
+    form.append("file", file)
     return await TernoaIPFS.upload(service, form)
   }
 
@@ -116,6 +119,113 @@ export class TernoaIPFS {
     const metadataBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
     const metadataFile = new File([metadataBlob], "NFT metadata")
     return await TernoaIPFS.storeFile(service, metadataFile)
+  }
+
+  /**
+   * Store a Ternoa secret NFT's metadata & asset on IPFS.
+   *
+   * @param service
+   * @param encryptedFile     NFT's encrypted asset.
+   * @param encryptedFileType The original encrypted file type.
+   * @param publicKey         Public key used to encrypt the Secret NFT.
+   * @param nftMetadata       (Optional) Secret NFT metadata {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-520-Secret-nft.md here}.
+   * @param mediaMetadata     (Optional) Secret NFT asset metadata.
+   * @returns                 IPFS secret NFT data (Hash, Size, Name).
+   */
+  static storeSecretNFT = async <TNFT, TMedia>(
+    service: IServiceIPFS,
+    encryptedFile: string,
+    encryptedFileType: string,
+    publicKey: string,
+    nftMetadata?: Partial<NftMetadataType<TNFT>>,
+    mediaMetadata?: MediaMetadataType<TMedia>,
+  ) => {
+    if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
+    if (typeof publicKey !== "string")
+      throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's publicKey must be a string`)
+    const publicKeyBlob = new Blob([publicKey], { type: "text/plain" })
+    const publicKeyFile = new File([publicKeyBlob], "SecretNFT public key")
+    const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile)
+    if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
+    const nftPublicKeyHash = publicKeyRes.Hash
+
+    const blob = new Blob([encryptedFile], { type: "text/plain" })
+    const file = new File([blob], "SecretNFT metadata")
+    const secretNFTRes = await TernoaIPFS.storeFile(service, file)
+    if (!secretNFTRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's asset`)
+    const { Hash: secretNFTHash, Size: secretNFTSize } = secretNFTRes
+
+    const secretNFTMetadata = {
+      ...(nftMetadata && nftMetadata),
+      properties: {
+        encrypted_media: {
+          hash: secretNFTHash,
+          type: encryptedFileType ?? file.type,
+          size: secretNFTSize,
+          ...(mediaMetadata && mediaMetadata),
+        },
+        public_key: nftPublicKeyHash,
+      },
+    }
+    const secretNFTMetadataBlob = new Blob([JSON.stringify(secretNFTMetadata)], { type: "application/json" })
+    const secretNFTMetadataFile = new File([secretNFTMetadataBlob], "secretNFT metadata")
+    return await TernoaIPFS.storeFile(service, secretNFTMetadataFile)
+  }
+
+  /**
+   * Store a Ternoa Capsule NFT's metadata & assets on IPFS.
+   *
+   * @param service
+   * @param publicKey         Public key used to encrypt the Capsule NFT.
+   * @param encryptedMedia    An array of NFT's encrypted asset.
+   * @param nftMetadata       (Optional) Capsule NFT metadata {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-530-Capsule.md here}.
+   * @returns                 IPFS Capsule data (Hash, Size, Name).
+   */
+  static storeCapsuleNFT = async <TNFT, TMedia>(
+    service: IServiceIPFS,
+    publicKey: string,
+    encryptedMedia: CapsuleMedia<TMedia>[],
+    nftMetadata?: Partial<NftMetadataType<TNFT>>,
+  ) => {
+    if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
+
+    if (typeof publicKey !== "string")
+      throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Capsule NFT's publicKey must be a string`)
+    const publicKeyBlob = new Blob([publicKey], { type: "text/plain" })
+    const publicKeyFile = new File([publicKeyBlob], "SecretNFT public key")
+    const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile)
+    if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
+    const nftPublicKeyHash = publicKeyRes.Hash
+
+    const capsuleMedia: CapsuleEncryptedMedia<TMedia>[] = []
+    await Promise.all(
+      encryptedMedia.map(async ({ encryptedFile, type, ...rest }) => {
+        const blob = new Blob([encryptedFile], { type: "text/plain" })
+        const file = new File([blob], "capsuleMediaNFT")
+        const { Hash: mediaHash, Size: mediaSize } = await TernoaIPFS.storeFile(service, file)
+        if (!mediaHash) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload capsule NFT's media`)
+
+        const media = {
+          hash: mediaHash,
+          type: type,
+          size: Number(mediaSize),
+          ...rest,
+        } as CapsuleEncryptedMedia<TMedia>
+
+        capsuleMedia.push(media)
+      }),
+    )
+
+    const capsuleMetadata = {
+      ...(nftMetadata && nftMetadata),
+      properties: {
+        encryptedMedia: capsuleMedia,
+        publicKey: nftPublicKeyHash,
+      },
+    }
+    const capsuleNFTMetadataBlob = new Blob([JSON.stringify(capsuleMetadata)], { type: "application/json" })
+    const capsuleNFTMetadataFile = new File([capsuleNFTMetadataBlob], "capsuleNFT metadata")
+    return await TernoaIPFS.storeFile(service, capsuleNFTMetadataFile)
   }
 
   /**
@@ -181,6 +291,24 @@ export class TernoaIPFS {
     return TernoaIPFS.storeNFT(this, file, metadata)
   }
 
+  storeSecretNFT<TNFT, TMedia>(
+    encryptedFile: string,
+    encryptedFileType: string,
+    publicKey: string,
+    nftMetadata?: Partial<NftMetadataType<TNFT>>,
+    mediaMetadata?: MediaMetadataType<TMedia>,
+  ) {
+    return TernoaIPFS.storeSecretNFT(this, encryptedFile, encryptedFileType, publicKey, nftMetadata, mediaMetadata)
+  }
+
+  storeCapsuleNFT<TNFT, TMedia>(
+    publicKey: string,
+    encryptedMedia: CapsuleMedia<TMedia>[],
+    nftMetadata?: Partial<NftMetadataType<TNFT>>,
+  ) {
+    return TernoaIPFS.storeCapsuleNFT(this, publicKey, encryptedMedia, nftMetadata)
+  }
+
   storeCollection<T>(profileFile: File, bannerFile: File, metadata: CollectionMetadataType<T>) {
     return TernoaIPFS.storeCollection(this, profileFile, bannerFile, metadata)
   }
@@ -199,6 +327,15 @@ export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T
   if (!description) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description is required`)
   else if (typeof description !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's description must be a string`)
+  }
+}
+
+export const validateOptionalNFTMetadata = <T>({ title, description }: Partial<NftMetadataType<T>>) => {
+  if (title !== undefined && typeof title !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's title must be a string`)
+  }
+  if (description !== undefined && typeof description !== "string") {
+    throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's description must be a string`)
   }
 }
 

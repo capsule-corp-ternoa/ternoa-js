@@ -21,7 +21,7 @@ beforeAll(async () => {
 
   // Create some Test NFT, Marketplace and Auction
   const { test: testAccount } = await createTestPairs()
-  const nEvent = await createNft("Test Auctionned NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+  const nEvent = await createNft("Test Auctioned  NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
   const mEvent = await createMarketplace(MarketplaceKind.Public, testAccount, WaitUntil.BlockInclusion)
   TEST_DATA.nftId = nEvent.nftId
   TEST_DATA.marketplaceId = mEvent.marketplaceId
@@ -63,7 +63,7 @@ describe("Testing to create an auction & buy NFT directly with buyItNow", (): vo
     ).toBe(true)
   })
 
-  it("Testing to buy an auctionned NFT directly with buyItNow", async (): Promise<void> => {
+  it("Testing to buy an Auctioned  NFT directly with buyItNow", async (): Promise<void> => {
     const { dest: destAccount } = await createTestPairs()
     const buyItPrice = 10
     const buyItPriceBN = numberToBalance(10)
@@ -86,7 +86,7 @@ describe("Testing to create an auction & buy NFT directly with buyItNow", (): vo
 
 it("Testing to cancel an auction", async (): Promise<void> => {
   const { test: testAccount } = await createTestPairs()
-  const nEvent = await createNft("Test Auctionned NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+  const nEvent = await createNft("Test Auctioned  NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
   const currentBlock = await query(txPallets.system, chainQuery.number)
   const auctionMinDuration = getMinAuctionDuration()
   const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 10
@@ -111,7 +111,7 @@ it("Testing to cancel an auction", async (): Promise<void> => {
 describe("Testing to create an auction & add/update/remove bids", (): void => {
   it("Testing to create an auction & add a bid", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
-    const nEvent = await createNft("Test Auctionned NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
+    const nEvent = await createNft("Test Auctioned NFT", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
     const currentBlock = await query(txPallets.system, chainQuery.number)
     const auctionMinDuration = getMinAuctionDuration()
     const auctionStartBlock = Number.parseInt(currentBlock.toString()) + 1

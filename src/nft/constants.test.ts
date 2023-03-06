@@ -4,6 +4,7 @@ import {
   getCollectionOffchainDataLimit,
   getCollectionSizeLimit,
   getInitialMintFee,
+  getInitialSecretMintFee,
   getNftOffchainDataLimit,
 } from "./constants"
 
@@ -15,6 +16,12 @@ beforeAll(() => {
 it("Testing initial mint fee to be 10 CAPS", async () => {
   const actual = await getInitialMintFee()
   const expected = new BN("10000000000000000000")
+  expect(actual.eq(expected)).toBe(true)
+})
+
+it("Testing initial secret mint fee to be 75 CAPS", async () => {
+  const actual = await getInitialSecretMintFee()
+  const expected = new BN("75000000000000000000")
   expect(actual.eq(expected)).toBe(true)
 })
 

@@ -26,12 +26,12 @@
 <h3>Summary</h3><p>Set or Remove (Noop for No Operation) the marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.</p>
 <p>Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
 Noop :                 No Operation, nothing change.
-Removed :              Current datas will be deleted.
+Removed :              Current data will be deleted.
 Set :                  Un object that update parameter value:
                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
-                       CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}</p>
+                       CollectionList require an array of number: { [MarketplaceConfigAction.Set]: number[]}</p>
 
 <h3>Returns</h3><p>MarketplaceConfigSetEvent Blockchain event.</p>
 </div>
@@ -72,7 +72,7 @@ Set :                  Un object that update parameter value:
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/TernoaEvents.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaEvents</a><span class="tsd-signature-symbol">.</span><a href="../classes/TernoaEvents.MarketplaceConfigSetEvent.html" class="tsd-signature-type" data-tsd-kind="Class">MarketplaceConfigSetEvent</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/150e507/src/marketplace/extrinsics.ts#L113">src/marketplace/extrinsics.ts:113</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/45edb74/src/marketplace/extrinsics.ts#L113">src/marketplace/extrinsics.ts:113</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -101,7 +101,9 @@ Set :                  Un object that update parameter value:
 <li class="tsd-kind-namespace"><a href="../modules/Blockchain.html">Blockchain</a></li>
 <li class="current tsd-kind-namespace"><a href="../modules/Marketplace.html">Marketplace</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Nft.html">Nft</a></li>
+<li class="tsd-kind-namespace"><a href="../modules/Protocols.html">Protocols</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/Rent.html">Rent</a></li>
+<li class="tsd-kind-namespace"><a href="../modules/Tee.html">Tee</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/TernoaConstants.html">Ternoa<wbr/>Constants</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/TernoaEvents.html">Ternoa<wbr/>Events</a></li>
 <li class="tsd-kind-namespace"><a href="../modules/TernoaHelpers.html">Ternoa<wbr/>Helpers</a></li></ul></li></ul></div></details></nav>

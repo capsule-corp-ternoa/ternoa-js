@@ -93,12 +93,12 @@ export const setMarketplaceConfigurationTx = async (
  *
  * Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
  * Noop :                 No Operation, nothing change.
- * Removed :              Current datas will be deleted.
+ * Removed :              Current data will be deleted.
  * Set :                  Un object that update parameter value:
  *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
  *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
  *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
- *                        CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
+ *                        CollectionList require an array of number: { [MarketplaceConfigAction.Set]: number[]}
  *
  * @param id              Marketplace Id of the marketplace to update.
  * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
@@ -147,7 +147,7 @@ export const setMarketplaceOwnerTx = async (id: number, recipient: string): Prom
  * @name setMarketplaceOwner
  * @summary               Set the new marketplace owner on the chain.
  * @param id              Marketplace Id of the marketplace to be transferred.
- * @param recipient       Adress of the new marketplace owner.
+ * @param recipient       Address of the new marketplace owner.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               MarketplaceOwnerSetEvent Blockchain event.

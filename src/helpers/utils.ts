@@ -1,7 +1,23 @@
 import BN from "bn.js"
+import { File } from "formdata-node"
+import { Buffer } from "buffer"
 
 import { balanceToNumber } from "../blockchain"
 import { Errors } from "../constants"
+import { RetryUploadErrorType } from "./types"
+
+/**
+ * @name convertFileToBuffer
+ * @summary                 Converts a File to Buffer.
+ * @param file              File to convert.
+ * @returns                 A Buffer.
+ */
+export const convertFileToBuffer = async (file: File): Promise<Buffer> => {
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  return buffer
+}
 
 /**
  * @name formatPermill
@@ -28,4 +44,28 @@ export const removeURLSlash = (url: string) => {
   } else {
     return url
   }
+}
+
+export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T | RetryUploadErrorType> => {
+  let lastError: RetryUploadErrorType | undefined
+
+  for (let i = 0; i < n; i++) {
+    try {
+      return await fn()
+    } catch (err: any) {
+      lastError = {
+        isRetryError: true,
+        status: "SDK_RETRY_POST_ERROR",
+        message: err?.message ? err.message : JSON.stringify(err),
+      }
+    }
+  }
+
+  return lastError as RetryUploadErrorType
+}
+
+export const ensureHttps = (url: string) => {
+  if (url.indexOf("https://") === 0) return url
+  else if (url.indexOf("http://") === 0) return url.replace("http://", "https://")
+  else return "https://" + url
 }
