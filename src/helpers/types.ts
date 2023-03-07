@@ -18,6 +18,12 @@ export type IpfsAddDataResponseType = {
 export type NftMetadataType<T> = {
   title: string
   description: string
+  properties?: {
+    [key: string]: any
+    media?: {
+      [key: string]: any
+    }
+  }
 } & T
 
 export type MediaMetadataType<T> = {
