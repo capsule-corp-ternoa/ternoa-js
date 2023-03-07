@@ -8,6 +8,8 @@ export enum txPallets {
   balances = "balances",
   associatedAccounts = "associatedAccounts",
   system = "system",
+  tee = "tee",
+  transmissionProtocols = "transmissionProtocols",
 }
 
 export enum txActions {
@@ -20,7 +22,9 @@ export enum txActions {
   forceBatch = "forceBatch",
 
   // nft
+  addSecret = "addSecret",
   createNft = "createNft",
+  createSecretNft = "createSecretNft",
   burnNft = "burnNft",
   transferNft = "transferNft",
   delegateNft = "delegateNft",
@@ -32,6 +36,13 @@ export enum txActions {
   burnCollection = "burnCollection",
   setNftMintFee = "setNftMintFee",
 
+  // capsule
+  convertToCapsule = "convertToCapsule",
+  createCapsule = "createCapsule",
+  revertCapsule = "revertCapsule",
+  setCapsuleOffchaindata = "setCapsuleOffchaindata",
+  notifyEnclaveKeyUpdate = "notifyEnclaveKeyUpdate",
+
   // rent
   createContract = "createContract",
   cancelContract = "cancelContract",
@@ -42,6 +53,12 @@ export enum txActions {
   makeRentOffer = "makeRentOffer",
   retractRentOffer = "retractRentOffer",
   revokeContract = "revokeContract",
+
+  // transmission protocols
+  addConsent = "addConsent",
+  removeTransmissionProtocol = "removeTransmissionProtocol",
+  resetTimer = "resetTimer",
+  setTransmissionProtocol = "setTransmissionProtocol",
 
   // marketplace
   buyNft = "buyNft",
@@ -76,6 +93,8 @@ export enum txEvent {
 
 export enum chainQuery {
   nftMintFee = "nftMintFee",
+  secretNftMintFee = "secretNftMintFee",
+  secretNftsOffchainData = "secretNftsOffchainData",
   nfts = "nfts",
   nextNFTId = "nextNFTId",
   nextCollectionId = "nextCollectionId",
@@ -87,6 +106,19 @@ export enum chainQuery {
   marketplaces = "marketplaces",
   listedNfts = "listedNfts",
 
+  // capsule
+  capsuleMintFee = "capsuleMintFee",
+  capsuleOffchainData = "capsuleOffchainData",
+
+  // transmissionProtocols
+  atBlockFee = "atBlockFee",
+  atBlockWithResetFee = "atBlockWithResetFee",
+  onConsentFee = "onConsentFee",
+  onConsentAtBlockFee = "onConsentAtBlockFee",
+  atBlockQueue = "atBlockQueue",
+  transmissions = "transmissions",
+  onConsentData = "onConsentData",
+
   // auction
   auctions = "auctions",
   deadlines = "deadlines",
@@ -96,10 +128,15 @@ export enum chainQuery {
   contracts = "contracts",
   queues = "queues",
   offers = "offers",
+
+  // tee
+  clusterData = "clusterData",
+  enclaveData = "enclaveData",
 }
 
 export enum chainConstants {
   initialMintFee = "initialMintFee",
+  initialSecretMintFee = "initialSecretMintFee",
   collectionSizeLimit = "collectionSizeLimit",
   existentialDeposit = "existentialDeposit",
   nftOffchainDataLimit = "nftOffchainDataLimit",
@@ -121,6 +158,11 @@ export enum chainConstants {
   maximumContractAvailabilityLimit = "maximumContractAvailabilityLimit",
   maximumContractDurationLimit = "maximumContractDurationLimit",
   simultaneousContractLimit = "simultaneousContractLimit",
+
+  // transmissionProtocols
+  simultaneousTransmissionLimit = "simultaneousTransmissionLimit",
+  maxConsentListSize = "maxConsentListSize",
+  maxBlockDuration = "maxBlockDuration",
 }
 
 export enum WaitUntil {
@@ -156,4 +198,16 @@ export enum Errors {
   BLOCK_NOT_FOUND_ON_CHAIN = "BLOCK_NOT_FOUND_ON_CHAIN",
   AUCTION_NFT_CONVERSION_ERROR = "AUCTION_NFT_CONVERSION_ERROR",
   RENT_NFT_CONVERSION_ERROR = "RENT_NFT_CONVERSION_ERROR",
+  CLUSTER_CONVERSION_ERROR = "CLUSTER_CONVERSION_ERROR",
+  ENCLAVE_CONVERSION_ERROR = "ENCLAVE_CONVERSION_ERROR",
+  TRANSMISSION_PROTOCOL_CONVERSION_ERROR = "TRANSMISSION_PROTOCOL_CONVERSION_ERROR",
+  TEE_CLUSTER_NOT_FOUND = "TEE_CLUSTER_NOT_FOUND",
+  TEE_ENCLAVE_NOT_FOUND = "TEE_ENCLAVE_NOT_FOUND",
+  TEE_ENCLAVE_NOT_AVAILBLE = "TEE_ENCLAVE_NOT_AVAILBLE",
+  TEE_UPLOAD_ERROR = "TEE_UPLOAD_ERROR",
+  TEE_RETRIEVE_ERROR = "TEE_RETRIEVE_ERROR",
+  TEE_REMOVE_ERROR = "TEE_REMOVE_ERROR",
+  TEE_ERROR = "TEE_ERROR",
+  NOT_CORRECT_AMOUNT_TEE_PAYLOADS = "NOT_CORRECT_AMOUNT_TEE_PAYLOADS",
+  NOT_CORRECT_AMOUNT_TEE_ENCLAVES = "NOT_CORRECT_AMOUNT_TEE_ENCLAVES",
 }

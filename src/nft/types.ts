@@ -5,6 +5,9 @@ export type NftState = {
   isDelegated: boolean
   isSoulbound: boolean
   isRented: boolean
+  isSyncingSecret: boolean
+  isSyncingCapsule: boolean
+  isTransmission: boolean
 }
 
 export type NftData = {
@@ -14,6 +17,24 @@ export type NftData = {
   collectionId: number | undefined
   royalty: number
   state: NftState
+}
+
+export type SecretNftData = {
+  nftId: number
+  owner: string
+  creator: string
+  offchainData: string
+  secretOffchainData: string
+  collectionId: number | null
+  royalty: number
+  isSoulbound: boolean
+}
+
+export type CapsuleNFTData<T extends NftData> = Omit<T, "collectionId" | "state"> & {
+  nftId: number
+  capsuleOffchainData: string
+  collectionId: number | null
+  isSoulbound: boolean
 }
 
 export type CollectionData = {

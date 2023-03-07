@@ -516,18 +516,20 @@ export const numberToBalance = (_input: number, chainDecimals = TERNOA_CHAIN_DEC
  * @returns             Returns a pair of objects :
  *                      - The first returned object contains some block information as the block hash, the block header and block extrinsics.
  *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
+ *                      - The third returned argument is the submitted transaction hash.
  */
 export const submitTxBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
 ): Promise<SubmitTxBlockingType> => {
-  const [conVar, events, blockInfo] = await submitTxNonBlocking(tx, waitUntil, keyring)
+  const [conVar, events, blockInfo, txHash] = await submitTxNonBlocking(tx, waitUntil, keyring)
   await conVar.wait()
 
   return {
     blockInfo,
     events,
+    txHash,
   }
 }
 
@@ -541,12 +543,13 @@ export const submitTxBlocking = async (
  *                      - The first returned object is a conditional variable which can yield the information if the operation is finished.
  *                      - The second returned object is an array of events which gets populated automatically once the operation is finished.
  *                      - The third returned object contains the block information as the block hash, the block header and block extrinsics.
+ *                      - The fouth returned argument is the submitted transaction hash.
  */
 export const submitTxNonBlocking = async (
   tx: TransactionHashType,
   waitUntil: WaitUntil,
   keyring?: IKeyringPair,
-): Promise<[ConditionalVariable, BlockchainEvents, BlockInfo]> => {
+): Promise<[ConditionalVariable, BlockchainEvents, BlockInfo, `0x${string}`]> => {
   const conVar = new ConditionalVariable(500)
   const chainEvents: BlockchainEvents = new BlockchainEvents([])
   const blockInfo = new BlockInfo()
@@ -569,9 +572,9 @@ export const submitTxNonBlocking = async (
     }
   }
 
-  await submitTxHex(tx, callback)
+  const txHash = await submitTxHex(tx, callback)
 
-  return [conVar, chainEvents, blockInfo]
+  return [conVar, chainEvents, blockInfo, txHash]
 }
 
 export * from "./types"

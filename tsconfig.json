@@ -10,7 +10,10 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts", "build", "src/_misc"]
