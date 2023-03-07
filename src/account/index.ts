@@ -1,19 +1,27 @@
 import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import { Keyring } from "@polkadot/keyring"
+import { IKeyringPair } from "@polkadot/types/types"
 
 /**
  * @name generateSeed
+ * @summary Generate a new seed
+ * @returns The new seed
+ */
+export const generateSeed = mnemonicGenerate
+
+/**
+ * @name generateAccount
  * @summary Generate a new account
  * @returns An object with the seed and the public address
  */
-export const generateSeed = async (): Promise<{
+export const generateAccount = async (): Promise<{
   seed: string
-  address: string
+  keyring: IKeyringPair
 }> => {
   await cryptoWaitReady()
   const seed = mnemonicGenerate()
-  const account = await getKeyringFromSeed(seed)
-  return { seed: seed, address: account.address }
+  const keyring = await getKeyringFromSeed(seed)
+  return { seed: seed, keyring }
 }
 
 /**

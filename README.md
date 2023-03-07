@@ -237,8 +237,8 @@ All functions are organized by a specific theme, for example, the function _gene
 ```javascript
 import { generateSeed, getKeyringFromSeed } from "ternoa-js/account"
 ;(async () => {
-  const account = await generateSeed()
-  const keyring = await getKeyringFromSeed(account.seed)
+  const seed = await generateSeed()
+  const keyring = await getKeyringFromSeed(seed)
   const address = keyring.address
   console.log("Your fresh public address is: ", address)
 })().catch((e) => {
