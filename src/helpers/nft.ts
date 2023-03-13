@@ -55,6 +55,9 @@ export const secretNftEncryptAndUploadFile = async <TNFT, TMedia>(
  * @param ipfsClient         A TernoaIPFS instance.
  * @param ownerPair          Account of the secret NFT's owner.
  * @param clusterId          The TEE Cluster id.
+ * @param royalty            Percentage of all second sales that the secret NFT creator will receive. Default is 0%. It's a decimal number in range [0, 100].
+ * @param collectionId       The collection to which the secret NFT belongs. Optional Parameter: Default is undefined.
+ * @param isSoulbound        If true, makes the secret NFT intransferable. Default is false.
  * @returns                  A JSON including both secretNftEvent & TEE enclave response (shards datas and description).
  */
 export const mintSecretNFT = async <T>(
@@ -65,6 +68,9 @@ export const mintSecretNFT = async <T>(
   ipfsClient: TernoaIPFS,
   ownerPair: IKeyringPair,
   clusterId = 0,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
 ) => {
   // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
@@ -88,9 +94,9 @@ export const mintSecretNFT = async <T>(
   const secretNftEvent = await createSecretNft(
     offchainDataHash,
     secretOffchainDataHash,
-    0,
-    undefined,
-    false,
+    royalty,
+    collectionId,
+    isSoulbound,
     ownerPair,
     WaitUntil.BlockInclusion,
   )
@@ -126,7 +132,8 @@ export const mintSecretNFT = async <T>(
  * @summary                  Retrieves and decrypts the secret NFT hash.
  * @param nftId              The secret NFT id.
  * @param ipfsClient         A TernoaIPFS instance.
- * @param owner              Account of the secret NFT's owner.
+ * @param requesterPair      Account of the secret NFT's owner or the decrypter account if NFT is delegated or rented.
+ * @param requesterRole      Kind of the secret NFT's decrypter: it can be either "OWNER", "DELEGATEE" or "RENTEE"
  * @param clusterId          The TEE Cluster id.
  * @returns                  A string containing the secretNFT decrypted content.
  */
@@ -156,16 +163,19 @@ export const viewSecretNFT = async (
 
 /**
  * @name mintCapsuleNFT
- * @summary                  Create a Capsule NFT and uploads your key's shards on a TEE.
- * @param owner              Account of the Capsule NFT's owner.
- * @param ipfsClient         A TernoaIPFS instance.
- * @param keys               Public and Private keys used to encrypt the file.
- * @param nftFile            File to upload as the preview of the Capsule NFT.
- * @param nftMetadata        The NFT preview metadata (Title, Description).
- * @param encryptedMedia     The array containing all the Capsule NFT encrypted media.
- * @param capsuleMetadata    (Optional) The Capusle NFT public metadata (Title, Description...).
- * @param clusterId          The TEE Cluster id.
- * @returns                  A JSON including both capsuleEvent & TEE enclave response (shards datas and description).
+ * @summary                   Create a Capsule NFT and uploads your key's shards on a TEE.
+ * @param owner               Account of the Capsule NFT's owner.
+ * @param ipfsClient          A TernoaIPFS instance.
+ * @param keys                Public and Private keys used to encrypt the file.
+ * @param nftFile             File to upload as the preview of the Capsule NFT.
+ * @param nftMetadata         The NFT preview metadata (Title, Description).
+ * @param encryptedMedia      The array containing all the Capsule NFT encrypted media.
+ * @param capsuleMetadata     (Optional) The Capusle NFT public metadata (Title, Description...).
+ * @param clusterId           The TEE Cluster id. Default is 0
+ * @param capsuleRoyalty      Percentage of all second sales that the capsule creator will receive. Default is 0%. It's a decimal number in range [0, 100].
+ * @param capsuleCollectionId The collection to which the capsule NFT belongs. Optional Parameter: Default is undefined.
+ * @param isSoulbound         If true, makes the Capsule intransferable. Default is false.
+ * @returns                   A JSON including both capsuleEvent & TEE enclave response (shards datas and description).
  */
 export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   ownerPair: IKeyringPair,
@@ -176,6 +186,9 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   encryptedMedia: CapsuleMedia<TMedia>[],
   capsuleMetadata?: Partial<NftMetadataType<TCapsule>>,
   clusterId = 0,
+  capsuleRoyalty = 0,
+  capsuleCollectionId: number | undefined = undefined,
+  isSoulbound = false,
 ) => {
   // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
@@ -197,9 +210,9 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
   const capsuleEvent = await createCapsule(
     offchainDataHash,
     capsuleOffchainDataHash,
-    0,
-    undefined,
-    false,
+    capsuleRoyalty,
+    capsuleCollectionId,
+    isSoulbound,
     ownerPair,
     WaitUntil.BlockInclusion,
   )
@@ -234,7 +247,8 @@ export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
  * @name getCapsuleNFTPrivateKey
  * @summary                  Retrieves the capsule NFT private key to decrypt the secret hashes from properties.
  * @param nftId              The capsule NFT id.
- * @param owner              Account of the capsule NFT's owner.
+ * @param requesterPair      Account of the capsule NFT's owner or the decrypter account if NFT is delegated or rented.
+ * @param requesterRole      Kind of the capsule NFT's decrypter: it can be either "OWNER", "DELEGATEE" or "RENTEE"
  * @param clusterId          The TEE Cluster id.
  * @returns                  A string containing the capsule NFT private key.
  */

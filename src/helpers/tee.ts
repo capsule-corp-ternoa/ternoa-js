@@ -167,7 +167,8 @@ export const formatStorePayload = (
 /**
  * @name formatRetrievePayload
  * @summary               Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
- * @param ownerPair       The NFT owner account used to sign data.
+ * @param requesterPair   The NFT owner account used to sign data. It can also be the retriever account of rentee or delegatee.
+ * @param requesterRole   Kind of account that want to retrieve the payload: it can be either "OWNER", "DELEGATEE" or "RENTEE"
  * @param nftId           The ID of the NFT.
  * @param blockId         The current block header id on-chain.
  * @param blockValidity   A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
