@@ -1,0 +1,34 @@
+{
+  "name": "@ternoa/types",
+  "version": "0.0.1",
+  "description": "Ternoa types using @polkadot/typegen to generate type definitions",
+  "main": "index.js",
+  "repository": "https://github.com/capsule-corp-ternoa/ternoa-js/packages/types",
+  "author": "Igor Papandinas",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "directory": "src",
+    "registry": "https://registry.npmjs.org"
+  },
+  "bugs": {
+    "url": "https://github.com/capsule-corp-ternoa/ternoa-js/issues"
+  },
+  "homepage": "https://github.com/capsule-corp-ternoa/ternoa-js",
+  "scripts": {
+    "get-metadata": "ts-node get-metadata.ts",
+    "build": "tsc && cp ./README.md ./build",
+    "generate": "yarn generate:defs && yarn generate:meta",
+    "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package @ternoa/types/interfaces --input ./src/interfaces  --endpoint ./ternoa.json",
+    "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package @ternoa/types/interfaces --endpoint ./ternoa.json --output ./src/interfaces --strict",
+    "lint": "tsc --noEmit --pretty"
+  },
+  "dependencies": {
+    "@polkadot/api": "latest"
+  },
+  "devDependencies": {
+    "@polkadot/typegen": "latest",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  }
+}
