@@ -5,7 +5,7 @@ import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
 
-import { getSignature } from "./crypto"
+import { getSignatureFromKeyring } from "./crypto"
 import { HttpClient } from "./http"
 import {
   RetrievePayloadType,
@@ -153,8 +153,8 @@ export const formatStorePayload = (
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): StorePayloadType => {
-  const data = `${nftId}_${share}_${blockId}_${blockValidity}`
-  const dataSignature = getSignature(signerPair, data)
+  const data = `<Bytes>${nftId}_${share}_${blockId}_${blockValidity}</Bytes>`
+  const dataSignature = getSignatureFromKeyring(signerPair, data)
   return {
     owner_address: ownerAddress,
     signer_address: signerAuthMessage,
@@ -181,8 +181,8 @@ export const formatRetrievePayload = (
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): RetrievePayloadType => {
-  const data = `${nftId}_${blockId}_${blockValidity}`
-  const signature = getSignature(requesterPair, data)
+  const data = `<Bytes>${nftId}_${blockId}_${blockValidity}</Bytes>`
+  const signature = getSignatureFromKeyring(requesterPair, data)
   return {
     requester_address: requesterPair.address,
     requester_type: requesterRole,
