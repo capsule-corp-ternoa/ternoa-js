@@ -16,7 +16,6 @@ import {
 
 import { MarketplaceConfigAction, MarketplaceKind } from "./enum"
 import { AccountListType, CollectionListType, CommissionFeeType, ListingFeeType, OffchainDataType } from "./types"
-import { formatMarketplaceFee } from "./utils"
 
 /**
  * @name createMarketplaceTx
@@ -50,21 +49,28 @@ export const createMarketplace = async (
  * @name setMarketplaceConfigurationTx
  * @summary               Creates an unsigned unsubmitted Set-Marketplace-Configuration Transaction Hash.
  *
- * Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
- * Noop :                 No Operation, nothing change.
- * Removed :              Current datas will be deleted.
- * Set :                  Un object that update parameter value:
- *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
- *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
- *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
- *                        CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
+ *                        Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
+ *                        - Noop: No Operation, nothing change.
+ *                        - Remove: Current datas will be deleted.
+ *                        - Set: An object that updates parameter value below.
+ *                            - Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
+ *                            - AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
+ *                            - OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
+ *                            - CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
+ *
+ *                        IMPORTANT: In order to avoid any error, we strongly recommand you to construct those fields using the helpers we provide.
+ *                        - formatMarketplaceFee() for both commission and listing fee.
+ *                        - formatMarketplaceAccountList() for both commission and listing fee.
+ *                        - formatMarketplaceOffchainData() for both commission and listing fee.
+ *                        - formatMarketplaceCollectionList() for both commission and listing fee.</br>
+ *                        - Check {@link https://docs.ternoa.network/for-developers/guides/marketplace/ Ternoa Doc}.
  *
  * @param id              Marketplace Id of the marketplace to update.
- * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
- * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (in Big Number format) or as percentage (in permill format). Without using formatters, you can use the convertMarketplaceFee() function.
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (in Big Number format) or as percentage (in permill format). Without using formatters, you can use the convertMarketplaceFee() function.
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
  * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
- * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed. ex: { [MarketplaceConfigAction.Set]: [0, 1, 2] }
+ * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed.
  * @returns               MarketplaceConfigSetEvent Blockchain event.
  */
 export const setMarketplaceConfigurationTx = async (
@@ -75,8 +81,6 @@ export const setMarketplaceConfigurationTx = async (
   offchainData: OffchainDataType = MarketplaceConfigAction.Noop,
   collectionList: CollectionListType = MarketplaceConfigAction.Noop,
 ): Promise<TransactionHashType> => {
-  await formatMarketplaceFee(commissionFee)
-  await formatMarketplaceFee(listingFee)
   return await createTxHex(txPallets.marketplace, txActions.setMarketplaceConfiguration, [
     id,
     commissionFee,
@@ -91,21 +95,28 @@ export const setMarketplaceConfigurationTx = async (
  * @name setMarketplaceConfiguration
  * @summary               Set or Remove (Noop for No Operation) the marketplace parameters configuration : Commission fee, listing fee, the account list or any offchain datas.
  *
- * Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
- * Noop :                 No Operation, nothing change.
- * Removed :              Current data will be deleted.
- * Set :                  Un object that update parameter value:
- *                        Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
- *                        AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
- *                        OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
- *                        CollectionList require an array of number: { [MarketplaceConfigAction.Set]: number[]}
+ *                        Each of the parameters of the marketplace, need one of the following type: Noop is set by default for each of the parameters.
+ *                        - Noop: No Operation, nothing change.
+ *                        - Remove: Current datas will be deleted.
+ *                        - Set: An object that updates parameter value below.
+ *                            - Commission Fee and Listing Fee require a data type (flat or percentage) under format : { [MarketplaceConfigAction.Set]: { setFeeType: number || BN}}
+ *                            - AccountList require an array of string: { [MarketplaceConfigAction.Set]: string[]}
+ *                            - OffChainData require a string: { [MarketplaceConfigAction.Set]: string}
+ *                            - CollectionList require an arry of number: { [MarketplaceConfigAction.Set]: number[]}
+ *
+ *                        IMPORTANT: In order to avoid any error, we strongly recommand you to construct those fields using the helpers we provide.
+ *                        - formatMarketplaceFee() for both commission and listing fee.
+ *                        - formatMarketplaceAccountList() for both commission and listing fee.
+ *                        - formatMarketplaceOffchainData() for both commission and listing fee.
+ *                        - formatMarketplaceCollectionList() for both commission and listing fee.</br>
+ *                        - Check {@link https://docs.ternoa.network/for-developers/guides/marketplace/ Ternoa Doc}.
  *
  * @param id              Marketplace Id of the marketplace to update.
- * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { percentage: 10 } }
- * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (number) or as percentage. ex: { [MarketplaceConfigAction.Set]: { flat: 5 } }
+ * @param commissionFee   Commission when an NFT is sold on the marketplace : it can be set as flat (in Big Number format) or as percentage (in permill format). Without using formatters, you can use the convertMarketplaceFee() function.
+ * @param listingFee      Fee when an NFT is added for sale to marketplace : it can be set as flat (in Big Number format) or as percentage (in permill format). Without using formatters, you can use the convertMarketplaceFee() function.
  * @param accountList     A list of accounts : if the marketplace kind is private, it allows these accounts to sell NFT. If the marketplace kind is public, it bans these accounts from selling NFT.
  * @param offchainData    Off-chain related marketplace metadata. Can be an IPFS Hash, an URL or plain text.
- * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed. ex: { [MarketplaceConfigAction.Set]: [0, 1, 2] }
+ * @param collectionList  A list of Collection Id: same as accountList, if the marketplace kind is private, the list is a whitelist and if the marketplace is public, the list bans the collection to be listed.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               MarketplaceConfigSetEvent Blockchain event.
