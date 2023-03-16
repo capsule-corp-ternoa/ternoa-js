@@ -60,9 +60,9 @@ export const createMarketplace = async (
  *
  *                        IMPORTANT: In order to avoid any error, we strongly recommand you to construct those fields using the helpers we provide.
  *                        - formatMarketplaceFee() for both commission and listing fee.
- *                        - formatMarketplaceAccountList() for both commission and listing fee.
- *                        - formatMarketplaceOffchainData() for both commission and listing fee.
- *                        - formatMarketplaceCollectionList() for both commission and listing fee.</br>
+ *                        - formatMarketplaceAccountList() for the account list.
+ *                        - formatMarketplaceOffchainData() for the offchain data.
+ *                        - formatMarketplaceCollectionList() for the collection list.
  *                        - Check {@link https://docs.ternoa.network/for-developers/guides/marketplace/ Ternoa Doc}.
  *
  * @param id              Marketplace Id of the marketplace to update.
@@ -106,9 +106,9 @@ export const setMarketplaceConfigurationTx = async (
  *
  *                        IMPORTANT: In order to avoid any error, we strongly recommand you to construct those fields using the helpers we provide.
  *                        - formatMarketplaceFee() for both commission and listing fee.
- *                        - formatMarketplaceAccountList() for both commission and listing fee.
- *                        - formatMarketplaceOffchainData() for both commission and listing fee.
- *                        - formatMarketplaceCollectionList() for both commission and listing fee.</br>
+ *                        - formatMarketplaceAccountList() for the account list.
+ *                        - formatMarketplaceOffchainData() for the offchain data.
+ *                        - formatMarketplaceCollectionList() for the collection list.
  *                        - Check {@link https://docs.ternoa.network/for-developers/guides/marketplace/ Ternoa Doc}.
  *
  * @param id              Marketplace Id of the marketplace to update.
