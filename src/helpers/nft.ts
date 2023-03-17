@@ -32,12 +32,12 @@ import { isValidAddress } from "../blockchain"
  * @param mediaMetadata     Optional asset NFT metadata (Name, Description, (...)) {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-510-Secret-nft.md here}.
  * @returns                 The data object with the secret NFT IPFS hash (ex: to add as offchain secret metadatas in the extrinsic).
  */
-export const secretNftEncryptAndUploadFile = async <TNFT, TMedia>(
+export const secretNftEncryptAndUploadFile = async (
   file: File,
   publicPGPKey: string,
   ipfsClient: TernoaIPFS,
-  nftMetadata?: Partial<NftMetadataType<TNFT>>,
-  mediaMetadata?: MediaMetadataType<TMedia>,
+  nftMetadata?: Partial<NftMetadataType>,
+  mediaMetadata?: MediaMetadataType,
 ) => {
   if (!file) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - File undefined`)
   const encryptedFile = await encryptFile(file, publicPGPKey)
@@ -131,11 +131,11 @@ export const prepareAndStoreKeyShares = async (
  * @param isSoulbound        If true, makes the secret NFT intransferable. Default is false.
  * @returns                  A JSON including both secretNftEvent & TEE enclave response (shards datas and description).
  */
-export const mintSecretNFT = async <T>(
+export const mintSecretNFT = async (
   nftFile: File,
-  nftMetadata: NftMetadataType<T>,
+  nftMetadata: NftMetadataType,
   secretNftFile: File,
-  secretNftMetadata: NftMetadataType<T>,
+  secretNftMetadata: NftMetadataType,
   ipfsClient: TernoaIPFS,
   ownerPair: IKeyringPair,
   clusterId = 0,
@@ -226,14 +226,14 @@ export const viewSecretNFT = async (
  * @param isSoulbound         If true, makes the Capsule intransferable. Default is false.
  * @returns                   A JSON including both capsuleEvent & TEE enclave response (shards datas and description).
  */
-export const mintCapsuleNFT = async <TNFT, TMedia, TCapsule>(
+export const mintCapsuleNFT = async (
   ownerPair: IKeyringPair,
   ipfsClient: TernoaIPFS,
   keys: PGPKeysType,
   nftFile: File,
-  nftMetadata: NftMetadataType<TNFT>,
-  encryptedMedia: CapsuleMedia<TMedia>[],
-  capsuleMetadata?: Partial<NftMetadataType<TCapsule>>,
+  nftMetadata: NftMetadataType,
+  encryptedMedia: CapsuleMedia[],
+  capsuleMetadata?: Partial<NftMetadataType>,
   clusterId = 0,
   capsuleRoyalty = 0,
   capsuleCollectionId: number | undefined = undefined,

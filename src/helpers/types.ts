@@ -15,38 +15,40 @@ export type IpfsAddDataResponseType = {
   Size: string
 }
 
-export type NftMetadataType<T> = {
+export type NftMetadataType = {
   title: string
   description: string
+  [key: string]: unknown
   properties?: {
-    [key: string]: any
+    [key: string]: unknown
     media?: {
-      [key: string]: any
+      [key: string]: unknown
     }
   }
-} & T
+}
 
-export type MediaMetadataType<T> = {
+export type MediaMetadataType = {
   name?: string
   description?: string
-} & T
+  [key: string]: unknown
+}
 
-export type CollectionMetadataType<T> = Required<MediaMetadataType<T>>
+export type CollectionMetadataType = Required<MediaMetadataType>
 
-export type MarketplaceMetadataType<T> = Omit<Required<MediaMetadataType<T>>, "description">
+export type MarketplaceMetadataType = Omit<Required<MediaMetadataType>, "description">
 
 export type RequesterType = "OWNER" | "DELEGATEE" | "RENTEE"
 
-export type CapsuleMedia<T> = {
+export type CapsuleMedia = {
   encryptedFile: string
   type: string
-} & T
+}
 
-export type CapsuleEncryptedMedia<T> = {
+export type CapsuleEncryptedMedia = {
   hash: string
   type: string
   size: number
-} & T
+}
 
 export type StorePayloadType = {
   owner_address: string
