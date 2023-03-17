@@ -160,7 +160,9 @@ export class TernoaIPFS {
     const secretNFTMetadata = {
       ...(nftMetadata && nftMetadata),
       properties: {
+        ...nftMetadata?.properties,
         encrypted_media: {
+          ...nftMetadata?.properties?.encrypted_media,
           hash: secretNFTHash,
           type: encryptedFileType ?? file.type,
           size: secretNFTSize,
@@ -221,6 +223,7 @@ export class TernoaIPFS {
     const capsuleMetadata = {
       ...(nftMetadata && nftMetadata),
       properties: {
+        ...nftMetadata?.properties,
         encryptedMedia: capsuleMedia,
         publicKey: nftPublicKeyHash,
       },
