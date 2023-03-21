@@ -224,8 +224,8 @@ export class TernoaIPFS {
       ...(nftMetadata && nftMetadata),
       properties: {
         ...nftMetadata?.properties,
-        encryptedMedia: capsuleMedia,
-        publicKey: nftPublicKeyHash,
+        encrypted_media: capsuleMedia,
+        public_key_of_nft: nftPublicKeyHash,
       },
     }
     const capsuleNFTMetadataBlob = new Blob([JSON.stringify(capsuleMetadata)], { type: "application/json" })
