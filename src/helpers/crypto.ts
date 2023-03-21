@@ -20,7 +20,7 @@ export const getSignatureFromKeyring = (keyring: IKeyringPair, data: string) => 
  * @name getSignatureFromExtension
  * @summary                 Signs data using an injector extension. We recommand Polkadot extention.
  * @param signerAddress     Account address that will sign the data.
- * @param injectorExtension The singer method retrived from your extension.
+ * @param injectorExtension The signer method retrived from your extension: object must have a signer key.
  * @param data              Data to be signed.
  * @returns                 Hex value of the signed data.
  */
@@ -30,11 +30,7 @@ export const getSignatureFromExtension = async (
   data: string,
 ) => {
   // To handle Polkadot Extension
-  // injectorExtension : InjectedExtension
-  // injectorExtension.singer : Signer
-  // injectorExtension?.signer?.signRaw : Promise<SignerResult>
   if (injectorExtension && "signer" in injectorExtension && injectorExtension?.signer?.signRaw) {
-    console.log("Signing from Polkadot Extension")
     const { signature } = (await injectorExtension?.signer?.signRaw({
       address: signerAddress,
       data,
@@ -43,12 +39,7 @@ export const getSignatureFromExtension = async (
     return signature
   }
   // To handle signing from Api
-  // { signer }?: SignerRawOptions
-  // interface SignerRawOptions {
-  //   signer?: Signer
-  // }
   else if (injectorExtension && "signer" in injectorExtension) {
-    console.log("Signing with api")
     const api = getRawApi()
     return await api.sign(
       signerAddress,

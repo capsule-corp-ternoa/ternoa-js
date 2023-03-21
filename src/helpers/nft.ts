@@ -63,10 +63,11 @@ export const getTemporarySignerKeys = async (address: string, lastBlockId: numbe
  * @name prepareAndStoreKeyShares
  * @summary                  Splits the private key into shards, format and send them for upload on to a Tee Cluster.
  * @param privateKey         The private key to be splited with Shamir algorithm.
- * @param ownerPair          Account owner of the private key to split.
+ * @param signer             Account owner of the private key to split (keyring) or address (string) .
  * @param nftId              The Capsule NFT id or Secret NFT id to link to the private key.
  * @param kind               The kind of nft linked to the key to upload: "secret" or "capsule".
- * @param clusterId          The TEE Cluster id.
+ * @param extensionInjector  (Optional)The signer method retrived from your extension to sign the transaction. We recommand Polkadot extention: object must have a signer key.
+ * @param clusterId          (Optional)The TEE Cluster id. Default is set to cluster id 0.
  * @returns                  The TEE enclave response (shards datas and description).
  */
 export const prepareAndStoreKeyShares = async (
@@ -97,23 +98,22 @@ export const prepareAndStoreKeyShares = async (
     typeof signer === "string"
       ? extensionInjector && (await getSignatureFromExtension(signer, extensionInjector, signerAuthMessage))
       : getSignatureFromKeyring(signer, signerAuthMessage)
-  if (signerAuthSignature) {
-    const payloads = await Promise.all(
-      shares.map((share: string) =>
-        formatStorePayload(
-          typeof signer === "string" ? signer : signer.address,
-          signerAuthMessage,
-          signerAuthSignature,
-          tmpSignerPair,
-          nftId,
-          share,
-          lastBlockId,
-        ),
+  if (!signerAuthSignature) throw new Error(`${Errors.TEE_UPLOAD_ERROR} : cannot get signature when uploading payload`)
+  const payloads = await Promise.all(
+    shares.map((share: string) =>
+      formatStorePayload(
+        typeof signer === "string" ? signer : signer.address,
+        signerAuthMessage,
+        signerAuthSignature,
+        tmpSignerPair,
+        nftId,
+        share,
+        lastBlockId,
       ),
-    )
-    // 3. request to store a batch of secret shares to the enclave
-    return await teeKeySharesStore(clusterId, kind, payloads)
-  }
+    ),
+  )
+  // 3. request to store a batch of secret shares to the enclave
+  return await teeKeySharesStore(clusterId, kind, payloads)
 }
 
 /**
@@ -125,7 +125,7 @@ export const prepareAndStoreKeyShares = async (
  * @param secretNftMetadata  Secret NFT metadata (Title, Description).
  * @param ipfsClient         A TernoaIPFS instance.
  * @param ownerPair          Account of the secret NFT's owner.
- * @param clusterId          The TEE Cluster id.
+ * @param clusterId          The TEE Cluster id. Default is set to cluster id 0.
  * @param royalty            Percentage of all second sales that the secret NFT creator will receive. Default is 0%. It's a decimal number in range [0, 100].
  * @param collectionId       The collection to which the secret NFT belongs. Optional Parameter: Default is undefined.
  * @param isSoulbound        If true, makes the secret NFT intransferable. Default is false.
@@ -181,31 +181,46 @@ export const mintSecretNFT = async (
  * @summary                  Retrieves and decrypts the secret NFT hash.
  * @param nftId              The secret NFT id.
  * @param ipfsClient         A TernoaIPFS instance.
- * @param requesterPair      Account of the secret NFT's owner or the decrypter account if NFT is delegated or rented.
+ * @param requester          Account of the secret NFT's owner(keyring) or address (string) or the decrypter account if NFT is delegated or rented.
  * @param requesterRole      Kind of the secret NFT's decrypter: it can be either "OWNER", "DELEGATEE" or "RENTEE"
- * @param clusterId          The TEE Cluster id.
+ * @param extensionInjector  (Optional) The signer method retrived from your extension: object must have a signer key.
+ * @param clusterId          (Optional)The TEE Cluster id. Default is set to cluster id 0.
  * @returns                  A string containing the secretNFT decrypted content.
  */
 export const viewSecretNFT = async (
   nftId: number,
   ipfsClient: TernoaIPFS,
-  requesterPair: IKeyringPair,
+  requester: IKeyringPair | string,
   requesterRole: RequesterType,
+  extensionInjector?: Record<string, any>,
   clusterId = 0,
 ) => {
+  // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
 
-  const lastBlockId = await getLastBlock()
+  // 1. Get Secret NFT metadata hash
   const secretNftOffchainData = await getSecretNftOffchainData(nftId)
   const secretNftData = (await ipfsClient.getFile(secretNftOffchainData)) as any
   const encryptedSecretOffchainData = (await ipfsClient.getFile(
     secretNftData.properties.encrypted_media.hash,
   )) as string
 
-  const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
+  // 2. Format and retrieve payload
+  const lastBlockId = await getLastBlock()
+  const payload = await formatRetrievePayload(
+    requester,
+    requesterRole,
+    nftId,
+    lastBlockId,
+    SIGNER_BLOCK_VALIDITY,
+    extensionInjector && extensionInjector,
+  )
   const shares = await teeKeySharesRetrieve(clusterId, "secret", payload)
+
+  // 3. Combine shares
   const privatePGPKey = combineKeyShares(shares)
 
+  // 4. Decrypt file to base 64
   const decryptedBase64 = await decryptFile(encryptedSecretOffchainData, privatePGPKey)
   return decryptedBase64
 }
@@ -273,20 +288,32 @@ export const mintCapsuleNFT = async (
  * @name getCapsuleNFTPrivateKey
  * @summary                  Retrieves the capsule NFT private key to decrypt the secret hashes from properties.
  * @param nftId              The capsule NFT id.
- * @param requesterPair      Account of the capsule NFT's owner or the decrypter account if NFT is delegated or rented.
+ * @param requester          Account of the capsule NFT's owner (keyring) or address (string) or the decrypter account or address if NFT is delegated or rented.
  * @param requesterRole      Kind of the capsule NFT's decrypter: it can be either "OWNER", "DELEGATEE" or "RENTEE"
- * @param clusterId          The TEE Cluster id.
+ * @param extensionInjector  (Optional) The signer method retrived from your extension: object must have a signer key.
+ * @param clusterId          (Optional) The TEE Cluster id. Default is set to 0.
  * @returns                  A string containing the capsule NFT private key.
  */
 export const getCapsuleNFTPrivateKey = async (
   nftId: number,
-  requesterPair: IKeyringPair,
+  requester: IKeyringPair | string,
   requesterRole: RequesterType,
+  extensionInjector?: Record<string, any>,
   clusterId = 0,
 ): Promise<string> => {
+  // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
+  // 1. Format and retrieve payload
   const lastBlockId = await getLastBlock()
-  const payload = formatRetrievePayload(requesterPair, requesterRole, nftId, lastBlockId)
+  const payload = await formatRetrievePayload(
+    requester,
+    requesterRole,
+    nftId,
+    lastBlockId,
+    SIGNER_BLOCK_VALIDITY,
+    extensionInjector && extensionInjector,
+  )
   const shares = await teeKeySharesRetrieve(clusterId, "capsule", payload)
+  // 3. Combine Key
   return combineKeyShares(shares)
 }
