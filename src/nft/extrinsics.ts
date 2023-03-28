@@ -9,6 +9,7 @@ import {
   CollectionClosedEvent,
   CollectionCreatedEvent,
   CollectionLimitedEvent,
+  CollectionOffchainDataSetEvent,
   NFTAddedToCollectionEvent,
   NFTBurnedEvent,
   NFTConvertedToCapsuleEvent,
@@ -631,4 +632,35 @@ export const burnCollection = async (
   const tx = await burnCollectionTx(id)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionBurnedEvent)
+}
+
+/**
+ * @name setCollectionOffchaindataTx
+ * @summary    		              Creates an unsigned unsubmitted Set-Collection-Offchain-Data Transaction Hash for a Collection.
+ * @param id		                The ID of the Collection.
+ * @param offchainData 	        The offchain collection data (a string)
+ * @returns  		                Unsigned unsubmitted Set-Collection-Offchain-Data Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const setCollectionOffchaindataTx = async (id: number, offchainData: string): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.setCollectionOffchaindata, [id, offchainData])
+}
+
+/**
+ * @name setCollectionOffchaindata
+ * @summary    		               Sets the offchain data of a Collection.
+ * @param id		                 The ID of the Collection.
+ * @param offchainData 	         The offchain collection data (a string)
+ * @param keyring                Account that will sign the transaction.
+ * @param waitUntil              Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                 CollectionOffchainDataSetEvent Blockchain event.
+ */
+export const setCollectionOffchaindata = async (
+  id: number,
+  offchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CollectionOffchainDataSetEvent> => {
+  const tx = await setCollectionOffchaindataTx(id, offchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(CollectionOffchainDataSetEvent)
 }
