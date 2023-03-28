@@ -274,22 +274,30 @@ export const unlistNft = async (
  * @name buyNftTx
  * @summary               Creates an unsigned unsubmitted Buy-NFT Transaction Hash.
  * @param nftId           NFT Id of the NFT for sale.
+ * @param signedPrice     The signed buy price.
  * @returns               Unsigned unsubmitted Buy-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const buyNftTx = async (nftId: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.marketplace, txActions.buyNft, [nftId])
+export const buyNftTx = async (nftId: number, signedPrice: number | BN): Promise<TransactionHashType> => {
+  const formattedSignedPrice = typeof signedPrice === "number" ? numberToBalance(signedPrice) : signedPrice
+  return await createTxHex(txPallets.marketplace, txActions.buyNft, [nftId, formattedSignedPrice])
 }
 
 /**
  * @name buyNft
  * @summary               Buys an NFT on a marketplace.
  * @param nftId           NFT Id of the NFT for sale.
+ * @param signedPrice     The signed buy price.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTSoldEvent Blockchain event.
  */
-export const buyNft = async (nftId: number, keyring: IKeyringPair, waitUntil: WaitUntil): Promise<NFTSoldEvent> => {
-  const tx = await buyNftTx(nftId)
+export const buyNft = async (
+  nftId: number,
+  signedPrice: number | BN,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<NFTSoldEvent> => {
+  const tx = await buyNftTx(nftId, signedPrice)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTSoldEvent)
 }

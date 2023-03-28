@@ -68,7 +68,7 @@ describe("Testing to create an auction & buy NFT directly with buyItNow", (): vo
     const buyItPrice = 10
     const buyItPriceBN = numberToBalance(10)
     const zeroBN = numberToBalance(0)
-    const aEvent = await buyItNow(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const aEvent = await buyItNow(TEST_DATA.nftId, buyItPriceBN, destAccount, WaitUntil.BlockInclusion)
 
     expect(
       aEvent.method === "AuctionCompleted" &&

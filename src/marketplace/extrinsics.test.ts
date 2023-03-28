@@ -176,7 +176,7 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
   it("Testing to Buy an NFT from a marketplace", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
-    const mpEvent = await buyNft(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
+    const mpEvent = await buyNft(TEST_DATA.nftId, 10, testAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
     const listedPrice = numberToBalance(10).toString()
     const marketplaceCut = numberToBalance(1).toString()
