@@ -85,8 +85,13 @@ export const createContract = async (
     renterCancellationFee,
     renteeCancellationFee,
   )
-  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
-  return events.findEventOrThrow(ContractCreatedEvent)
+  const { blockInfo, events } = await submitTxBlocking(tx, waitUntil, keyring)
+  const creationBlockId = blockInfo.block?.header.number.toNumber()
+  const contractCreatedEvent = events.findEventOrThrow(ContractCreatedEvent)
+  if (creationBlockId) {
+    contractCreatedEvent.creationBlockId = creationBlockId
+  }
+  return contractCreatedEvent
 }
 
 /**
@@ -149,7 +154,7 @@ export const revokeContract = async (
  * @name rentTx
  * @summary                       Creates an unsigned unsubmitted Rent-Contract Transaction Hash for an NFT.
  * @param nftId                   The NFT Id with the contract to rent.
- * @param signedRentStartBlockId  The block id of when the rent contract is signed to be rent
+ * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
  * @returns                       Unsigned unsubmitted Rent-Contract Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const rentTx = async (nftId: number, signedRentStartBlockId: number): Promise<TransactionHashType> => {
@@ -160,7 +165,7 @@ export const rentTx = async (nftId: number, signedRentStartBlockId: number): Pro
  * @name rent
  * @summary                       Rents an nft.
  * @param nftId                   The NFT Id of the contract to rent.
- * @param signedRentStartBlockId  The block id of when the rent contract is signed to be rent
+ * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
  * @param keyring                 Account that will sign the transaction.
  * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns                       ContractStartedEvent Blockchain event
@@ -180,7 +185,7 @@ export const rent = async (
  * @name makeRentOfferTx
  * @summary                       Creates an unsigned unsubmitted Make-Rent-Offer Transaction Hash for an NFT.
  * @param nftId                   The NFT Id of the contract to make the offer.
- * @param signedRentStartBlockId  The block id of when the rent contract is signed to be rent
+ * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
  * @returns                       Unsigned unsubmitted Make-Rent-Offer Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const makeRentOfferTx = async (nftId: number, signedRentStartBlockId: number): Promise<TransactionHashType> => {
@@ -191,7 +196,7 @@ export const makeRentOfferTx = async (nftId: number, signedRentStartBlockId: num
  * @name makeRentOffer
  * @summary                       Makes an offer for an available contract.
  * @param nftId                   The NFT Id of the contract to make the offer.
- * @param signedRentStartBlockId  The block id of when the rent contract is signed to be rent
+ * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
  * @param keyring                 Account that will sign the transaction.
  * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns                       ContractOfferCreated Blockchain event

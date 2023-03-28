@@ -816,6 +816,7 @@ export class TransmittedEvent extends BlockchainEvent {
 export class ContractCreatedEvent extends BlockchainEvent {
   nftId: number
   renter: string
+  creationBlockId: number
   duration: DurationType
   acceptanceType: AcceptanceAction
   acceptanceList: string[] | null
@@ -857,6 +858,7 @@ export class ContractCreatedEvent extends BlockchainEvent {
     const parsedRenteeCancellationFee =
       renteeCancellationFee.toString() !== CancellationFeeAction.None && JSON.parse(renteeCancellationFee.toString())
 
+    this.creationBlockId = 0
     this.nftId = Number.parseInt(nftId.toString())
     this.renter = renter.toString()
     this.duration = parsedDuration
