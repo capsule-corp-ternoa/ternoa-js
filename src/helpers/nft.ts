@@ -93,23 +93,19 @@ export const prepareAndStoreKeyShares = async (
   // 1. generate secret shares from the private key
   const shares = generateKeyShares(privateKey)
   // 2. format payloads with temporary signer account
-  const signerAuthMessage = `<Bytes>${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}</Bytes>`
-  const signerAuthSignature =
+  const signerAddress = typeof signer === "string" ? signer : signer.address
+  const authMessage = `<Bytes>${tmpSignerPair.address}_${lastBlockId}_${SIGNER_BLOCK_VALIDITY}</Bytes>`
+  const authSignature =
     typeof signer === "string"
-      ? extensionInjector && (await getSignatureFromExtension(signer, extensionInjector, signerAuthMessage))
-      : getSignatureFromKeyring(signer, signerAuthMessage)
-  if (!signerAuthSignature) throw new Error(`${Errors.TEE_UPLOAD_ERROR} : cannot get signature when uploading payload`)
+      ? extensionInjector && (await getSignatureFromExtension(signer, extensionInjector, authMessage))
+      : getSignatureFromKeyring(signer, authMessage)
+  if (!authSignature)
+    throw new Error(
+      `${Errors.TEE_UPLOAD_ERROR} : signing of the temporary authentication message failed when uploading payload`,
+    )
   const payloads = await Promise.all(
     shares.map((share: string) =>
-      formatStorePayload(
-        typeof signer === "string" ? signer : signer.address,
-        signerAuthMessage,
-        signerAuthSignature,
-        tmpSignerPair,
-        nftId,
-        share,
-        lastBlockId,
-      ),
+      formatStorePayload(signerAddress, authMessage, authSignature, tmpSignerPair, nftId, share, lastBlockId),
     ),
   )
   // 3. request to store a batch of secret shares to the enclave
@@ -118,7 +114,7 @@ export const prepareAndStoreKeyShares = async (
 
 /**
  * @name mintSecretNFT
- * @summary                  Encrypts your data to create a secret NFT and uploads your key's shards on a TEE.
+ * @summary                  Encrypts your data to create a secret NFT on-chain and uploads your key's shards on a TEE.
  * @param nftFile            File to upload as the preview of the encrypted NFT.
  * @param nftMetadata        NFT metadata (Title, Description).
  * @param secretNftFile      File to encrypt and then upload on IPFS.
@@ -129,6 +125,7 @@ export const prepareAndStoreKeyShares = async (
  * @param royalty            Percentage of all second sales that the secret NFT creator will receive. Default is 0%. It's a decimal number in range [0, 100].
  * @param collectionId       The collection to which the secret NFT belongs. Optional Parameter: Default is undefined.
  * @param isSoulbound        If true, makes the secret NFT intransferable. Default is false.
+ * @param waitUntil          Execution trigger that can be set either to BlockInclusion or BlockFinalization. Default is BlockInclusion.
  * @returns                  A JSON including both secretNftEvent & TEE enclave response (shards datas and description).
  */
 export const mintSecretNFT = async (
@@ -142,6 +139,7 @@ export const mintSecretNFT = async (
   royalty = 0,
   collectionId: number | undefined = undefined,
   isSoulbound = false,
+  waitUntil = WaitUntil.BlockInclusion,
 ) => {
   // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
@@ -164,7 +162,7 @@ export const mintSecretNFT = async (
     collectionId,
     isSoulbound,
     ownerPair,
-    WaitUntil.BlockInclusion,
+    waitUntil,
   )
 
   // 3. request to format and store a batch of secret shares to the enclave
@@ -213,7 +211,7 @@ export const viewSecretNFT = async (
     nftId,
     lastBlockId,
     SIGNER_BLOCK_VALIDITY,
-    extensionInjector && extensionInjector,
+    extensionInjector,
   )
   const shares = await teeKeySharesRetrieve(clusterId, "secret", payload)
 
@@ -239,6 +237,7 @@ export const viewSecretNFT = async (
  * @param capsuleRoyalty      Percentage of all second sales that the capsule creator will receive. Default is 0%. It's a decimal number in range [0, 100].
  * @param capsuleCollectionId The collection to which the capsule NFT belongs. Optional Parameter: Default is undefined.
  * @param isSoulbound         If true, makes the Capsule intransferable. Default is false.
+ * @param waitUntil           Execution trigger that can be set either to BlockInclusion or BlockFinalization. Default is BlockInclusion.
  * @returns                   A JSON including both capsuleEvent & TEE enclave response (shards datas and description).
  */
 export const mintCapsuleNFT = async (
@@ -253,6 +252,7 @@ export const mintCapsuleNFT = async (
   capsuleRoyalty = 0,
   capsuleCollectionId: number | undefined = undefined,
   isSoulbound = false,
+  waitUntil = WaitUntil.BlockInclusion,
 ) => {
   // 0. query Enclave with /Health API
   await getEnclaveHealthStatus(clusterId)
@@ -273,7 +273,7 @@ export const mintCapsuleNFT = async (
     capsuleCollectionId,
     isSoulbound,
     ownerPair,
-    WaitUntil.BlockInclusion,
+    waitUntil,
   )
 
   // 3. request to format and store a batch of secret shares to the enclave
@@ -311,7 +311,7 @@ export const getCapsuleNFTPrivateKey = async (
     nftId,
     lastBlockId,
     SIGNER_BLOCK_VALIDITY,
-    extensionInjector && extensionInjector,
+    extensionInjector,
   )
   const shares = await teeKeySharesRetrieve(clusterId, "capsule", payload)
   // 3. Combine Key

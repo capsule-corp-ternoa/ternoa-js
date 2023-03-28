@@ -30,8 +30,8 @@ export const getSignatureFromExtension = async (
   data: string,
 ) => {
   // To handle Polkadot Extension
-  if (injectorExtension && "signer" in injectorExtension && injectorExtension?.signer?.signRaw) {
-    const { signature } = (await injectorExtension?.signer?.signRaw({
+  if (injectorExtension && "signer" in injectorExtension && injectorExtension.signer.signRaw) {
+    const { signature } = (await injectorExtension.signer.signRaw({
       address: signerAddress,
       data,
       type: "payload",
