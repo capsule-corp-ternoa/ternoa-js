@@ -99,7 +99,7 @@ export class TernoaIPFS {
    * @param metadata  Ternoa basic NFT metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-100-Basic-NFT.md#metadata here}.
    * @returns         IPFS data (Hash, Size, Name)
    */
-  static storeNFT = async <T>(service: IServiceIPFS, file: File, metadata: NftMetadataType<T>) => {
+  static storeNFT = async (service: IServiceIPFS, file: File, metadata: NftMetadataType) => {
     validateNFTMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload NFT's asset`)
@@ -134,13 +134,13 @@ export class TernoaIPFS {
    * @param mediaMetadata     (Optional) Secret NFT asset metadata.
    * @returns                 IPFS secret NFT data (Hash, Size, Name).
    */
-  static storeSecretNFT = async <TNFT, TMedia>(
+  static storeSecretNFT = async (
     service: IServiceIPFS,
     encryptedFile: string,
     encryptedFileType: string,
     publicKey: string,
-    nftMetadata?: Partial<NftMetadataType<TNFT>>,
-    mediaMetadata?: MediaMetadataType<TMedia>,
+    nftMetadata?: Partial<NftMetadataType>,
+    mediaMetadata?: MediaMetadataType,
   ) => {
     if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
     if (typeof publicKey !== "string")
@@ -160,7 +160,9 @@ export class TernoaIPFS {
     const secretNFTMetadata = {
       ...(nftMetadata && nftMetadata),
       properties: {
+        ...nftMetadata?.properties,
         encrypted_media: {
+          ...(typeof nftMetadata?.properties?.encrypted_media === "object" && nftMetadata?.properties?.encrypted_media),
           hash: secretNFTHash,
           type: encryptedFileType ?? file.type,
           size: secretNFTSize,
@@ -183,11 +185,11 @@ export class TernoaIPFS {
    * @param nftMetadata       (Optional) Capsule NFT metadata {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-530-Capsule.md here}.
    * @returns                 IPFS Capsule data (Hash, Size, Name).
    */
-  static storeCapsuleNFT = async <TNFT, TMedia>(
+  static storeCapsuleNFT = async (
     service: IServiceIPFS,
     publicKey: string,
-    encryptedMedia: CapsuleMedia<TMedia>[],
-    nftMetadata?: Partial<NftMetadataType<TNFT>>,
+    encryptedMedia: CapsuleMedia[],
+    nftMetadata?: Partial<NftMetadataType>,
   ) => {
     if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
 
@@ -199,7 +201,7 @@ export class TernoaIPFS {
     if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
     const nftPublicKeyHash = publicKeyRes.Hash
 
-    const capsuleMedia: CapsuleEncryptedMedia<TMedia>[] = []
+    const capsuleMedia: CapsuleEncryptedMedia[] = []
     await Promise.all(
       encryptedMedia.map(async ({ encryptedFile, type, ...rest }) => {
         const blob = new Blob([encryptedFile], { type: "text/plain" })
@@ -212,7 +214,7 @@ export class TernoaIPFS {
           type: type,
           size: Number(mediaSize),
           ...rest,
-        } as CapsuleEncryptedMedia<TMedia>
+        } as CapsuleEncryptedMedia
 
         capsuleMedia.push(media)
       }),
@@ -221,8 +223,9 @@ export class TernoaIPFS {
     const capsuleMetadata = {
       ...(nftMetadata && nftMetadata),
       properties: {
-        encryptedMedia: capsuleMedia,
-        publicKey: nftPublicKeyHash,
+        ...nftMetadata?.properties,
+        encrypted_media: capsuleMedia,
+        public_key_of_nft: nftPublicKeyHash,
       },
     }
     const capsuleNFTMetadataBlob = new Blob([JSON.stringify(capsuleMetadata)], { type: "application/json" })
@@ -239,11 +242,11 @@ export class TernoaIPFS {
    * @param metadata      Ternoa Collection metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-101-Collection.md#metadata here}.
    * @returns             IPFS data (Hash, Size, Name)
    */
-  static storeCollection = async <T>(
+  static storeCollection = async (
     service: IServiceIPFS,
     profileFile: File,
     bannerFile: File,
-    metadata: CollectionMetadataType<T>,
+    metadata: CollectionMetadataType,
   ) => {
     validateCollectionMetadata(metadata)
     const profileRes = await TernoaIPFS.storeFile(service, profileFile)
@@ -268,7 +271,7 @@ export class TernoaIPFS {
    * @param metadata  Ternoa Marketplace metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-200-Marketplace.md#metadata here}.
    * @returns         IPFS data (Hash, Size, Name)
    */
-  static storeMarketplace = async <T>(service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType<T>) => {
+  static storeMarketplace = async (service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType) => {
     validateMarketplaceMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload marketplace's logo asset`)
@@ -289,38 +292,34 @@ export class TernoaIPFS {
     return TernoaIPFS.storeFile(this, file)
   }
 
-  storeNFT<T>(file: File, metadata: NftMetadataType<T>) {
+  storeNFT(file: File, metadata: NftMetadataType) {
     return TernoaIPFS.storeNFT(this, file, metadata)
   }
 
-  storeSecretNFT<TNFT, TMedia>(
+  storeSecretNFT(
     encryptedFile: string,
     encryptedFileType: string,
     publicKey: string,
-    nftMetadata?: Partial<NftMetadataType<TNFT>>,
-    mediaMetadata?: MediaMetadataType<TMedia>,
+    nftMetadata?: Partial<NftMetadataType>,
+    mediaMetadata?: MediaMetadataType,
   ) {
     return TernoaIPFS.storeSecretNFT(this, encryptedFile, encryptedFileType, publicKey, nftMetadata, mediaMetadata)
   }
 
-  storeCapsuleNFT<TNFT, TMedia>(
-    publicKey: string,
-    encryptedMedia: CapsuleMedia<TMedia>[],
-    nftMetadata?: Partial<NftMetadataType<TNFT>>,
-  ) {
+  storeCapsuleNFT(publicKey: string, encryptedMedia: CapsuleMedia[], nftMetadata?: Partial<NftMetadataType>) {
     return TernoaIPFS.storeCapsuleNFT(this, publicKey, encryptedMedia, nftMetadata)
   }
 
-  storeCollection<T>(profileFile: File, bannerFile: File, metadata: CollectionMetadataType<T>) {
+  storeCollection(profileFile: File, bannerFile: File, metadata: CollectionMetadataType) {
     return TernoaIPFS.storeCollection(this, profileFile, bannerFile, metadata)
   }
 
-  storeMarketplace<T>(file: File, metadata: MarketplaceMetadataType<T>) {
+  storeMarketplace(file: File, metadata: MarketplaceMetadataType) {
     return TernoaIPFS.storeMarketplace(this, file, metadata)
   }
 }
 
-export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T>) => {
+export const validateNFTMetadata = ({ title, description }: NftMetadataType) => {
   if (!title) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's title is required`)
   else if (typeof title !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : NFT's title must be a string`)
@@ -332,7 +331,7 @@ export const validateNFTMetadata = <T>({ title, description }: NftMetadataType<T
   }
 }
 
-export const validateOptionalNFTMetadata = <T>({ title, description }: Partial<NftMetadataType<T>>) => {
+export const validateOptionalNFTMetadata = ({ title, description }: Partial<NftMetadataType>) => {
   if (title !== undefined && typeof title !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's title must be a string`)
   }
@@ -341,7 +340,7 @@ export const validateOptionalNFTMetadata = <T>({ title, description }: Partial<N
   }
 }
 
-export const validateCollectionMetadata = <T>({ name, description }: CollectionMetadataType<T>) => {
+export const validateCollectionMetadata = ({ name, description }: CollectionMetadataType) => {
   if (!name) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's name is required`)
   else if (typeof name !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Collection's name must be a string`)
@@ -353,7 +352,7 @@ export const validateCollectionMetadata = <T>({ name, description }: CollectionM
   }
 }
 
-export const validateMarketplaceMetadata = <T>({ name }: MarketplaceMetadataType<T>) => {
+export const validateMarketplaceMetadata = ({ name }: MarketplaceMetadataType) => {
   if (!name) throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Marketplace's name is required`)
   else if (typeof name !== "string") {
     throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Marketplace's name must be a string`)
