@@ -34,6 +34,7 @@ export enum txActions {
   limitCollection = "limitCollection",
   closeCollection = "closeCollection",
   burnCollection = "burnCollection",
+  setCollectionOffchaindata = "setCollectionOffchaindata",
   setNftMintFee = "setNftMintFee",
 
   // capsule

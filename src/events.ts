@@ -42,6 +42,7 @@ export enum EventType {
   CollectionLimited = "nft.CollectionLimited",
   CollectionClosed = "nft.CollectionClosed",
   CollectionBurned = "nft.CollectionBurned",
+  CollectionOffchainDataSet = "nft.CollectionOffchainDataSet",
 
   //Transmission Protocols
   ProtocolSet = "transmissionProtocols.ProtocolSet",
@@ -612,6 +613,26 @@ export class CollectionBurnedEvent extends BlockchainEvent {
     const [collectionId] = event.data
 
     this.collectionId = Number.parseInt(collectionId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain CollectionBurnedEvent event.
+ */
+export class CollectionOffchainDataSetEvent extends BlockchainEvent {
+  collectionId: number
+  offchainData: string
+
+  /**
+   * Construct the data object from the CollectionBurnedEvent event
+   * @param event The CollectionBurnedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.CollectionOffchainDataSet)
+    const [collectionId, offchainData] = event.data
+
+    this.collectionId = Number.parseInt(collectionId.toString())
+    this.offchainData = hexToString(offchainData.toString())
   }
 }
 
