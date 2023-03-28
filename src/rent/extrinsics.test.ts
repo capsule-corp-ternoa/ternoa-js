@@ -121,7 +121,15 @@ describe("Testing to update and revoke a subscription contract", (): void => {
   })
   it("Should return the nftId of the new updated and accepted contract", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { nftId } = await acceptSubscriptionTerms(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { nftId } = await acceptSubscriptionTerms(
+      TEST_DATA.nftId,
+      3,
+      10,
+      100,
+      true,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
 

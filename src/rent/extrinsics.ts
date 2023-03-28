@@ -317,26 +317,50 @@ export const changeSubscriptionTerms = async (
  * @name acceptSubscriptionTermsTx
  * @summary               Creates an unsigned unsubmitted Accept-Contract-Subscription-Terms Transaction Hash for an NFT.
  * @param nftId           The NFT Id of the contract to accept the new subscription terms.
+ * @param rentFee         The fee to rent the contract: a token amount
+ * @param period          The period of subscription before renewal
+ * @param maxDuration     The contract duration (in block). Optional, default is null.
+ * @param isChangeable    A boolean to make the contract updatable.
  * @returns               Unsigned unsubmitted Accept-Contract-Subscription-Terms Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const acceptSubscriptionTermsTx = async (nftId: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.rent, txActions.acceptSubscriptionTerms, [nftId])
+export const acceptSubscriptionTermsTx = async (
+  nftId: number,
+  rentFee: number,
+  period: number,
+  maxDuration: number | null = null,
+  isChangeable: boolean,
+): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.rent, txActions.acceptSubscriptionTerms, [
+    nftId,
+    rentFee,
+    period,
+    maxDuration,
+    isChangeable,
+  ])
 }
 
 /**
  * @name acceptSubscriptionTerms
  * @summary               Accepts the subscription terms for subscription contracts.
  * @param nftId           The NFT Id of the contract to change the subscription terms.
+ * @param rentFee         The fee to rent the contract: a token amount
+ * @param period          The period of subscription before renewal
+ * @param maxDuration     The contract duration (in block). Optional, default is null.
+ * @param isChangeable    A boolean to make the contract updatable.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               ContractSubscriptionTermsAcceptedEvent Blockchain event
  */
 export const acceptSubscriptionTerms = async (
   nftId: number,
+  rentFee: number,
+  period: number,
+  maxDuration: number | null = null,
+  isChangeable: boolean,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractSubscriptionTermsAcceptedEvent> => {
-  const tx = await acceptSubscriptionTermsTx(nftId)
+  const tx = await acceptSubscriptionTermsTx(nftId, rentFee, period, maxDuration, isChangeable)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractSubscriptionTermsAcceptedEvent)
 }
