@@ -153,6 +153,8 @@ export class BlockchainEvent {
         return new CollectionClosedEvent(event)
       case EventType.CollectionBurned:
         return new CollectionBurnedEvent(event)
+      case EventType.CollectionOffchainDataSet:
+        return new CollectionOffchainDataSetEvent(event)
       // Capsule
       case EventType.NFTConvertedToCapsule:
         return new NFTConvertedToCapsuleEvent(event)

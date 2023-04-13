@@ -156,7 +156,7 @@ describe("Testing to rent or cancel a contract", (): void => {
     const rentFee = formatRentFee("tokens", 1)
     const renterCancellationFee = formatCancellationFee("none")
     const renteeCancellationFee = formatCancellationFee("none")
-    await createContract(
+    const contractEvent = await createContract(
       TEST_DATA.nftId,
       duration,
       acceptanceType,
@@ -167,12 +167,7 @@ describe("Testing to rent or cancel a contract", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const { nftId } = await rent(
-      TEST_DATA.nftId,
-      TEST_DATA.contractCreationBlockId,
-      destAccount,
-      WaitUntil.BlockInclusion,
-    )
+    const { nftId } = await rent(TEST_DATA.nftId, contractEvent.creationBlockId, destAccount, WaitUntil.BlockInclusion)
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
   it("Should return the nftId of the cancelled contract", async () => {

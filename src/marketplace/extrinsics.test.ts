@@ -36,7 +36,7 @@ describe("Testing Marketplace extrinsics", (): void => {
     const mpEvent = await createMarketplace(MarketplaceKind.Public, testAccount, WaitUntil.BlockInclusion)
     TEST_DATA.marketplaceId = mpEvent.marketplaceId
     expect(
-      mpEvent.marketplaceId > 0 && mpEvent.kind === MarketplaceKind.Public && mpEvent.owner === testAccount.address,
+      mpEvent.marketplaceId >= 0 && mpEvent.kind === MarketplaceKind.Public && mpEvent.owner === testAccount.address,
     ).toBe(true)
   })
 

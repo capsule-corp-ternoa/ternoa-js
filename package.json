@@ -1,6 +1,6 @@
 {
   "name": "ternoa-js",
-  "version": "1.5.0-alpha6",
+  "version": "1.5.0-rc3",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "engines": {
     "node": ">=14.13.1 || >=16.0.0"
@@ -10,7 +10,6 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "rimraf build && tsc && npm run build:frank-build",
-    "browserify": "browserify build/index.js -o build/bundle.js",
     "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
     "docs": "typedoc ./src/index.ts",
     "lint": "eslint ./src --ext .js,.ts",

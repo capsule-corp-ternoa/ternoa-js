@@ -1,3 +1,4 @@
+import BN from "bn.js"
 import { IKeyringPair } from "@polkadot/types/types"
 
 import { AcceptanceType, CancellationFeeType, DurationType, RentFeeType } from "./types"
@@ -154,29 +155,29 @@ export const revokeContract = async (
  * @name rentTx
  * @summary                       Creates an unsigned unsubmitted Rent-Contract Transaction Hash for an NFT.
  * @param nftId                   The NFT Id with the contract to rent.
- * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
+ * @param contractCreationBlockId The contract creation block id to check to ensure contract authenticity.
  * @returns                       Unsigned unsubmitted Rent-Contract Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const rentTx = async (nftId: number, signedRentStartBlockId: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.rent, txActions.rent, [nftId, signedRentStartBlockId])
+export const rentTx = async (nftId: number, contractCreationBlockId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.rent, txActions.rent, [nftId, contractCreationBlockId])
 }
 
 /**
  * @name rent
  * @summary                       Rents an nft.
  * @param nftId                   The NFT Id of the contract to rent.
- * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
+ * @param contractCreationBlockId The contract creation block id to check to ensure contract authenticity.
  * @param keyring                 Account that will sign the transaction.
  * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns                       ContractStartedEvent Blockchain event
  */
 export const rent = async (
   nftId: number,
-  signedRentStartBlockId: number,
+  contractCreationBlockId: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractStartedEvent> => {
-  const tx = await rentTx(nftId, signedRentStartBlockId)
+  const tx = await rentTx(nftId, contractCreationBlockId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractStartedEvent)
 }
@@ -185,29 +186,29 @@ export const rent = async (
  * @name makeRentOfferTx
  * @summary                       Creates an unsigned unsubmitted Make-Rent-Offer Transaction Hash for an NFT.
  * @param nftId                   The NFT Id of the contract to make the offer.
- * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
+ * @param contractCreationBlockId The contract creation block id to check to ensure contract authenticity.
  * @returns                       Unsigned unsubmitted Make-Rent-Offer Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const makeRentOfferTx = async (nftId: number, signedRentStartBlockId: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.rent, txActions.makeRentOffer, [nftId, signedRentStartBlockId])
+export const makeRentOfferTx = async (nftId: number, contractCreationBlockId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.rent, txActions.makeRentOffer, [nftId, contractCreationBlockId])
 }
 
 /**
  * @name makeRentOffer
  * @summary                       Makes an offer for an available contract.
  * @param nftId                   The NFT Id of the contract to make the offer.
- * @param signedRentStartBlockId  The contract creation block id to check to ensure contract authenticity.
+ * @param contractCreationBlockId The contract creation block id to check to ensure contract authenticity.
  * @param keyring                 Account that will sign the transaction.
  * @param waitUntil               Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns                       ContractOfferCreated Blockchain event
  */
 export const makeRentOffer = async (
   nftId: number,
-  signedRentStartBlockId: number,
+  contractCreationBlockId: number,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<ContractOfferCreatedEvent> => {
-  const tx = await makeRentOfferTx(nftId, signedRentStartBlockId)
+  const tx = await makeRentOfferTx(nftId, contractCreationBlockId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(ContractOfferCreatedEvent)
 }
@@ -284,14 +285,15 @@ export const acceptRentOffer = async (
 
 export const changeSubscriptionTermsTx = async (
   nftId: number,
-  rentFee: number,
+  rentFee: number | BN,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
 ): Promise<TransactionHashType> => {
+  const formattedRentFee = typeof rentFee === "number" ? numberToBalance(rentFee) : rentFee
   return await createTxHex(txPallets.rent, txActions.changeSubscriptionTerms, [
     nftId,
-    numberToBalance(rentFee),
+    formattedRentFee,
     period,
     maxDuration,
     isChangeable,
@@ -312,7 +314,7 @@ export const changeSubscriptionTermsTx = async (
  */
 export const changeSubscriptionTerms = async (
   nftId: number,
-  rentFee: number,
+  rentFee: number | BN,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
@@ -336,14 +338,15 @@ export const changeSubscriptionTerms = async (
  */
 export const acceptSubscriptionTermsTx = async (
   nftId: number,
-  rentFee: number,
+  rentFee: number | BN,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
 ): Promise<TransactionHashType> => {
+  const formattedRentFee = typeof rentFee === "number" ? numberToBalance(rentFee) : rentFee
   return await createTxHex(txPallets.rent, txActions.acceptSubscriptionTerms, [
     nftId,
-    rentFee,
+    formattedRentFee,
     period,
     maxDuration,
     isChangeable,
@@ -364,7 +367,7 @@ export const acceptSubscriptionTermsTx = async (
  */
 export const acceptSubscriptionTerms = async (
   nftId: number,
-  rentFee: number,
+  rentFee: number | BN,
   period: number,
   maxDuration: number | null = null,
   isChangeable: boolean,
