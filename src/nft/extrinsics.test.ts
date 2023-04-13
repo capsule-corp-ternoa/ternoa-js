@@ -16,6 +16,7 @@ import {
   notifyEnclaveKeyUpdate,
   //revertCapsule,
   setCapsuleOffchaindata,
+  setCollectionOffchaindata,
   setRoyalty,
   transferNft,
 } from "."
@@ -34,7 +35,7 @@ beforeAll(async () => {
   await initializeApi(endpoint)
 })
 
-describe("Testing to create/limit a collection", (): void => {
+describe("Testing to create/update/limit a collection", (): void => {
   it("Testing to create a collection", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
     const cEvent = await createCollection("Collection Test", undefined, testAccount, WaitUntil.BlockInclusion)
@@ -45,6 +46,20 @@ describe("Testing to create/limit a collection", (): void => {
         cEvent.offchainData === "Collection Test" &&
         cEvent.limit === null,
     ).toBe(true)
+  })
+
+  it("Testing to update collection offchaindata", async (): Promise<void> => {
+    const { test: testAccount } = await createTestPairs()
+    const cEvent = await setCollectionOffchaindata(
+      TEST_DATA.collectionId,
+      "Collection Test Updated",
+      testAccount,
+      WaitUntil.BlockInclusion,
+    )
+
+    expect(cEvent.collectionId === TEST_DATA.collectionId && cEvent.offchainData === "Collection Test Updated").toBe(
+      true,
+    )
   })
 
   it("Testing to limit a collection", async (): Promise<void> => {
@@ -207,6 +222,7 @@ describe("Testing Capsule NFT extrinsics", (): void => {
     expect(nftData?.state.isSyncingCapsule).toBe(true)
   })
 })
+
 describe("Testing to close/burn a collection", (): void => {
   it("Testing to close a collection", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()

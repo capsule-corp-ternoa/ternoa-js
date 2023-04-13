@@ -5,7 +5,7 @@ import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
 
-import { getSignature } from "./crypto"
+import { getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
 import { HttpClient } from "./http"
 import {
   RetrievePayloadType,
@@ -21,6 +21,7 @@ import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
 import { EnclaveHealthType, NFTShareAvailableType } from "tee/types"
+import { isValidAddress } from "../blockchain"
 
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
@@ -153,8 +154,8 @@ export const formatStorePayload = (
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
 ): StorePayloadType => {
-  const data = `${nftId}_${share}_${blockId}_${blockValidity}`
-  const dataSignature = getSignature(signerPair, data)
+  const data = `<Bytes>${nftId}_${share}_${blockId}_${blockValidity}</Bytes>`
+  const dataSignature = getSignatureFromKeyring(signerPair, data)
   return {
     owner_address: ownerAddress,
     signer_address: signerAuthMessage,
@@ -166,24 +167,37 @@ export const formatStorePayload = (
 
 /**
  * @name formatRetrievePayload
- * @summary               Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
- * @param ownerPair       The NFT owner account used to sign data.
- * @param nftId           The ID of the NFT.
- * @param blockId         The current block header id on-chain.
- * @param blockValidity   A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
- * @returns               Payload ready to be submitted to TEE enclaves.
+ * @summary                  Prepares post request payload to retrieve secret/capsule NFT data into TEE enclaves.
+ * @param requester          The NFT owner account (keyring) or address (string) used to sign data. It can also be the retriever account of rentee or delegatee.
+ * @param requesterRole      Kind of account that want to retrieve the payload: it can be either "OWNER", "DELEGATEE" or "RENTEE"
+ * @param nftId              The ID of the NFT.
+ * @param blockId            The current block header id on-chain.
+ * @param blockValidity      A block duration validity for the temporay signer account to be valid; default SIGNER_BLOCK_VALIDITY = 100 blocks.
+ * @param extensionInjector  (Optional)The signer method retrived from your extension. We recommand Polkadot extention: object must have a signer key.
+ * @returns                  Payload ready to be submitted to TEE enclaves.
  */
-export const formatRetrievePayload = (
-  requesterPair: IKeyringPair,
+export const formatRetrievePayload = async (
+  requester: IKeyringPair | string,
   requesterRole: RequesterType,
   nftId: number,
   blockId: number,
   blockValidity = SIGNER_BLOCK_VALIDITY,
-): RetrievePayloadType => {
-  const data = `${nftId}_${blockId}_${blockValidity}`
-  const signature = getSignature(requesterPair, data)
+  extensionInjector?: Record<string, any>,
+): Promise<RetrievePayloadType> => {
+  if (typeof requester === "string" && !isValidAddress(requester)) throw new Error("INVALID_ADDRESS_FORMAT")
+  if (typeof requester === "string" && !extensionInjector)
+    throw new Error(
+      `${Errors.TEE_RETRIEVE_ERROR} - INJECTOR_SIGNER_MISSING : injectorSigner must be provided when signer is of type string`,
+    )
+  const data = `<Bytes>${nftId}_${blockId}_${blockValidity}</Bytes>`
+  const signature =
+    typeof requester === "string"
+      ? extensionInjector && (await getSignatureFromExtension(requester, extensionInjector, data))
+      : getSignatureFromKeyring(requester, data)
+
+  if (!signature) throw new Error(`${Errors.TEE_RETRIEVE_ERROR} : cannot get signature when retrieving payload`)
   return {
-    requester_address: requesterPair.address,
+    requester_address: typeof requester === "string" ? requester : requester.address,
     requester_type: requesterRole,
     data,
     signature,

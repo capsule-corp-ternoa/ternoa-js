@@ -13,6 +13,12 @@ import {
   setMarketplaceOwner,
   unlistNft,
 } from "./extrinsics"
+import {
+  formatMarketplaceAccountList,
+  formatMarketplaceCollectionList,
+  formatMarketplaceFee,
+  formatMarketplaceOffchainData,
+} from "./utils"
 
 const TEST_DATA = {
   nftId: 0,
@@ -42,13 +48,25 @@ describe("Testing Marketplace extrinsics", (): void => {
       destAccount,
       WaitUntil.BlockInclusion,
     )
+    const formattedCommissionFee = formatMarketplaceFee(
+      MarketplaceConfigAction.Set,
+      MarketplaceConfigFeeType.Percentage,
+      10,
+    )
+    const formattedListingFee = formatMarketplaceFee(MarketplaceConfigAction.Set, MarketplaceConfigFeeType.Flat, 100)
+    const formattedAccountList = formatMarketplaceAccountList(MarketplaceConfigAction.Set, [destAccount.address])
+    const formattedOffchainData = formatMarketplaceOffchainData(
+      MarketplaceConfigAction.Set,
+      "SDK_MARKETPLACE_CONFIG_TEST",
+    )
+    const formattedCollectionList = formatMarketplaceCollectionList(MarketplaceConfigAction.Set, [collectionId])
     const mpEvent = await setMarketplaceConfiguration(
       TEST_DATA.marketplaceId,
-      { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Percentage]: 10 } },
-      { [MarketplaceConfigAction.Set]: { [MarketplaceConfigFeeType.Flat]: 100 } },
-      { [MarketplaceConfigAction.Set]: [destAccount.address] },
-      { [MarketplaceConfigAction.Set]: "SDK_MARKETPLACE_CONFIG_TEST" },
-      { [MarketplaceConfigAction.Set]: [collectionId] },
+      formattedCommissionFee,
+      formattedListingFee,
+      formattedAccountList,
+      formattedOffchainData,
+      formattedCollectionList,
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -69,13 +87,18 @@ describe("Testing Marketplace extrinsics", (): void => {
   })
   it("Testing to Remove and keep(Noop) the marketplace parameters configuration", async (): Promise<void> => {
     const { test: testAccount } = await createTestPairs()
+    const formattedCommissionFee = formatMarketplaceFee(MarketplaceConfigAction.Noop)
+    const formattedListingFee = formatMarketplaceFee(MarketplaceConfigAction.Remove)
+    const formattedAccountList = formatMarketplaceAccountList(MarketplaceConfigAction.Remove)
+    const formattedOffchainData = formatMarketplaceOffchainData(MarketplaceConfigAction.Noop)
+    const formattedCollectionList = formatMarketplaceCollectionList(MarketplaceConfigAction.Remove)
     const mpEvent = await setMarketplaceConfiguration(
       TEST_DATA.marketplaceId,
-      MarketplaceConfigAction.Noop,
-      MarketplaceConfigAction.Remove,
-      MarketplaceConfigAction.Remove,
-      MarketplaceConfigAction.Noop,
-      MarketplaceConfigAction.Remove,
+      formattedCommissionFee,
+      formattedListingFee,
+      formattedAccountList,
+      formattedOffchainData,
+      formattedCollectionList,
       testAccount,
       WaitUntil.BlockInclusion,
     )
@@ -153,7 +176,7 @@ describe("Testing to List, Unlist, Buy an NFT on the Marketplace", (): void => {
   it("Testing to Buy an NFT from a marketplace", async (): Promise<void> => {
     const { test: testAccount, dest: destAccount } = await createTestPairs()
     await listNft(TEST_DATA.nftId, TEST_DATA.marketplaceId, 10, destAccount, WaitUntil.BlockInclusion)
-    const mpEvent = await buyNft(TEST_DATA.nftId, testAccount, WaitUntil.BlockInclusion)
+    const mpEvent = await buyNft(TEST_DATA.nftId, 10, testAccount, WaitUntil.BlockInclusion)
     const nData = await getNftData(TEST_DATA.nftId)
     const listedPrice = numberToBalance(10).toString()
     const marketplaceCut = numberToBalance(1).toString()

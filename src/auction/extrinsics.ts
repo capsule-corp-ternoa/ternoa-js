@@ -189,28 +189,32 @@ export const removeBid = async (
 
 /**
  * @name buyItNowTx
- * @summary       The NFT can be directly buy if a buyItPrice was defined and the auction has not started yet.
- * @param nftId   The ID of the NFT.
- * @returns       Unsigned unsubmitted Buy-It-Now Transaction Hash. The Hash is only valid for 5 minutes.
+ * @summary               The NFT can be directly buy if a buyItPrice was defined and the auction has not started yet.
+ * @param nftId           The ID of the NFT.
+ * @param signedPrice     The signed buy price.
+ * @returns               Unsigned unsubmitted Buy-It-Now Transaction Hash. The Hash is only valid for 5 minutes.
  */
-export const buyItNowTx = async (nftId: number): Promise<TransactionHashType> => {
-  return await createTxHex(txPallets.auction, txActions.buyItNow, [nftId])
+export const buyItNowTx = async (nftId: number, signedPrice: number | BN): Promise<TransactionHashType> => {
+  const formattedSignedPrice = typeof signedPrice === "number" ? numberToBalance(signedPrice) : signedPrice
+  return await createTxHex(txPallets.auction, txActions.buyItNow, [nftId, formattedSignedPrice])
 }
 
 /**
  * @name buyItNow
  * @summary               The NFT can be directly buy if a buyItPrice was defined and the auction has not started yet.
  * @param nftId           The ID of the NFT.
+ * @param signedPrice     The signed buy price.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               AuctionCompletedEvent Blockchain event.
  */
 export const buyItNow = async (
   nftId: number,
+  signedPrice: number | BN,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,
 ): Promise<AuctionCompletedEvent> => {
-  const tx = await buyItNowTx(nftId)
+  const tx = await buyItNowTx(nftId, signedPrice)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(AuctionCompletedEvent)
 }

@@ -18,7 +18,7 @@
 <h1>Function rent</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-<li class="tsd-signature tsd-anchor-link" id="rent">rent<span class="tsd-signature-symbol">(</span>nftId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, keyring<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKeyringPair</span>, waitUntil<span class="tsd-signature-symbol">: </span><a href="../modules/TernoaConstants.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaConstants</a><span class="tsd-signature-symbol">.</span><a href="../enums/TernoaConstants.WaitUntil.html" class="tsd-signature-type" data-tsd-kind="Enumeration">WaitUntil</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/TernoaEvents.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaEvents</a><span class="tsd-signature-symbol">.</span><a href="../classes/TernoaEvents.ContractStartedEvent.html" class="tsd-signature-type" data-tsd-kind="Class">ContractStartedEvent</a><span class="tsd-signature-symbol">&gt;</span><a href="#rent" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="rent">rent<span class="tsd-signature-symbol">(</span>nftId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, signedRentStartBlockId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, keyring<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKeyringPair</span>, waitUntil<span class="tsd-signature-symbol">: </span><a href="../modules/TernoaConstants.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaConstants</a><span class="tsd-signature-symbol">.</span><a href="../enums/TernoaConstants.WaitUntil.html" class="tsd-signature-type" data-tsd-kind="Enumeration">WaitUntil</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/TernoaEvents.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaEvents</a><span class="tsd-signature-symbol">.</span><a href="../classes/TernoaEvents.ContractStartedEvent.html" class="tsd-signature-type" data-tsd-kind="Class">ContractStartedEvent</a><span class="tsd-signature-symbol">&gt;</span><a href="#rent" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography">
 <h3>Name</h3><p>rent</p>
@@ -35,6 +35,10 @@
 <div class="tsd-comment tsd-typography"><p>The NFT Id of the contract to rent.</p>
 </div></li>
 <li>
+<h5>signedRentStartBlockId: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>The block id of when the rent contract is signed to be rent</p>
+</div></li>
+<li>
 <h5>keyring: <span class="tsd-signature-type">IKeyringPair</span></h5>
 <div class="tsd-comment tsd-typography"><p>Account that will sign the transaction.</p>
 </div></li>
@@ -44,7 +48,7 @@
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/TernoaEvents.html" class="tsd-signature-type" data-tsd-kind="Namespace">TernoaEvents</a><span class="tsd-signature-symbol">.</span><a href="../classes/TernoaEvents.ContractStartedEvent.html" class="tsd-signature-type" data-tsd-kind="Class">ContractStartedEvent</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/1f9d397c/src/rent/extrinsics.ts#L166">src/rent/extrinsics.ts:166</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/capsule-corp-ternoa/ternoa-js/blob/eb5197c6/src/rent/extrinsics.ts#L168">src/rent/extrinsics.ts:168</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">

@@ -73,7 +73,8 @@ describe("Testing Rent extrinsics", (): void => {
 
   it("Should return the address who made the offer on an NFT contract", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { rentee, nftId } = await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    //TODO: improve signed_block_id
+    const { rentee, nftId } = await makeRentOffer(TEST_DATA.nftId, 0, destAccount, WaitUntil.BlockInclusion)
     expect(rentee === destAccount.address && nftId === TEST_DATA.nftId).toBe(true)
   })
 
@@ -85,7 +86,8 @@ describe("Testing Rent extrinsics", (): void => {
 
   it("Should return the rentee address of the accepted offer when a contract started", async () => {
     const { dest: destAccount, test: testAccount } = await createTestPairs()
-    await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    //TODO: improve signed_block_id
+    await makeRentOffer(TEST_DATA.nftId, 0, destAccount, WaitUntil.BlockInclusion)
     const { rentee, nftId } = await acceptRentOffer(
       TEST_DATA.nftId,
       destAccount.address,
@@ -121,7 +123,15 @@ describe("Testing to update and revoke a subscription contract", (): void => {
   })
   it("Should return the nftId of the new updated and accepted contract", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { nftId } = await acceptSubscriptionTerms(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { nftId } = await acceptSubscriptionTerms(
+      TEST_DATA.nftId,
+      3,
+      10,
+      100,
+      true,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
 
@@ -151,7 +161,8 @@ describe("Testing to rent or cancel a contract", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const { nftId } = await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    //TODO: improve signed_block_id
+    const { nftId } = await rent(TEST_DATA.nftId, 0, destAccount, WaitUntil.BlockInclusion)
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
   it("Should return the nftId of the cancelled contract", async () => {
