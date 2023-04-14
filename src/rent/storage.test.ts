@@ -10,6 +10,7 @@ import { createTestPairs } from "../_misc/testingPairs"
 
 const TEST_DATA = {
   nftId: 0,
+  contractCreationBlockId: 0,
 }
 
 beforeAll(async () => {
@@ -25,7 +26,7 @@ beforeAll(async () => {
   const rentFee = formatRentFee("tokens", 1)
   const renterCancellationFee = formatCancellationFee("flexible", 1)
   const renteeCancellationFee = formatCancellationFee("none")
-  await createContract(
+  const contractEvent = await createContract(
     TEST_DATA.nftId,
     duration,
     acceptanceType,
@@ -36,6 +37,7 @@ beforeAll(async () => {
     testAccount,
     WaitUntil.BlockInclusion,
   )
+  TEST_DATA.contractCreationBlockId = contractEvent.creationBlockId
 })
 
 describe("Testing contracts in queue and getting contract data", (): void => {
@@ -45,7 +47,8 @@ describe("Testing contracts in queue and getting contract data", (): void => {
     const rentFee = numberToBalance(1).toString()
     const cancellationFee = numberToBalance(1).toString()
     expect(
-      contract?.startBlock == null &&
+      contract?.creationBlock == TEST_DATA.contractCreationBlockId &&
+        contract?.startBlock == null &&
         contract?.startBlockDate == null &&
         contract?.renter == testAccount.address &&
         contract.rentee == null &&
@@ -73,7 +76,12 @@ describe("Testing contracts in queue and getting contract data", (): void => {
 
   it("Should return the address of the offer made on an NFT", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { rentee } = await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { rentee } = await makeRentOffer(
+      TEST_DATA.nftId,
+      TEST_DATA.contractCreationBlockId,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     const offer = await getRentalOffers(TEST_DATA.nftId)
     expect(rentee === destAccount.address && offer[0] === rentee).toBe(true)
   })
@@ -111,7 +119,7 @@ describe("Testing contracts in queue and getting contract data", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    await rent(TEST_DATA.nftId, contract.creationBlockId, destAccount, WaitUntil.BlockInclusion)
     const { subscriptionQueue } = await getRentingQueues()
     const filteredContract = subscriptionQueue.filter((x) => x.nftId === TEST_DATA.nftId)
     expect(

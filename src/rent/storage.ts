@@ -25,6 +25,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
   }
   try {
     const {
+      creationBlock,
       startBlock,
       renter,
       rentee,
@@ -36,6 +37,7 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
       renteeCancellationFee,
     } = data.toJSON() as RentalContractChainRawDataType
 
+    const creationBlockDate = await blockNumberToDate(creationBlock)
     const startBlockDate = startBlock !== null ? await blockNumberToDate(startBlock) : null
     const isManualAcceptance = AcceptanceAction.ManualAcceptance in acceptanceType
     const acceptance = isManualAcceptance ? AcceptanceAction.ManualAcceptance : AcceptanceAction.AutoAcceptance
@@ -94,6 +96,8 @@ export const getRentalContractData = async (nftId: number): Promise<RentalContra
     }
 
     return {
+      creationBlock,
+      creationBlockDate,
       startBlock,
       startBlockDate,
       renter,

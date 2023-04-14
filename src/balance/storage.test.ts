@@ -1,5 +1,5 @@
 import { createTestPairs } from "../_misc/testingPairs"
-import { generateSeed } from "../account"
+import { generateSeed, getKeyringFromSeed } from "../account"
 import { initializeApi } from "../blockchain"
 import { checkBalanceForTransfer, getBalances, getTotalBalance, getTransferrableBalance } from "./storage"
 
@@ -10,8 +10,9 @@ beforeAll(async () => {
 
 describe("Testing getBalances", (): void => {
   it("Should get an empty account free balance for a new one", async (): Promise<void> => {
-    const account = await generateSeed()
-    const balance = await getBalances(account.address)
+    const seed = generateSeed()
+    const keyring = await getKeyringFromSeed(seed)
+    const balance = await getBalances(keyring.address)
     expect(balance.free.isZero()).toBe(true)
   })
 
@@ -24,8 +25,9 @@ describe("Testing getBalances", (): void => {
 
 describe("Testing getTotalBalance", (): void => {
   it("Should get an empty account balance for a new one", async (): Promise<void> => {
-    const account = await generateSeed()
-    const balance = await getTotalBalance(account.address)
+    const seed = generateSeed()
+    const keyring = await getKeyringFromSeed(seed)
+    const balance = await getTotalBalance(keyring.address)
     expect(balance.isZero()).toBe(true)
   })
 
@@ -38,8 +40,9 @@ describe("Testing getTotalBalance", (): void => {
 
 describe("Testing getTransferrableBalance", (): void => {
   it("Should get an empty account balance for a new one", async (): Promise<void> => {
-    const account = await generateSeed()
-    const balance = await getTransferrableBalance(account.address)
+    const seed = generateSeed()
+    const keyring = await getKeyringFromSeed(seed)
+    const balance = await getTransferrableBalance(keyring.address)
     expect(balance.isZero()).toBe(true)
   })
 
@@ -52,8 +55,9 @@ describe("Testing getTransferrableBalance", (): void => {
 
 describe("Testing checkBalanceForTransfer", (): void => {
   it("Insufficient funds to transfer", async (): Promise<void> => {
-    const account = await generateSeed()
-    const hasEnoughFunds = await checkBalanceForTransfer(account.address, 1)
+    const seed = generateSeed()
+    const keyring = await getKeyringFromSeed(seed)
+    const hasEnoughFunds = await checkBalanceForTransfer(keyring.address, 1)
     expect(hasEnoughFunds).toBe(false)
   })
 
