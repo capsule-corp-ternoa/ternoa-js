@@ -19,6 +19,7 @@ import { createTestPairs } from "../_misc/testingPairs"
 
 const TEST_DATA = {
   nftId: 0,
+  contractCreationBlockId: 0,
 }
 beforeAll(async () => {
   const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
@@ -48,9 +49,11 @@ describe("Testing Rent extrinsics", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
+    TEST_DATA.contractCreationBlockId = contractEvent.creationBlockId
     expect(
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.renter === testAccount.address &&
+        contractEvent.creationBlockId > 0 &&
         contractEvent.duration[DurationAction.Subscription].periodLength === 30 &&
         contractEvent.duration[DurationAction.Subscription].maxDuration === 100 &&
         contractEvent.duration[DurationAction.Subscription].isChangeable === true &&
@@ -73,7 +76,12 @@ describe("Testing Rent extrinsics", (): void => {
 
   it("Should return the address who made the offer on an NFT contract", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { rentee, nftId } = await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { rentee, nftId } = await makeRentOffer(
+      TEST_DATA.nftId,
+      TEST_DATA.contractCreationBlockId,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     expect(rentee === destAccount.address && nftId === TEST_DATA.nftId).toBe(true)
   })
 
@@ -85,7 +93,7 @@ describe("Testing Rent extrinsics", (): void => {
 
   it("Should return the rentee address of the accepted offer when a contract started", async () => {
     const { dest: destAccount, test: testAccount } = await createTestPairs()
-    await makeRentOffer(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    await makeRentOffer(TEST_DATA.nftId, TEST_DATA.contractCreationBlockId, destAccount, WaitUntil.BlockInclusion)
     const { rentee, nftId } = await acceptRentOffer(
       TEST_DATA.nftId,
       destAccount.address,
@@ -121,7 +129,15 @@ describe("Testing to update and revoke a subscription contract", (): void => {
   })
   it("Should return the nftId of the new updated and accepted contract", async () => {
     const { dest: destAccount } = await createTestPairs()
-    const { nftId } = await acceptSubscriptionTerms(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { nftId } = await acceptSubscriptionTerms(
+      TEST_DATA.nftId,
+      3,
+      10,
+      100,
+      true,
+      destAccount,
+      WaitUntil.BlockInclusion,
+    )
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
 
@@ -140,7 +156,7 @@ describe("Testing to rent or cancel a contract", (): void => {
     const rentFee = formatRentFee("tokens", 1)
     const renterCancellationFee = formatCancellationFee("none")
     const renteeCancellationFee = formatCancellationFee("none")
-    await createContract(
+    const contractEvent = await createContract(
       TEST_DATA.nftId,
       duration,
       acceptanceType,
@@ -151,7 +167,7 @@ describe("Testing to rent or cancel a contract", (): void => {
       testAccount,
       WaitUntil.BlockInclusion,
     )
-    const { nftId } = await rent(TEST_DATA.nftId, destAccount, WaitUntil.BlockInclusion)
+    const { nftId } = await rent(TEST_DATA.nftId, contractEvent.creationBlockId, destAccount, WaitUntil.BlockInclusion)
     expect(nftId === TEST_DATA.nftId).toBe(true)
   })
   it("Should return the nftId of the cancelled contract", async () => {

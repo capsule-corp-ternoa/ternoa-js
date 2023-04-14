@@ -8,7 +8,7 @@ import { AuctionChainRawDataType, AuctionDataType, Bidder, ClaimableBidBalanceDa
 /**
  * @name getAuctionData
  * @summary       Provides the data related to an auction.
- * @param nftId   The ID of the auctionned NFT.
+ * @param nftId   The ID of the Auctioned  NFT.
  * @returns       A JSON object with the auction data.
  */
 export const getAuctionData = async (nftId: number): Promise<AuctionDataType | null> => {
@@ -57,7 +57,7 @@ export const getAuctionData = async (nftId: number): Promise<AuctionDataType | n
 /**
  * @name getAuctionDeadline
  * @summary       Provides the auction ending block.
- * @param nftId   The ID of the auctionned NFT.
+ * @param nftId   The ID of the Auctioned  NFT.
  * @returns       Number.
  */
 export const getAuctionDeadline = async (nftId: number): Promise<number | null> => {

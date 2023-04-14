@@ -1,30 +1,30 @@
 import { mnemonicGenerate, cryptoWaitReady } from "@polkadot/util-crypto"
 import { Keyring } from "@polkadot/keyring"
-import { KeyringPair } from "@polkadot/keyring/types"
 
 /**
  * @name generateSeed
- * @summary Generate a new account
- * @returns An object with the seed and the public address
+ * @summary Generate a new seed
+ * @returns The new seed
  */
-export const generateSeed = async (): Promise<{
-  seed: string
-  address: string
-}> => {
-  await cryptoWaitReady()
-  const seed = mnemonicGenerate()
-  const account = await getKeyringFromSeed(seed)
-  return { seed: seed, address: account.address }
-}
+export const generateSeed = mnemonicGenerate
 
 /**
  * @name getKeyringFromSeed
- * @summary Create a keyring from a seed
- * @param seed
- * @returns A keyring pair
+ * @summary               Create a keyring from a seed
+ * @param seed            Mnemonic
+ * @param hardPath        Hard path derivation
+ * @param softPath        Soft path derivation
+ * @param passwordPath    Password path derivation
+ * @returns               A keyring pair
  */
-export const getKeyringFromSeed = async (seed: string): Promise<KeyringPair> => {
+export const getKeyringFromSeed = async (seed: string, hardPath?: string, softPath?: string, passwordPath?: string) => {
   await cryptoWaitReady()
-  const keyring = new Keyring({ type: "sr25519" })
-  return keyring.createFromUri(seed)
+
+  const _suri =
+    seed +
+    `${hardPath ? `//${hardPath}` : ""}` +
+    `${softPath ? `/${softPath}` : ""}` +
+    `${passwordPath ? `///${passwordPath}` : ""}`
+  const keyring = new Keyring()
+  return keyring.createFromUri(_suri, {}, "sr25519")
 }

@@ -15,7 +15,7 @@ beforeAll(async () => {
   const endpoint: string | undefined = process.env.BLOCKCHAIN_ENDPOINT
   await initializeApi(endpoint)
 
-  // Create some datas to test Markeplace queries.
+  // Create some data to test Marketplace queries.
   const { test: testAccount } = await createTestPairs()
   const nEvent = await createNft("Test NFT Data", 0, undefined, false, testAccount, WaitUntil.BlockInclusion)
   const mEvent = await createMarketplace(MarketplaceKind.Public, testAccount, WaitUntil.BlockInclusion)

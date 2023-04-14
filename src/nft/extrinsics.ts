@@ -3,19 +3,25 @@ import { IKeyringPair } from "@polkadot/types/types"
 import { createTxHex, submitTxBlocking, TransactionHashType } from "../blockchain"
 import { txActions, txPallets, WaitUntil } from "../constants"
 import {
+  CapsuleKeyUpdateNotifiedEvent,
+  CapsuleOffchainDataSetEvent,
   CollectionBurnedEvent,
   CollectionClosedEvent,
   CollectionCreatedEvent,
   CollectionLimitedEvent,
+  CollectionOffchainDataSetEvent,
   NFTAddedToCollectionEvent,
   NFTBurnedEvent,
+  NFTConvertedToCapsuleEvent,
   NFTCreatedEvent,
   NFTDelegatedEvent,
   NFTRoyaltySetEvent,
   NFTTransferredEvent,
+  SecretAddedToNFTEvent,
 } from "../events"
 
 import { formatPermill } from "../helpers/utils"
+import { CapsuleNFTData, NftData, SecretNftData } from "./types"
 
 // NFTs
 
@@ -34,10 +40,10 @@ export const createNftTx = async (
   collectionId: number | undefined = undefined,
   isSoulbound = false,
 ): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(royalty)
+  const formattedRoyality = formatPermill(royalty)
   return await createTxHex(txPallets.nft, txActions.createNft, [
     offchainData,
-    formatedRoyalty,
+    formattedRoyality,
     collectionId,
     isSoulbound,
   ])
@@ -65,6 +71,101 @@ export const createNft = async (
   const tx = await createNftTx(offchainData, royalty, collectionId, isSoulbound)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTCreatedEvent)
+}
+
+/**
+ * @name createSecretNftTx
+ * @summary                   Creates an unsigned unsubmitted Create-Secret-NFT Transaction Hash.
+ * @param offchainData        Off-chain related NFT preview metadata. Can be an IPFS hash, a URL or plain text.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty             Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId        The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound         If true, makes the NFT intransferable. Default is false.
+ * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const createSecretNftTx = async (
+  offchainData: string,
+  secretOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+): Promise<TransactionHashType> => {
+  const formattedRoyality = formatPermill(royalty)
+  return await createTxHex(txPallets.nft, txActions.createSecretNft, [
+    offchainData,
+    secretOffchainData,
+    formattedRoyality,
+    collectionId,
+    isSoulbound,
+  ])
+}
+
+/**
+ * @name createSecretNft
+ * @summary                   Creates a Secret NFT on chain.
+ * @param offchainData        Off-chain related NFT preview metadata. Can be an IPFS hash, a URL or plain text.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty             Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId        The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound         If true, makes the NFT intransferable. Default is false.
+ * @param keyring             Account that will sign the transaction.
+ * @param waitUntil           Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns                   Secret NFT data combining the data from NFTCreatedEvent and SecretAddedToNFTEvent.
+ */
+export const createSecretNft = async (
+  offchainData: string,
+  secretOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<SecretNftData> => {
+  const tx = await createSecretNftTx(offchainData, secretOffchainData, royalty, collectionId, isSoulbound)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  const nftCreatedEvent = events.findEventOrThrow(NFTCreatedEvent)
+  const secretAddedToNFTEvent = events.findEventOrThrow(SecretAddedToNFTEvent)
+  return {
+    nftId: nftCreatedEvent.nftId,
+    owner: nftCreatedEvent.owner,
+    creator: nftCreatedEvent.owner,
+    offchainData: nftCreatedEvent.offchainData,
+    secretOffchainData: secretAddedToNFTEvent.offchainData,
+    royalty: nftCreatedEvent.royalty,
+    collectionId: nftCreatedEvent.collectionId,
+    isSoulbound: nftCreatedEvent.isSoulbound,
+  }
+}
+
+/**
+ * @name addSecretToNftTx
+ * @summary                   Creates an unsigned unsubmitted Add-Secret-NFT Transaction Hash.
+ * @param id                  The ID of the NFT.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @returns                   Unsigned unsubmitted Create-Secret-NFT Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const addSecretToNftTx = async (id: number, secretOffchainData: string): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.addSecret, [id, secretOffchainData])
+}
+
+/**
+ * @name addSecretToNft
+ * @summary                   Adds a Secret to an NFT on chain.
+ * @param id                  The ID of the NFT.
+ * @param secretOffchainData  Off-chain related NFT secret metadata. Can be an IPFS hash, a URL or plain text.
+ * @param keyring             Account that will sign the transaction.
+ * @param waitUntil           Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns                   SecretAddedToNFTEvent Blockchain event.
+ */
+export const addSecretToNft = async (
+  id: number,
+  secretOffchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<SecretAddedToNFTEvent> => {
+  const tx = await addSecretToNftTx(id, secretOffchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(SecretAddedToNFTEvent)
 }
 
 /**
@@ -133,8 +234,8 @@ export const delegateNft = async (
  * @returns       Unsigned unsubmitted Set-Royalty-NFT Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const setRoyaltyTx = async (id: number, amount: number): Promise<TransactionHashType> => {
-  const formatedRoyalty = formatPermill(amount)
-  return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formatedRoyalty])
+  const formattedRoyality = formatPermill(amount)
+  return await createTxHex(txPallets.nft, txActions.setRoyalty, [id, formattedRoyality])
 }
 
 /**
@@ -191,8 +292,8 @@ export const transferNft = async (
 /**
  * @name addNftToCollectionTx
  * @summary               Creates an unsigned unsubmitted Add-NFT-To-Collection Transaction Hash.
- * @param nftId          The ID of the NFT.
- * @param collectionId   The ID of the Collection.
+ * @param nftId           The ID of the NFT.
+ * @param collectionId    The ID of the Collection.
  * @returns               Unsigned unsubmitted Add-NFT-To-Collection Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const addNftToCollectionTx = async (nftId: number, collectionId: number): Promise<TransactionHashType> => {
@@ -202,8 +303,8 @@ export const addNftToCollectionTx = async (nftId: number, collectionId: number):
 /**
  * @name addNftToCollection
  * @summary               Adds an NFT to an existing collection.
- * @param nftId          The ID of the NFT.
- * @param collectionId   The ID of the Collection.
+ * @param nftId           The ID of the NFT.
+ * @param collectionId    The ID of the Collection.
  * @param keyring         Account that will sign the transaction.
  * @param waitUntil       Execution trigger that can be set either to BlockInclusion or BlockFinalization.
  * @returns               NFTAddedToCollectionEvent Blockchain event.
@@ -217,6 +318,197 @@ export const addNftToCollection = async (
   const tx = await addNftToCollectionTx(nftId, collectionId)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(NFTAddedToCollectionEvent)
+}
+
+// Capsule
+
+/**
+ * @name convertNftToCapsuleTx
+ * @summary    		              Creates an unsigned unsubmitted Convert-To-Capsule Transaction Hash for a Capsule NFT.
+ * @param nftId		              The NFT Id to convert into a capsule.
+ * @param capsuleOffchainData 	The offchain capsule data (a string)
+ * @returns  		                Unsigned unsubmitted Convert-To-Capsule Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const convertNftToCapsuleTx = async (
+  nftId: number,
+  capsuleOffchainData: string,
+): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.convertToCapsule, [nftId, capsuleOffchainData])
+}
+
+/**
+ * @name convertNftToCapsule
+ * @summary    		              Convert an existing basic NFT into a Capsule NFT.
+ * @param nftId		              The NFT Id to convert in a capsule.
+ * @param capsuleOffchainData 	The offchain capsule data (a string)
+ * @param keyring               Account that will sign the transaction.
+ * @param waitUntil             Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                NFTConvertedToCapsuleEvent Blockchain event.
+ */
+export const convertNftToCapsule = async (
+  nftId: number,
+  capsuleOffchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<NFTConvertedToCapsuleEvent> => {
+  const tx = await convertNftToCapsuleTx(nftId, capsuleOffchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(NFTConvertedToCapsuleEvent)
+}
+
+/**
+ * @name createCapsuleTx
+ * @summary    		             Creates an unsigned unsubmitted Create-Capsule Transaction Hash for a Capsule NFT.
+ * @param offchainData         Off-chain data related to the NFT metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param capsuleOffchainData  Off-chain data related to the Capsule metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty              Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId         The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound          If true, makes the Capsule intransferable. Default is false.
+ * @returns  		               Unsigned unsubmitted Create-Capsule Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+
+export const createCapsuleTx = async (
+  offchainData: string,
+  capsuleOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+): Promise<TransactionHashType> => {
+  const formattedRoyality = formatPermill(royalty)
+  return await createTxHex(txPallets.nft, txActions.createCapsule, [
+    offchainData,
+    capsuleOffchainData,
+    formattedRoyality,
+    collectionId,
+    isSoulbound,
+  ])
+}
+
+/**
+ * @name createCapsule
+ * @summary    		              Convert an existing basic NFT into a Capsule NFT.
+ * @param offchainData          Off-chain data related to the NFT metadata. Can be an IPFS Hash, an URL or plain text.
+ * @param capsuleOffchainData   Off-chain data related to the Capsule metadata. Can be an IPFS hash, a URL or plain text.
+ * @param royalty               Percentage of all second sales that the creator will receive. It's a decimal number in range [0, 100]. Default is 0.
+ * @param collectionId          The collection to which the NFT belongs. Optional Parameter.
+ * @param isSoulbound           If true, makes the Capsule intransferable. Default is false.
+ * @param keyring               Account that will sign the transaction.
+ * @param waitUntil             Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                Capsule NFT data combining the data from NFTCreatedEvent and NFTConvertedToCapsuleEvent.
+ */
+export const createCapsule = async (
+  offchainData: string,
+  capsuleOffchainData: string,
+  royalty = 0,
+  collectionId: number | undefined = undefined,
+  isSoulbound = false,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CapsuleNFTData<NftData>> => {
+  const tx = await createCapsuleTx(offchainData, capsuleOffchainData, royalty, collectionId, isSoulbound)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  const nftCreatedEvent = events.findEventOrThrow(NFTCreatedEvent)
+  const nftConvertedToCapsuleEvent = events.findEventOrThrow(NFTConvertedToCapsuleEvent)
+  return {
+    nftId: nftCreatedEvent.nftId,
+    owner: nftCreatedEvent.owner,
+    creator: nftCreatedEvent.owner,
+    offchainData: nftCreatedEvent.offchainData,
+    capsuleOffchainData: nftConvertedToCapsuleEvent.offchainData,
+    royalty: nftCreatedEvent.royalty,
+    collectionId: nftCreatedEvent.collectionId,
+    isSoulbound: nftCreatedEvent.isSoulbound,
+  }
+}
+
+// /**
+//  * @name revertCapsuleTx
+//  * @summary    		    Creates an unsigned unsubmitted Revert-Capsule Transaction Hash for a Capsule NFT.
+//  * @param nftId		    The NFT Id to remove the capsule part.
+//  * @returns  		      Unsigned unsubmitted Revert-Capsule Transaction Hash. The Hash is only valid for 5 minutes.
+//  */
+// export const revertCapsuleTx = async (nftId: number): Promise<TransactionHashType> => {
+//   return await createTxHex(txPallets.nft, txActions.revertCapsule, [nftId])
+// }
+
+// /**
+//  * @name revertCapsule
+//  * @summary		       Removes the capsule part of an NFT.
+//  * @param nftId		   The NFT Id to remove the capsule part.
+//  * @param keyring		 Account that will sign the transaction.
+//  * @param waitUntil  Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+//  * @returns  		     CapsuleRevertedEvent Blockchain event.
+//  */
+// export const revertCapsule = async (
+//   nftId: number,
+//   keyring: IKeyringPair,
+//   waitUntil: WaitUntil,
+// ): Promise<CapsuleRevertedEvent> => {
+//   const tx = await revertCapsuleTx(nftId)
+//   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+//   return events.findEventOrThrow(CapsuleRevertedEvent)
+// }
+
+/**
+ * @name setCapsuleOffchaindataTx
+ * @summary    		              Creates an unsigned unsubmitted Set-Capsule-Offchain-Data Transaction Hash for a Capsule NFT.
+ * @param nftId		              The NFT Id to set the capsule's offchain data. Capsules are mutable
+ * @param capsuleOffchainData 	The offchain capsule data (a string)
+ * @returns  		                Unsigned unsubmitted Set-Capsule-Offchain-Data Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const setCapsuleOffchaindataTx = async (
+  nftId: number,
+  capsuleOffchainData: string,
+): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.setCapsuleOffchaindata, [nftId, capsuleOffchainData])
+}
+
+/**
+ * @name setCapsuleOffchaindata
+ * @summary    		               Sets the offchain data of a Capsule NFT.
+ * @param nftId		               The NFT Id to set the capsule's offchain data. Capsules are mutable
+ * @param capsuleOffchainData 	 The offchain capsule data (a string)
+ * @param keyring                Account that will sign the transaction.
+ * @param waitUntil              Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                 CapsuleOffchainDataSetEvent Blockchain event.
+ */
+export const setCapsuleOffchaindata = async (
+  nftId: number,
+  capsuleOffchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CapsuleOffchainDataSetEvent> => {
+  const tx = await setCapsuleOffchaindataTx(nftId, capsuleOffchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(CapsuleOffchainDataSetEvent)
+}
+
+/**
+ * @name notifyEnclaveKeyUpdateTx
+ * @summary    		   Creates an unsigned unsubmitted Notify-Enclave-Key-Update Transaction Hash for a Capsule NFT.
+ * @param nftId		   The capsule NFT Id to signify that new keys were requested by the capsule owner.
+ * @returns  		     Unsigned unsubmitted Notify-Enclave-Key-Update Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const notifyEnclaveKeyUpdateTx = async (nftId: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.notifyEnclaveKeyUpdate, [nftId])
+}
+
+/**
+ * @name notifyEnclaveKeyUpdate
+ * @summary		       Notifies the enclave that capsule owner requests new keys.
+ * @param nftId		   The capsule NFT Id to signify that new keys were requested by the capsule owner.
+ * @param keyring		 Account that will sign the transaction.
+ * @param waitUntil  Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		     CapsuleKeyUpdateNotifiedEvent Blockchain event.
+ */
+export const notifyEnclaveKeyUpdate = async (
+  nftId: number,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CapsuleKeyUpdateNotifiedEvent> => {
+  const tx = await notifyEnclaveKeyUpdateTx(nftId)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(CapsuleKeyUpdateNotifiedEvent)
 }
 
 // Collections
@@ -340,4 +632,35 @@ export const burnCollection = async (
   const tx = await burnCollectionTx(id)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(CollectionBurnedEvent)
+}
+
+/**
+ * @name setCollectionOffchaindataTx
+ * @summary    		              Creates an unsigned unsubmitted Set-Collection-Offchain-Data Transaction Hash for a Collection.
+ * @param id		                The ID of the Collection.
+ * @param offchainData 	        The offchain collection data (a string)
+ * @returns  		                Unsigned unsubmitted Set-Collection-Offchain-Data Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const setCollectionOffchaindataTx = async (id: number, offchainData: string): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.nft, txActions.setCollectionOffchaindata, [id, offchainData])
+}
+
+/**
+ * @name setCollectionOffchaindata
+ * @summary    		               Sets the offchain data of a Collection.
+ * @param id		                 The ID of the Collection.
+ * @param offchainData 	         The offchain collection data (a string)
+ * @param keyring                Account that will sign the transaction.
+ * @param waitUntil              Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns  		                 CollectionOffchainDataSetEvent Blockchain event.
+ */
+export const setCollectionOffchaindata = async (
+  id: number,
+  offchainData: string,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<CollectionOffchainDataSetEvent> => {
+  const tx = await setCollectionOffchaindataTx(id, offchainData)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(CollectionOffchainDataSetEvent)
 }

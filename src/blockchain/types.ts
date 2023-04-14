@@ -32,6 +32,7 @@ export interface IFormatBalanceOptions {
 export type SubmitTxBlockingType = {
   blockInfo: BlockInfo
   events: BlockchainEvents
+  txHash: `0x${string}`
 }
 
 export type TransactionHashType = `0x${string}`
