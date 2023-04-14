@@ -3,14 +3,14 @@ import { getKeyringFromSeed, generateSeed } from "./index"
 import { isValidAddress } from "../blockchain"
 
 test("Should generate a new seed", async () => {
-  const account = await generateSeed()
-  expect(mnemonicValidate(account.seed)).toBe(true)
-  expect(isValidAddress(account.address)).toBe(true)
+  const seed = generateSeed()
+  expect(mnemonicValidate(seed)).toBe(true)
 })
 
 test("A valid seed should return a keypair", async () => {
-  const account = await generateSeed()
-  const keyring = await getKeyringFromSeed(account.seed)
+  const seed = generateSeed()
+  const keyring = await getKeyringFromSeed(seed)
   const address = keyring.address
-  expect(address).toBe(account.address)
+  expect(isValidAddress(address)).toBe(true)
+  expect(address).toBe(address)
 })

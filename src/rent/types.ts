@@ -35,6 +35,8 @@ export type CancellationFeeType =
   | CancellationFeeNFTType
 
 export type RentalContractDataType = {
+  creationBlock: number
+  creationBlockDate: Date
   startBlock: number | null
   startBlockDate: Date | null
   renter: string
@@ -55,6 +57,7 @@ export type RentalContractDataType = {
 }
 
 export type RentalContractChainRawDataType = {
+  creationBlock: number
   startBlock: number | null
   renter: string
   rentee: string | null
