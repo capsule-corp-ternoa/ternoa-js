@@ -40,7 +40,7 @@ export const TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT = "/api/capsule-nft/remove
 export const TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT = (nftId: number) =>
   `/api/capsule-nft/is-keyshare-available/${nftId}`
 
-export const SIGNER_BLOCK_VALIDITY = 100
+export const SIGNER_BLOCK_VALIDITY = 20
 
 /**
  * @name generateKeyShares
