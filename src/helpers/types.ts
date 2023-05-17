@@ -42,6 +42,7 @@ export type RequesterType = "OWNER" | "DELEGATEE" | "RENTEE"
 export type CapsuleMedia = {
   encryptedFile: string
   type: string
+  [key: string]: unknown
 }
 
 export type CapsuleEncryptedMedia = {
