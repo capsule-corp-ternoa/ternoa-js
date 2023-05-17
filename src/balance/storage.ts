@@ -41,8 +41,14 @@ export const getTotalBalance = async (address: string): Promise<BN> => {
  * @returns             The transferrable balance of an account.
  */
 export const getTransferrableBalance = async (address: string): Promise<BN> => {
-  const { free, miscFrozen } = await getBalances(address)
-  return free.sub(miscFrozen)
+  const { feeFrozen, free, miscFrozen } = await getBalances(address)
+  let frozen
+  if (feeFrozen.gt(miscFrozen)) {
+    frozen = feeFrozen
+  } else {
+    frozen = miscFrozen
+  }
+  return free.sub(frozen)
 }
 
 /**
