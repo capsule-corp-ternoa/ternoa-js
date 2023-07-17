@@ -20,7 +20,13 @@ import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
 import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
-import { EnclaveHealthType, NFTShareAvailableType } from "tee/types"
+import {
+  EnclaveDataAndHealthType,
+  EnclaveHealthType,
+  NFTShareAvailableType,
+  PopulatedEnclavesDataType,
+} from "tee/types"
+// import { EnclaveHealthType, EnclaveQuoteRawType, EnclaveQuoteType, NFTShareAvailableType } from "tee/types"
 import { isValidAddress } from "../blockchain"
 
 export const SSSA_NUMSHARES = 5
@@ -29,6 +35,7 @@ export const SSSA_THRESHOLD = 3
 const TEE_STORE_STATUS_SUCCESS = "STORESUCCESS"
 const TEE_RETRIEVE_STATUS_SUCCESS = "RETRIEVESUCCESS"
 export const TEE_HEALTH_ENDPOINT = "/api/health"
+// export const TEE_QUOTE_ENDPOINT = "/api/quote"
 export const TEE_STORE_SECRET_NFT_ENDPOINT = "/api/secret-nft/store-keyshare"
 export const TEE_RETRIEVE_SECRET_NFT_ENDPOINT = "/api/secret-nft/retrieve-keyshare"
 export const TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT = "/api/secret-nft/remove-keyshare"
@@ -84,13 +91,90 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
       const http = new HttpClient(ensureHttps(enclaveUrl))
       const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
       if (enclaveData.status !== 200) {
-        throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE ${idx}: ${enclaveUrl}`)
+        throw new Error(
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE_ID ${idx}: ${enclaveData.description} - URL: ${enclaveUrl}`,
+        )
       }
       return enclaveData
     }),
   )
   return clusterHealthCheck
 }
+
+/**
+ * @name populateEnclavesData
+ * @summary           Populate enclaves data with addresses, slot and urls.
+ * @param clusterId   The TEE Cluster id.
+ * @returns           An array of the TEE enclaves data for the cluster.
+ */
+export const populateEnclavesData = async (clusterId = 0) => {
+  const clusterData = await getClusterData(clusterId)
+  if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
+  const data: PopulatedEnclavesDataType[] = await Promise.all(
+    clusterData.enclaves.map(async (enclave) => {
+      const enclaveData = await getEnclaveData(enclave[0])
+      if (!enclaveData) throw new Error(Errors.TEE_ENCLAVE_NOT_FOUND)
+      return {
+        clusterId,
+        clusterType: clusterData.isPublic ? "Public" : "Private",
+        enclaveAddress: enclaveData.enclaveAddress,
+        operatorAddress: enclave[0],
+        enclaveUrl: removeURLSlash(hexToString(enclaveData.apiUri)),
+        enclaveSlot: enclave[1],
+      }
+    }),
+  )
+  return data
+}
+
+/**
+ * @name getEnclaveDataAndHealth
+ * @summary           Get the enclaves data from a cluster populated with health check.
+ * @param clusterId   The TEE Cluster id.
+ * @returns           An array of JSONs containing each enclave data populated with its health information.
+ */
+export const getEnclaveDataAndHealth = async (clusterId = 0): Promise<EnclaveDataAndHealthType[]> => {
+  const teeEnclaves = await populateEnclavesData(clusterId)
+  const enclaveData = await Promise.all(
+    teeEnclaves.map(async (e, idx) => {
+      try {
+        const http = new HttpClient(ensureHttps(e.enclaveUrl))
+        const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
+        const { date, status, description } = enclaveData
+        return { ...e, status, description, date }
+      } catch (error) {
+        const date = new Date().toJSON()
+        const description =
+          error instanceof Error ? `SGX_SERVER_ERROR - ${error.message}` : "SGX_SERVER_ERROR - ENCLAVE UNREACHABLE"
+        return { ...teeEnclaves[idx], status: 500, description, date }
+      }
+    }),
+  )
+  return enclaveData
+}
+
+// /**
+//  * @name getEnclavesQuote
+//  * @summary           Generate the enclaves quote.
+//  * @param clusterId   The TEE Cluster id.
+//  * @returns           An array of JSONs containing each enclave quote information (status, data or error)
+//  */
+// export const getEnclavesQuote = async (clusterId = 0) => {
+//   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+//   const clusterQuote = await Promise.all(
+//     teeEnclaves.map(async (enclaveUrl, idx) => {
+//       const http = new HttpClient(ensureHttps(enclaveUrl))
+//       const enclaveData: EnclaveQuoteRawType = await http.get(TEE_QUOTE_ENDPOINT)
+//       if (enclaveData.status !== "Success" && "error" in enclaveData) {
+//         throw new Error(
+//           `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ENCLAVE_ID ${idx}: ${enclaveData.error} - URL: ${enclaveUrl}`,
+//         )
+//       }
+//       return { ...enclaveData, enclaveUrl }
+//     }),
+//   )
+//   return clusterQuote as EnclaveQuoteType[]
+// }
 
 /**
  * @name getTeeEnclavesBaseUrl
@@ -102,10 +186,10 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
   const clusterData = await getClusterData(clusterId)
   if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
   const urls: string[] = await Promise.all(
-    clusterData.map(async (enclave) => {
-      const enclaveData = await getEnclaveData(enclave)
+    clusterData.enclaves.map(async (enclave) => {
+      const enclaveData = await getEnclaveData(enclave[0]) // not working with Alphanet
       if (!enclaveData) throw new Error(Errors.TEE_ENCLAVE_NOT_FOUND)
-      return removeURLSlash(hexToString(enclaveData.apiUri))
+      return removeURLSlash(hexToString(enclaveData?.apiUri))
     }),
   )
   return urls
@@ -205,14 +289,14 @@ export const formatRetrievePayload = async (
 }
 
 /**
- * @name teeUpload
+ * @name TeePost
  * @summary               Upload secret payload data to an TEE enclave.
  * @param http            HttpClient instance.
  * @param endpoint        TEE enclave endpoint.
  * @param secretPayload   Payload formatted with the required secret NFT's data.
  * @returns               TEE enclave response.
  */
-export const teeUpload = async <T, K>(http: HttpClient, endpoint: string, secretPayload: T): Promise<K> => {
+export const TeePost = async <T, K>(http: HttpClient, endpoint: string, secretPayload: T): Promise<K> => {
   const headers = {
     "Content-Type": "application/json",
   }
@@ -257,7 +341,7 @@ export const teeKeySharesStore = async (
       const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
       const http = new HttpClient(ensureHttps(baseUrl))
       const endpoint = kind === "secret" ? TEE_STORE_SECRET_NFT_ENDPOINT : TEE_STORE_CAPSULE_NFT_ENDPOINT
-      const post = async () => await teeUpload<StorePayloadType, TeeGenericDataResponseType>(http, endpoint, payload)
+      const post = async () => await TeePost<StorePayloadType, TeeGenericDataResponseType>(http, endpoint, payload)
       return await retryPost<TeeGenericDataResponseType>(post, nbRetry)
     }),
   )
@@ -297,7 +381,7 @@ export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, 
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   let isShareAvailable = false
   let i = 0
-  while (isShareAvailable !== true && i <= teeEnclaves.length) {
+  while (isShareAvailable !== true && i <= teeEnclaves.length - 1) {
     const { exists } = await getTeeEnclaveSharesAvailablility(teeEnclaves[i], nftId, kind)
     isShareAvailable = exists
     i += 1
@@ -333,7 +417,7 @@ export const teeKeySharesRetrieve = async (
       const http = new HttpClient(ensureHttps(baseUrl))
       const endpoint = kind === "secret" ? TEE_RETRIEVE_SECRET_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT
       try {
-        const res = await teeUpload<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
+        const res = await TeePost<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
         if (res.status !== TEE_RETRIEVE_STATUS_SUCCESS)
           errors.push(res.description ? res.description.split(":")[1] : "Share could not be retrieved")
         return res.status === TEE_RETRIEVE_STATUS_SUCCESS && res.keyshare_data
@@ -382,7 +466,7 @@ export const teeKeySharesRemove = async (
       const endpoint =
         kind === "secret" ? TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT : TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT
       try {
-        const res = await teeUpload<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
+        const res = await TeePost<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
         return res
       } catch {
         return {
