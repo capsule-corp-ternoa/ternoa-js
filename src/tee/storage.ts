@@ -9,15 +9,14 @@ import { ClusterDataType, EnclaveDataType } from "./types"
  * @param clusterId    The Cluster id.
  * @returns            An array containing the cluster data: the list of enclaves
  */
-export const getClusterData = async (clusterId: number): Promise<string[] | null> => {
+export const getClusterData = async (clusterId: number): Promise<ClusterDataType | null> => {
   const data = await query(txPallets.tee, chainQuery.clusterData, [clusterId])
   if (data.isEmpty == true) {
     throw new Error(`${Errors.TEE_CLUSTER_NOT_FOUND}: ${clusterId}`)
   }
-
   try {
     const result = data.toJSON() as ClusterDataType
-    return result.enclaves
+    return result
   } catch (error) {
     throw new Error(`${Errors.CLUSTER_CONVERSION_ERROR}`)
   }
@@ -34,7 +33,6 @@ export const getEnclaveData = async (enclaveId: string): Promise<EnclaveDataType
   if (data.isEmpty == true) {
     throw new Error(`${Errors.TEE_ENCLAVE_NOT_FOUND}: ${enclaveId}`)
   }
-
   try {
     const result = data.toJSON() as EnclaveDataType
     return result

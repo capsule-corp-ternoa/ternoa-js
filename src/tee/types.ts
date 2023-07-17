@@ -5,16 +5,35 @@ export type EnclaveDataType = {
 
 export type EnclaveHealthType = {
   status: number
-  date: Date
+  date: string
   description: string
   enclave_address: string
-  operator_address: string
-  binary_hash: { [k: string]: string }
-  quote: Uint32Array
 }
 
+export type PopulatedEnclavesDataType = {
+  enclaveAddress: string
+  operatorAddress: string
+  enclaveUrl: string
+  enclaveSlot: number
+  clusterId: number
+  clusterType: string
+}
+
+export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & Omit<EnclaveHealthType, "enclave_address">
+
+// export type EnclaveQuoteRawType = {
+//   status: string
+//   data?: Date
+//   error?: string
+// }
+
+// export type EnclaveQuoteType = EnclaveQuoteRawType & {
+//   enclaveUrl?: string
+// }
+
 export type ClusterDataType = {
-  enclaves: string[]
+  enclaves: [string, number][]
+  isPublic?: boolean
 }
 
 export type NFTShareAvailableType = {
