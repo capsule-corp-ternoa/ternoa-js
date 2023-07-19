@@ -289,14 +289,14 @@ export const formatRetrievePayload = async (
 }
 
 /**
- * @name TeePost
+ * @name teePost
  * @summary               Upload secret payload data to an TEE enclave.
  * @param http            HttpClient instance.
  * @param endpoint        TEE enclave endpoint.
  * @param secretPayload   Payload formatted with the required secret NFT's data.
  * @returns               TEE enclave response.
  */
-export const TeePost = async <T, K>(http: HttpClient, endpoint: string, secretPayload: T): Promise<K> => {
+export const teePost = async <T, K>(http: HttpClient, endpoint: string, secretPayload: T): Promise<K> => {
   const headers = {
     "Content-Type": "application/json",
   }
@@ -331,32 +331,38 @@ export const teeKeySharesStore = async (
       : SSSA_NUMSHARES
   if (payloads.length !== nbShares)
     throw new Error(`${Errors.NOT_CORRECT_AMOUNT_TEE_PAYLOADS} - Got: ${payloads.length}; Expected: ${SSSA_NUMSHARES}`)
-  const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  const teeEnclaves = await populateEnclavesData(clusterId)
   if (teeEnclaves.length !== SSSA_NUMSHARES)
     throw new Error(
       `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
     )
   const teeRes = await Promise.all(
     payloads.map(async (payload, idx) => {
-      const baseUrl = teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
-      const http = new HttpClient(ensureHttps(baseUrl))
+      const { enclaveUrl, enclaveAddress, operatorAddress, enclaveSlot } =
+        teeEnclaves[enclavesIndex && enclavesIndex.length > 0 ? enclavesIndex[idx] : idx]
+      const http = new HttpClient(ensureHttps(enclaveUrl))
       const endpoint = kind === "secret" ? TEE_STORE_SECRET_NFT_ENDPOINT : TEE_STORE_CAPSULE_NFT_ENDPOINT
-      const post = async () => await TeePost<StorePayloadType, TeeGenericDataResponseType>(http, endpoint, payload)
-      return await retryPost<TeeGenericDataResponseType>(post, nbRetry)
+      const post = async () => await teePost<StorePayloadType, TeeGenericDataResponseType>(http, endpoint, payload)
+      const retryFn = await retryPost<TeeGenericDataResponseType>(post, nbRetry)
+      return { enclaveAddress, operatorAddress, enclaveSlot, ...retryFn }
     }),
   )
 
   return teeRes.map((enclaveRes, i) => {
     const payload = payloads[i]
-
-    if ("isRetryError" in enclaveRes)
+    if ("isRetryError" in enclaveRes) {
+      const { message, status, enclaveAddress, operatorAddress, enclaveSlot } = enclaveRes
       return {
-        status: enclaveRes.status,
-        description: enclaveRes.message,
+        enclaveAddress,
+        operatorAddress,
+        enclaveSlot,
+        description: message,
         nft_id: Number(payload.data.split("_")[0]),
+        status: status,
         isError: true,
         ...payload,
       }
+    }
 
     return {
       ...enclaveRes,
@@ -417,7 +423,7 @@ export const teeKeySharesRetrieve = async (
       const http = new HttpClient(ensureHttps(baseUrl))
       const endpoint = kind === "secret" ? TEE_RETRIEVE_SECRET_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT
       try {
-        const res = await TeePost<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
+        const res = await teePost<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
         if (res.status !== TEE_RETRIEVE_STATUS_SUCCESS)
           errors.push(res.description ? res.description.split(":")[1] : "Share could not be retrieved")
         return res.status === TEE_RETRIEVE_STATUS_SUCCESS && res.keyshare_data
@@ -466,7 +472,7 @@ export const teeKeySharesRemove = async (
       const endpoint =
         kind === "secret" ? TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT : TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT
       try {
-        const res = await TeePost<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
+        const res = await teePost<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
         return res
       } catch {
         return {
