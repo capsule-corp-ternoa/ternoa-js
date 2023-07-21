@@ -2,12 +2,13 @@ import BN from "bn.js"
 import { Event } from "@polkadot/types/interfaces/system"
 import { bnToBn, hexToString } from "@polkadot/util"
 
-import { roundBalance } from "./helpers/utils"
 import { Errors } from "./constants"
+import { roundBalance } from "./helpers/utils"
 import { MarketplaceConfigFeeType, MarketplaceKind } from "./marketplace/enum"
+import { Protocols, TransmissionCancellation } from "./protocols"
 import { AcceptanceAction, CancellationFeeAction, RentFeeAction } from "./rent/enum"
 import { DurationType } from "./rent/types"
-import { Protocols, TransmissionCancellation } from "./protocols"
+import { ReportParamsType } from "./tee"
 
 export enum EventType {
   //Assets
@@ -95,6 +96,9 @@ export enum EventType {
   ExtrinsicSuccess = "system.ExtrinsicSuccess",
   NewAccount = "system.NewAccount",
 
+  // Tee
+  MetricsServerReportSubmitted = "MetricsServerReportSubmitted",
+
   // Unknown
   Unknown = "Unknown",
 }
@@ -177,6 +181,9 @@ export class BlockchainEvent {
         return new ThresholdReachedEvent(event)
       case EventType.Transmitted:
         return new TransmittedEvent(event)
+      // Assets
+      case EventType.MetricsServerReportSubmitted:
+        return new MetricsServerReportSubmittedEvent(event)
       // Rent
       case EventType.ContractCreated:
         return new ContractCreatedEvent(event)
@@ -809,6 +816,26 @@ export class TransmittedEvent extends BlockchainEvent {
     super(event, EventType.Transmitted)
     const [nftId] = event.data
     this.nftId = Number.parseInt(nftId.toString())
+  }
+}
+
+/**
+ * This class represents the on-chain MetricsServerReportSubmitted event.
+ */
+export class MetricsServerReportSubmittedEvent extends BlockchainEvent {
+  era: number
+  metricsServerAddress: string
+  metricsServerReport: ReportParamsType
+  /**
+   * Construct the data object from the MetricsServerReportSubmittedEvent event
+   * @param event The MetricsServerReportSubmittedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.MetricsServerReportSubmitted)
+    const [era, metricsServerAddress, metricsServerReport] = event.data
+    this.era = Number.parseInt(era.toString())
+    this.metricsServerAddress = metricsServerAddress.toString()
+    this.metricsServerReport = metricsServerReport.toJSON() as ReportParamsType
   }
 }
 

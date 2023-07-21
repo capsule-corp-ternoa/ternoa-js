@@ -1,3 +1,5 @@
+import BN from "bn.js"
+
 export type EnclaveDataType = {
   enclaveAddress: string
   apiUri: string
@@ -40,4 +42,13 @@ export type NFTShareAvailableType = {
   enclave_id: string
   nft_id: number
   exists: boolean
+}
+
+export type ReportParamsType = {
+  operatorAddress: string
+  param1: number
+  param2: number
+  param3: number
+  param4: number
+  param5: number
 }
