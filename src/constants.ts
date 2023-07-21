@@ -79,6 +79,9 @@ export enum txActions {
   removeBid = "removeBid",
   buyItNow = "buyItNow",
   claim = "claim",
+
+  // tee
+  submitMetricsServerReport = "submitMetricsServerReport",
 }
 
 export enum txEvent {
