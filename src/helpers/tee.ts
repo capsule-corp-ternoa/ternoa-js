@@ -22,11 +22,12 @@ import { getClusterData, getEnclaveData } from "../tee"
 import { Errors } from "../constants"
 import {
   EnclaveDataAndHealthType,
+  EnclaveQuoteRawType,
+  EnclaveQuoteType,
   EnclaveHealthType,
   NFTShareAvailableType,
   PopulatedEnclavesDataType,
 } from "tee/types"
-// import { EnclaveHealthType, EnclaveQuoteRawType, EnclaveQuoteType, NFTShareAvailableType } from "tee/types"
 import { isValidAddress } from "../blockchain"
 
 export const SSSA_NUMSHARES = 5
@@ -35,7 +36,7 @@ export const SSSA_THRESHOLD = 3
 const TEE_STORE_STATUS_SUCCESS = "STORESUCCESS"
 const TEE_RETRIEVE_STATUS_SUCCESS = "RETRIEVESUCCESS"
 export const TEE_HEALTH_ENDPOINT = "/api/health"
-// export const TEE_QUOTE_ENDPOINT = "/api/quote"
+export const TEE_QUOTE_ENDPOINT = "/api/quote"
 export const TEE_STORE_SECRET_NFT_ENDPOINT = "/api/secret-nft/store-keyshare"
 export const TEE_RETRIEVE_SECRET_NFT_ENDPOINT = "/api/secret-nft/retrieve-keyshare"
 export const TEE_REMOVE_SECRET_NFT_KEYSHARE_ENDPOINT = "/api/secret-nft/remove-keyshare"
@@ -153,28 +154,31 @@ export const getEnclaveDataAndHealth = async (clusterId = 0): Promise<EnclaveDat
   return enclaveData
 }
 
-// /**
-//  * @name getEnclavesQuote
-//  * @summary           Generate the enclaves quote.
-//  * @param clusterId   The TEE Cluster id.
-//  * @returns           An array of JSONs containing each enclave quote information (status, data or error)
-//  */
-// export const getEnclavesQuote = async (clusterId = 0) => {
-//   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
-//   const clusterQuote = await Promise.all(
-//     teeEnclaves.map(async (enclaveUrl, idx) => {
-//       const http = new HttpClient(ensureHttps(enclaveUrl))
-//       const enclaveData: EnclaveQuoteRawType = await http.get(TEE_QUOTE_ENDPOINT)
-//       if (enclaveData.status !== "Success" && "error" in enclaveData) {
-//         throw new Error(
-//           `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ENCLAVE_ID ${idx}: ${enclaveData.error} - URL: ${enclaveUrl}`,
-//         )
-//       }
-//       return { ...enclaveData, enclaveUrl }
-//     }),
-//   )
-//   return clusterQuote as EnclaveQuoteType[]
-// }
+/**
+ * @name getEnclavesQuote
+ * @summary           Generate the enclaves quote.
+ * @param clusterId   The TEE Cluster id.
+ * @returns           An array of JSONs containing each enclave quote information (status, data or error)
+ */
+export const getEnclavesQuote = async (clusterId = 0): Promise<EnclaveQuoteType[]> => {
+  const teeEnclaves = await populateEnclavesData(clusterId)
+  const clusterQuote = await Promise.all(
+    teeEnclaves.map(async (e, idx) => {
+      try {
+        const http = new HttpClient(ensureHttps(e.enclaveUrl))
+        const enclaveData: EnclaveQuoteRawType = await http.get(TEE_QUOTE_ENDPOINT)
+        const data = enclaveData.data ? enclaveData.data : "QUOTE_NOT_AVAILABLE"
+        const error = enclaveData.error ? enclaveData.error : "NO_ERROR"
+        return { ...e, status: enclaveData.status, data, error }
+      } catch (error) {
+        const description =
+          error instanceof Error ? `SGX_SERVER_ERROR - ${error.message}` : "SGX_SERVER_ERROR - QUOTE_NOT_AVAILABLE"
+        return { ...teeEnclaves[idx], status: "Failed", data: "DATA_NOT_AVAILABLE", error: description }
+      }
+    }),
+  )
+  return clusterQuote
+}
 
 /**
  * @name getTeeEnclavesBaseUrl

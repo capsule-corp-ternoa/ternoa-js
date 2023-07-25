@@ -23,16 +23,6 @@ export type PopulatedEnclavesDataType = {
 
 export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & Omit<EnclaveHealthType, "enclave_address">
 
-// export type EnclaveQuoteRawType = {
-//   status: string
-//   data?: Date
-//   error?: string
-// }
-
-// export type EnclaveQuoteType = EnclaveQuoteRawType & {
-//   enclaveUrl?: string
-// }
-
 export type ClusterDataType = {
   enclaves: [string, number][]
   isPublic?: boolean
@@ -52,3 +42,11 @@ export type ReportParamsType = {
   param4: number
   param5: number
 }
+
+export type EnclaveQuoteRawType = {
+  status: string
+  data?: string
+  error?: string
+}
+
+export type EnclaveQuoteType = EnclaveQuoteRawType & PopulatedEnclavesDataType
