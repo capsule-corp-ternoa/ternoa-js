@@ -12,7 +12,7 @@ import { MetricsServerReportSubmittedEvent } from "../events"
  * @returns                         Unsigned unsubmitted Submit Metrics Server Report Transaction Hash. The Hash is only valid for 5 minutes.
  */
 export const submitMetricsServerReportTx = async (
-  eraIndex: number,
+  eraIndex: number | undefined,
   metricsServerReport: ReportParamsType,
 ): Promise<TransactionHashType> => {
   return await createTxHex(txPallets.tee, txActions.submitMetricsServerReport, [eraIndex, metricsServerReport])
@@ -28,7 +28,7 @@ export const submitMetricsServerReportTx = async (
  * @returns                         MetricsServerReportSubmittedEvent Blockchain event.
  */
 export const submitMetricsServerReport = async (
-  eraIndex: number,
+  eraIndex: number | undefined,
   metricsServerReport: ReportParamsType,
   keyring: IKeyringPair,
   waitUntil: WaitUntil,

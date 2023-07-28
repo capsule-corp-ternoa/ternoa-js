@@ -97,7 +97,7 @@ export enum EventType {
   NewAccount = "system.NewAccount",
 
   // Tee
-  MetricsServerReportSubmitted = "MetricsServerReportSubmitted",
+  MetricsServerReportSubmitted = "tee.MetricsServerReportSubmitted",
 
   // Unknown
   Unknown = "Unknown",

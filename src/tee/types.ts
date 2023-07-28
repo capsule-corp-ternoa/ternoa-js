@@ -1,5 +1,3 @@
-import BN from "bn.js"
-
 export type EnclaveDataType = {
   enclaveAddress: string
   apiUri: string
