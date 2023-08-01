@@ -33,12 +33,12 @@ export type NFTShareAvailableType = {
 }
 
 export type ReportParamsType = {
-  operatorAddress: string
   param1: number
   param2: number
   param3: number
   param4: number
   param5: number
+  submittedBy: string
 }
 
 export type EnclaveQuoteRawType = {

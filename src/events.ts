@@ -824,7 +824,7 @@ export class TransmittedEvent extends BlockchainEvent {
  */
 export class MetricsServerReportSubmittedEvent extends BlockchainEvent {
   era: number
-  metricsServerAddress: string
+  operatorAddress: string
   metricsServerReport: ReportParamsType
   /**
    * Construct the data object from the MetricsServerReportSubmittedEvent event
@@ -832,9 +832,9 @@ export class MetricsServerReportSubmittedEvent extends BlockchainEvent {
    */
   constructor(event: Event) {
     super(event, EventType.MetricsServerReportSubmitted)
-    const [era, metricsServerAddress, metricsServerReport] = event.data
+    const [era, operatorAddress, metricsServerReport] = event.data
     this.era = Number.parseInt(era.toString())
-    this.metricsServerAddress = metricsServerAddress.toString()
+    this.operatorAddress = operatorAddress.toString()
     this.metricsServerReport = metricsServerReport.toJSON() as ReportParamsType
   }
 }
