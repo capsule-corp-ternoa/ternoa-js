@@ -5,7 +5,7 @@ import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
 
-import { getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
+import { getLastBlock, getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
 import { HttpClient } from "./http"
 import {
   RetrievePayloadType,
@@ -90,12 +90,12 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
   const clusterHealthCheck = await Promise.all(
     teeEnclaves.map(async (enclaveUrl, idx) => {
       const http = new HttpClient(ensureHttps(enclaveUrl))
-      const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
-      if (enclaveData.status !== 200) {
+      const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
+      const isError = enclaveData.status.toString()[0] === "4" && enclaveData.status.toString()[0] === "5"
+      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
         throw new Error(
-          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - CANNOT_REACH_ENCLAVE_ID ${idx}: ${enclaveData.description} - URL: ${enclaveUrl}`,
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
         )
-      }
       return enclaveData
     }),
   )
@@ -140,14 +140,14 @@ export const getEnclaveDataAndHealth = async (clusterId = 0): Promise<EnclaveDat
     teeEnclaves.map(async (e, idx) => {
       try {
         const http = new HttpClient(ensureHttps(e.enclaveUrl))
-        const enclaveData: EnclaveHealthType = await http.get(TEE_HEALTH_ENDPOINT)
-        const { date, status, description } = enclaveData
-        return { ...e, status, description, date }
+        const enclaveHealthData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
+        const { block_number, sync_state, version, description, status } = enclaveHealthData
+        return { ...e, status, blockNumber: block_number, syncState: sync_state, description, version }
       } catch (error) {
-        const date = new Date().toJSON()
+        const blockNumber = await getLastBlock()
         const description =
           error instanceof Error ? `SGX_SERVER_ERROR - ${error.message}` : "SGX_SERVER_ERROR - ENCLAVE UNREACHABLE"
-        return { ...teeEnclaves[idx], status: 500, description, date }
+        return { ...teeEnclaves[idx], status: 500, blockNumber, syncState: "Internal Error", description }
       }
     }),
   )
@@ -191,7 +191,7 @@ export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
   if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
   const urls: string[] = await Promise.all(
     clusterData.enclaves.map(async (enclave) => {
-      const enclaveData = await getEnclaveData(enclave[0]) // not working with Alphanet
+      const enclaveData = await getEnclaveData(enclave[0])
       if (!enclaveData) throw new Error(Errors.TEE_ENCLAVE_NOT_FOUND)
       return removeURLSlash(hexToString(enclaveData?.apiUri))
     }),

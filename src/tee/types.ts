@@ -4,10 +4,12 @@ export type EnclaveDataType = {
 }
 
 export type EnclaveHealthType = {
-  status: number
-  date: string
+  status:number
   description: string
   enclave_address: string
+  block_number: number
+  sync_state: string
+  version: string
 }
 
 export type PopulatedEnclavesDataType = {
@@ -19,7 +21,12 @@ export type PopulatedEnclavesDataType = {
   clusterType: string
 }
 
-export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & Omit<EnclaveHealthType, "enclave_address">
+export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & {
+  syncState: string
+  description: string
+  blockNumber: number
+  version?: string
+}
 
 export type ClusterDataType = {
   enclaves: [string, number][]
