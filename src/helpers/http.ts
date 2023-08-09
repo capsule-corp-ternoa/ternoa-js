@@ -24,7 +24,6 @@ export class HttpClient {
     const response = await this.client.get<T>(url, config).catch((err) => {
       throw new Error(err)
     })
-    console.log(response)
     const { data, status } = response
     return { ...data, status }
   }
