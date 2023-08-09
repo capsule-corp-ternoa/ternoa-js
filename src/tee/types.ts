@@ -4,7 +4,7 @@ export type EnclaveDataType = {
 }
 
 export type EnclaveHealthType = {
-  status:number
+  status: number
   description: string
   enclave_address: string
   block_number: number
@@ -18,7 +18,7 @@ export type PopulatedEnclavesDataType = {
   enclaveUrl: string
   enclaveSlot: number
   clusterId: number
-  clusterType: string
+  clusterType: "Disabled" | "Admin" | "Public" | "Private"
 }
 
 export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & {
@@ -30,7 +30,7 @@ export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & {
 
 export type ClusterDataType = {
   enclaves: [string, number][]
-  isPublic?: boolean
+  clusterType: "Disabled" | "Admin" | "Public" | "Private"
 }
 
 export type NFTShareAvailableType = {

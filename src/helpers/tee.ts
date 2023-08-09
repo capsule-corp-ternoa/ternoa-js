@@ -91,7 +91,7 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
     teeEnclaves.map(async (enclaveUrl, idx) => {
       const http = new HttpClient(ensureHttps(enclaveUrl))
       const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
-      const isError = enclaveData.status.toString()[0] === "4" && enclaveData.status.toString()[0] === "5"
+      const isError = enclaveData.status !== 200
       if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
         throw new Error(
           `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
@@ -111,13 +111,14 @@ export const getEnclaveHealthStatus = async (clusterId = 0) => {
 export const populateEnclavesData = async (clusterId = 0) => {
   const clusterData = await getClusterData(clusterId)
   if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
+  if (clusterData.enclaves.length === 0) throw new Error(`${Errors.TEE_CLUSTER_IS_EMPTY}: ${clusterId}`)
   const data: PopulatedEnclavesDataType[] = await Promise.all(
     clusterData.enclaves.map(async (enclave) => {
       const enclaveData = await getEnclaveData(enclave[0])
       if (!enclaveData) throw new Error(Errors.TEE_ENCLAVE_NOT_FOUND)
       return {
         clusterId,
-        clusterType: clusterData.isPublic ? "Public" : "Private",
+        clusterType: clusterData.clusterType,
         enclaveAddress: enclaveData.enclaveAddress,
         operatorAddress: enclave[0],
         enclaveUrl: removeURLSlash(hexToString(enclaveData.apiUri)),
@@ -166,7 +167,7 @@ export const getEnclavesQuote = async (clusterId = 0): Promise<EnclaveQuoteType[
     teeEnclaves.map(async (e, idx) => {
       try {
         const http = new HttpClient(ensureHttps(e.enclaveUrl))
-        const enclaveData: EnclaveQuoteRawType = await http.get(TEE_QUOTE_ENDPOINT)
+        const enclaveData: EnclaveQuoteRawType = await http.getRaw(TEE_QUOTE_ENDPOINT)
         const data = enclaveData.data ? enclaveData.data : "QUOTE_NOT_AVAILABLE"
         const error = enclaveData.error ? enclaveData.error : "NO_ERROR"
         return { ...e, status: enclaveData.status, data, error }
@@ -189,6 +190,7 @@ export const getEnclavesQuote = async (clusterId = 0): Promise<EnclaveQuoteType[
 export const getTeeEnclavesBaseUrl = async (clusterId = 0) => {
   const clusterData = await getClusterData(clusterId)
   if (!clusterData) throw new Error(Errors.TEE_CLUSTER_NOT_FOUND)
+  if (clusterData.enclaves.length === 0) throw new Error(`${Errors.TEE_CLUSTER_IS_EMPTY}: ${clusterId}`)
   const urls: string[] = await Promise.all(
     clusterData.enclaves.map(async (enclave) => {
       const enclaveData = await getEnclaveData(enclave[0])
