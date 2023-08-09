@@ -1,6 +1,6 @@
 {
   "name": "ternoa-js",
-  "version": "1.6.0-alpha6",
+  "version": "1.6.0-alpha7",
   "description": "Ternoa library of functions to interact with the blockchain and manipulate transactions",
   "engines": {
     "node": ">=14.13.1 || >=16.0.0"
