@@ -72,7 +72,7 @@
     "buffer": "6.0.x",
     "form-data-encoder": "1.7.x",
     "formdata-node": "4.4.x",
-    "openpgp": "5.9.0",
+    "openpgp": "5.10.1",
     "sssa-js": "^0.0.1",
     "stream": "0.0.x"
   }
