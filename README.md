@@ -11,6 +11,8 @@ You can start by familiarizing yourself with the architecture and playing around
 
 Lastly, don’t forget to have a good time, that's like the most important thing. Cheers 🍻
 
+_**⚠️ Important note:** The TEE/SGX pallet and environement is improving! Both the secret NFT & Capsule NFT pallets are impacted. If you intend to create either some Secret NFT or Capsule NFT **on Alphanet**, this release candidate package version **must be installed**. The new TEE/SGX pallet and environement base code is not yet available on the Mainnet. If you do not use any of the Secret NFT or Caspule NFT privacy features, you can go with the last stable package version. Please keep looking at the [Discussion #175 on the Ternoa SDK repository](https://github.com/capsule-corp-ternoa/ternoa-js/discussions/175), to get the last information about those changes and the mainnet release schedule!_
+
 **Table of Contents**
 
 - [Introduction](#introduction)
