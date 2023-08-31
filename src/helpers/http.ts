@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from "axios"
-import https from "https"
 
 export class HttpClient {
   client: AxiosInstance
@@ -7,9 +6,6 @@ export class HttpClient {
   constructor(baseURL: string) {
     this.client = axios.create({
       baseURL,
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
     })
   }
 
