@@ -5,16 +5,32 @@ export type EnclaveDataType = {
 
 export type EnclaveHealthType = {
   status: number
-  date: Date
   description: string
   enclave_address: string
-  operator_address: string
-  binary_hash: { [k: string]: string }
-  quote: Uint32Array
+  block_number: number
+  sync_state: string
+  version: string
+}
+
+export type PopulatedEnclavesDataType = {
+  enclaveAddress: string
+  operatorAddress: string
+  enclaveUrl: string
+  enclaveSlot: number
+  clusterId: number
+  clusterType: "Disabled" | "Admin" | "Public" | "Private"
+}
+
+export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & {
+  syncState: string
+  description: string
+  blockNumber: number
+  version?: string
 }
 
 export type ClusterDataType = {
-  enclaves: string[]
+  enclaves: [string, number][]
+  clusterType: "Disabled" | "Admin" | "Public" | "Private"
 }
 
 export type NFTShareAvailableType = {
@@ -22,3 +38,20 @@ export type NFTShareAvailableType = {
   nft_id: number
   exists: boolean
 }
+
+export type ReportParamsType = {
+  param1: number
+  param2: number
+  param3: number
+  param4: number
+  param5: number
+  submittedBy: string
+}
+
+export type EnclaveQuoteRawType = {
+  status: number
+  data: string
+  block_number?: number
+}
+
+export type EnclaveQuoteType = EnclaveQuoteRawType & PopulatedEnclavesDataType
