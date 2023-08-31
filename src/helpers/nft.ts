@@ -277,7 +277,7 @@ export const mintCapsuleNFT = async (
   )
 
   // 3. request to format and store a batch of secret shares to the enclave
-  const teeRes = await prepareAndStoreKeyShares(keys.privateKey, ownerPair, capsuleEvent.nftId, "capsule")
+  const teeRes = await prepareAndStoreKeyShares(keys.privateKey, ownerPair, capsuleEvent.nftId, "capsule", undefined, clusterId)
   return {
     event: capsuleEvent,
     clusterResponse: teeRes,

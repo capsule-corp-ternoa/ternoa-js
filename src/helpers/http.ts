@@ -16,6 +16,14 @@ export class HttpClient {
     return response.data
   }
 
+  getRaw = async <T>(url: string, config = {}) => {
+    const response = await this.client.get<T>(url, config).catch((err) => {
+      throw new Error(err)
+    })
+    const { data, status } = response
+    return { ...data, status }
+  }
+
   post = async <T>(url: string, data: any, config = {}) => {
     const response = await this.client.post<T>(url, data, config).catch((err) => {
       throw new Error(err)
