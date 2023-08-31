@@ -168,13 +168,14 @@ export const getEnclavesQuote = async (clusterId = 0): Promise<EnclaveQuoteType[
       try {
         const http = new HttpClient(ensureHttps(e.enclaveUrl))
         const enclaveData: EnclaveQuoteRawType = await http.getRaw(TEE_QUOTE_ENDPOINT)
-        const data = enclaveData.data ? enclaveData.data : "QUOTE_NOT_AVAILABLE"
-        const error = enclaveData.error ? enclaveData.error : "NO_ERROR"
-        return { ...e, status: enclaveData.status, data, error }
+        const { status, data, block_number } = enclaveData
+        return { ...e, status, data, blockNumber: block_number }
       } catch (error) {
         const description =
-          error instanceof Error ? `SGX_SERVER_ERROR - ${error.message}` : "SGX_SERVER_ERROR - QUOTE_NOT_AVAILABLE"
-        return { ...teeEnclaves[idx], status: "Failed", data: "DATA_NOT_AVAILABLE", error: description }
+          error instanceof Error
+            ? `INTERNAL_SGX_SERVER_ERROR - ${error.message}`
+            : `INTERNAL_SGX_SERVER_ERROR - QUOTE_NOT_AVAILABLE`
+        return { ...teeEnclaves[idx], status: 500, data: description }
       }
     }),
   )

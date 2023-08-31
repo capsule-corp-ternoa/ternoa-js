@@ -49,9 +49,9 @@ export type ReportParamsType = {
 }
 
 export type EnclaveQuoteRawType = {
-  status: string
-  data?: string
-  error?: string
+  status: number
+  data: string
+  block_number?: number
 }
 
 export type EnclaveQuoteType = EnclaveQuoteRawType & PopulatedEnclavesDataType
