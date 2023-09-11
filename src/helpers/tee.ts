@@ -18,8 +18,8 @@ import {
 } from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
-import { getClusterData, getEnclaveData } from "../tee"
-import { Errors } from "../constants"
+import { getClusterData, getEnclaveData, getNextClusterIdAvailable } from "../tee"
+import { Errors, chainQuery, txPallets } from "../constants"
 import {
   EnclaveDataAndHealthType,
   EnclaveQuoteRawType,
@@ -27,11 +27,13 @@ import {
   EnclaveHealthType,
   NFTShareAvailableType,
   PopulatedEnclavesDataType,
+  ClusterDataType,
 } from "tee/types"
-import { isValidAddress } from "../blockchain"
+import { isValidAddress, query } from "../blockchain"
 
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
+export const ENCLAVES_IN_CLUSTER = 5
 
 const TEE_STORE_STATUS_SUCCESS = "STORESUCCESS"
 const TEE_RETRIEVE_STATUS_SUCCESS = "RETRIEVESUCCESS"
@@ -180,6 +182,58 @@ export const getEnclavesQuote = async (clusterId = 0): Promise<EnclaveQuoteType[
     }),
   )
   return clusterQuote
+}
+
+/**
+ * @name getPublicsClusters
+ * @summary           Provides the list of the availables publics clusters.
+ * @returns           An array of publics clusterId.
+ */
+export const getPublicsClusters = async () => {
+  const nextClusterId = await getNextClusterIdAvailable()
+  const clustersList: number[] = []
+  for (let i = 0; i < nextClusterId; i++) {
+    try {
+      const data = await query(txPallets.tee, chainQuery.clusterData, [i])
+      const result = data.toJSON() as ClusterDataType
+      if (result) {
+        const { enclaves, clusterType } = result
+        // CHECK PUBLIC CLUSTERS WITH THE 5 ENCLAVES WORKING
+        if (enclaves.length === ENCLAVES_IN_CLUSTER && clusterType === "Public") {
+          clustersList.push(i)
+        }
+      }
+    } catch (error) {
+      // DO NOT THROW AN ERROR - WE WANT TO PROVIDE A LIST.
+      // console.log(`CLUSTER_UNAVAILABLE: ${i} - ${error instanceof Error ? error.message : JSON.stringify(error)}`)
+    }
+  }
+  return clustersList
+}
+
+/**
+ * @name getFirstPublicClusterAvailable
+ * @summary           Provides the id of the first available public cluster.
+ * @returns           A clusterId as a number.
+ */
+export const getFirstPublicClusterAvailable = async () => {
+  const nextClusterId = await getNextClusterIdAvailable()
+  for (let i = 0; i < nextClusterId; i++) {
+    try {
+      const data = await query(txPallets.tee, chainQuery.clusterData, [i])
+      const result = data.toJSON() as ClusterDataType
+      if (result) {
+        const { enclaves, clusterType } = result
+        // CHECK PUBLIC CLUSTER WITH THE 5 ENCLAVES WORKING
+        if (enclaves.length === ENCLAVES_IN_CLUSTER && clusterType === "Public") {
+          return i
+        }
+      }
+    } catch (error) {
+      // DO NOT THROW AN ERROR - WE WANT TO PROVIDE THE NEXT ID.
+      // console.log(`CLUSTER_${i}_UNAVAILABLE - ${error instanceof Error ? error.message : JSON.stringify(error)}`)
+    }
+  }
 }
 
 /**
