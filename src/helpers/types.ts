@@ -84,9 +84,9 @@ export type TeeRetrieveDataResponseType = {
 export type TeeSharesStoreType = {
   isError: boolean
   enclave_id?: string
-  enclaveAddress: string,
-  operatorAddress: string,
-  enclaveSlot:number,
+  enclaveAddress: string
+  operatorAddress: string
+  enclaveSlot: number
 } & Omit<TeeGenericDataResponseType, "enclave_id"> &
   StorePayloadType
 
