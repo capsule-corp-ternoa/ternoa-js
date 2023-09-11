@@ -40,3 +40,20 @@ export const getEnclaveData = async (enclaveId: string): Promise<EnclaveDataType
     throw new Error(`${Errors.ENCLAVE_CONVERSION_ERROR}`)
   }
 }
+
+/**
+ * @name getNextClusterIdAvailable
+ * @summary            Provides the next available cluster id.
+ * @returns            A number corresponding to the next available cluster id.
+ */
+export const getNextClusterIdAvailable = async () => {
+  try {
+    const data = await query(txPallets.tee, chainQuery.nextClusterId)
+    if (data.isEmpty == true) {
+      throw new Error(`${Errors.NEXT_TEE_CLUSTER_UNDEFINED}`)
+    }
+    return data.toHuman() as number
+  } catch (error) {
+    throw new Error(`${Errors.NEXT_TEE_CLUSTER_UNDEFINED}`)
+  }
+}
