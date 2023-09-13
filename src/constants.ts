@@ -136,7 +136,7 @@ export enum chainQuery {
   // tee
   clusterData = "clusterData",
   enclaveData = "enclaveData",
-  nextClusterId= "nextClusterId"
+  nextClusterId = "nextClusterId",
 }
 
 export enum chainConstants {
@@ -218,4 +218,6 @@ export enum Errors {
   TEE_ERROR = "TEE_ERROR",
   NOT_CORRECT_AMOUNT_TEE_PAYLOADS = "NOT_CORRECT_AMOUNT_TEE_PAYLOADS",
   NOT_CORRECT_AMOUNT_TEE_ENCLAVES = "NOT_CORRECT_AMOUNT_TEE_ENCLAVES",
+  NFT_RECONCILIATION_FAILED = "NFT_RECONCILIATION_FAILED",
+  RECONCILIATION_PAYLOAD_UNDEFINED = "RECONCILIATION_PAYLOAD_UNDEFINED"
 }
