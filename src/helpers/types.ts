@@ -100,3 +100,21 @@ export type TeeSharesRemoveType = {
   requester_address: string
   nft_id: number
 }
+
+export type ReconciliationPayloadType = {
+  metric_account: string
+  block_interval: string
+  auth_token: string
+  signature: string
+}
+
+export type NFTListType = {
+  nftid: number[]
+}
+
+export type TeeReconciliationType = {
+  enclaveAddress: string
+  operatorAddress: string
+  nftId: number[]
+  error?: string
+}

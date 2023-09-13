@@ -4,6 +4,7 @@ import { create, combine } from "sssa-js"
 import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
+import { createHash } from "node:crypto"
 
 import { getLastBlock, getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
 import { HttpClient } from "./http"
@@ -15,6 +16,9 @@ import {
   TeeSharesStoreType,
   TeeSharesRemoveType,
   RequesterType,
+  ReconciliationPayloadType,
+  NFTListType,
+  TeeReconciliationType,
 } from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
@@ -49,6 +53,7 @@ export const TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT = "/api/capsule-nft/retrieve-keys
 export const TEE_REMOVE_CAPSULE_NFT_KEYSHARE_ENDPOINT = "/api/capsule-nft/remove-keyshare"
 export const TEE_AVAILABLE_CAPSULE_NFT_KEYSHARE_ENDPOINT = (nftId: number) =>
   `/api/capsule-nft/is-keyshare-available/${nftId}`
+export const RECONCILIATION_NFT_INTERVAL = "/api/metric/interval-nft-list"
 
 export const SIGNER_BLOCK_VALIDITY = 15
 
@@ -547,4 +552,81 @@ export const teeKeySharesRemove = async (
   )
 
   return shares
+}
+
+/**
+ * @name formatReconciliationIntervalPayload
+ * @summary                       Prepares post request payload to reconciliate the list of secret/capsule NFT synced on a block interval period.
+ * @param interval                The block number interval period: an array of the starting and ending block.
+ * @param metricsServerKeyring    The metric server keyring.
+ * @returns                       A formatted payload ready to be submitted to TEE enclaves.
+ */
+export const formatReconciliationIntervalPayload = async (
+  interval: [number, number],
+  metricsServerKeyring: IKeyringPair,
+): Promise<ReconciliationPayloadType> => {
+  const block_number = await getLastBlock()
+  const block_validation = SIGNER_BLOCK_VALIDITY
+  const formattedInterval = JSON.stringify(interval)
+  const data_hash = createHash("sha256").update(formattedInterval).digest("hex")
+  const authenticationToken = JSON.stringify({
+    block_number,
+    block_validation,
+    data_hash,
+  })
+  const signedToken = getSignatureFromKeyring(metricsServerKeyring, authenticationToken)
+  return {
+    metric_account: metricsServerKeyring.address,
+    block_interval: formattedInterval,
+    auth_token: authenticationToken,
+    signature: signedToken,
+  }
+}
+
+/**
+ * @name teeNFTReconciliation
+ * @summary                       Get a reconciliation list of secret/capsule NFT synced on a block interval period.
+ * @param clusterId               The TEE Cluster id to query.
+ * @param interval                The block number interval period: an array of the starting and ending block.
+ * @param metricsServerKeyring    The metric server keyring.
+ * @returns                       An array of JSONs containing the NFT list and the TEE addresses (operator & enclave)
+ */
+export const teeNFTReconciliation = async (
+  clusterId: number,
+  interval: [number, number],
+  metricsServerKeyring: IKeyringPair,
+) => {
+  const payload = await formatReconciliationIntervalPayload(interval, metricsServerKeyring)
+  if (!payload) throw new Error(Errors.RECONCILIATION_PAYLOAD_UNDEFINED)
+  const teeEnclaves = await populateEnclavesData(clusterId)
+  if (teeEnclaves.length !== SSSA_NUMSHARES)
+    throw new Error(
+      `${Errors.NOT_CORRECT_AMOUNT_TEE_ENCLAVES} - Got: ${teeEnclaves.length}; Expected: ${SSSA_NUMSHARES}`,
+    )
+  const errors: TeeReconciliationType[] = []
+  let nftList = await Promise.all(
+    teeEnclaves.map(async (e) => {
+      const http = new HttpClient(ensureHttps(e.enclaveUrl))
+      try {
+        const data = await teePost<ReconciliationPayloadType, NFTListType>(http, RECONCILIATION_NFT_INTERVAL, payload)
+        return {
+          enclaveAddress: e.enclaveAddress,
+          operatorAddress: e.operatorAddress,
+          nftId: data.nftid,
+        } as TeeReconciliationType
+      } catch (error) {
+        const errorDescription = error instanceof Error ? error.message : JSON.stringify(error)
+        errors.push({
+          enclaveAddress: e.enclaveAddress,
+          operatorAddress: e.operatorAddress,
+          nftId: [],
+          error: errorDescription,
+        })
+      }
+    }),
+  )
+
+  if (!nftList) throw new Error(Errors.NFT_RECONCILIATION_FAILED)
+  nftList = nftList.filter((x) => x !== undefined)
+  return [...nftList, ...errors]
 }
