@@ -4,7 +4,7 @@ import { create, combine } from "sssa-js"
 import { Buffer } from "buffer"
 import { IKeyringPair } from "@polkadot/types/types"
 import { hexToString } from "@polkadot/util"
-import { createHash } from "node:crypto"
+import { createHash } from "crypto"
 
 import { getLastBlock, getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
 import { HttpClient } from "./http"
