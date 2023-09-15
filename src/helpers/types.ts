@@ -84,6 +84,9 @@ export type TeeRetrieveDataResponseType = {
 export type TeeSharesStoreType = {
   isError: boolean
   enclave_id?: string
+  enclaveAddress: string
+  operatorAddress: string
+  enclaveSlot: number
 } & Omit<TeeGenericDataResponseType, "enclave_id"> &
   StorePayloadType
 
@@ -96,4 +99,22 @@ export type RetryUploadErrorType = {
 export type TeeSharesRemoveType = {
   requester_address: string
   nft_id: number
+}
+
+export type ReconciliationPayloadType = {
+  metric_account: string
+  block_interval: string
+  auth_token: string
+  signature: string
+}
+
+export type NFTListType = {
+  nftid: number[]
+}
+
+export type TeeReconciliationType = {
+  enclaveAddress: string
+  operatorAddress: string
+  nftId: number[]
+  error?: string
 }
