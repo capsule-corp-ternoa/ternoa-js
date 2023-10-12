@@ -98,6 +98,7 @@ export enum EventType {
 
   // Tee
   MetricsServerReportSubmitted = "tee.MetricsServerReportSubmitted",
+  RewardsClaimed = "tee.RewardsClaimed",
 
   // Unknown
   Unknown = "Unknown",
@@ -181,9 +182,11 @@ export class BlockchainEvent {
         return new ThresholdReachedEvent(event)
       case EventType.Transmitted:
         return new TransmittedEvent(event)
-      // Assets
+      // Tee
       case EventType.MetricsServerReportSubmitted:
         return new MetricsServerReportSubmittedEvent(event)
+      case EventType.RewardsClaimed:
+        return new RewardsClaimedEvent(event)
       // Rent
       case EventType.ContractCreated:
         return new ContractCreatedEvent(event)
@@ -836,6 +839,28 @@ export class MetricsServerReportSubmittedEvent extends BlockchainEvent {
     this.era = Number.parseInt(era.toString())
     this.operatorAddress = operatorAddress.toString()
     this.metricsServerReport = metricsServerReport.toJSON() as ReportParamsType
+  }
+}
+
+/**
+ * This class represents the on-chain RewardsClaimed event.
+ */
+export class RewardsClaimedEvent extends BlockchainEvent {
+  era: number
+  operatorAddress: string
+  amount: string | number 
+  amountRounded:number
+  /**
+   * Construct the data object from the RewardsClaimedEvent event
+   * @param event The RewardsClaimedEvent event
+   */
+  constructor(event: Event) {
+    super(event, EventType.RewardsClaimed)
+    const [era, operatorAddress, amount] = event.data
+    this.era = Number.parseInt(era.toString())
+    this.operatorAddress = operatorAddress.toString()
+    this.amount = bnToBn(amount.toString()).toString()
+    this.amountRounded = roundBalance(this.amount)
   }
 }
 
