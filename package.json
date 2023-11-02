@@ -66,13 +66,13 @@
     "typescript": "5.0.x"
   },
   "dependencies": {
-    "@polkadot/api": "^10.7.1",
+    "@polkadot/api": "^10.10.1",
     "axios": "0.27.x",
     "bn.js": "5.2.x",
     "buffer": "6.0.x",
     "form-data-encoder": "1.7.x",
     "formdata-node": "4.4.x",
-    "openpgp": "5.9.0",
+    "openpgp": "^5.11.0",
     "sssa-js": "^0.0.1",
     "stream": "0.0.x"
   }
