@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "@polkadot/api": "^10.10.1",
-    "axios": "0.27.x",
+    "axios": "^1.6.2",
     "bn.js": "5.2.x",
     "buffer": "6.0.x",
     "form-data-encoder": "1.7.x",
