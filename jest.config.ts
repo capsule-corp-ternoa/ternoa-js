@@ -4,6 +4,7 @@ export default async (): Promise<Config> => {
   return {
     preset: "ts-jest",
     testEnvironment: "node",
+    // testSequencer: "./src/_misc/CustomSequencer.js",
     detectOpenHandles: true,
     forceExit: true,
     testTimeout: 30000,

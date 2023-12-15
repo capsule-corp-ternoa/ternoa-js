@@ -59,8 +59,8 @@
     "prettier": "^3.1.1",
     "ts-jest": "29.1.x",
     "ts-node": "10.9.x",
-    "typedoc": "0.24.x",
-    "typescript": "5.0.x"
+    "typedoc": "^0.25.4",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "@polkadot/api": "^10.10.1",
