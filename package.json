@@ -9,12 +9,13 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
-    "build": "rimraf build && tsc && npm run build:frank-build",
-    "build:frank-build": "node ./src/_misc/scripts/frank-build.mjs",
+    "build": "rimraf build && tsc && node ./src/_misc/scripts/build.mjs",
+    "build:tsup": "tsup index.ts --format --minify cjs,esm --dts ",
     "docs": "typedoc ./src/index.ts",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "test": "jest --config jestconfig.json --detectOpenHandles --forceExit --silent=false --runInBand"
+    "test": "jest --config jestconfig.json --detectOpenHandles --forceExit --silent=false --runInBand",
+    "newtest": "npx jest --config jest.config.ts --runInBand"
   },
   "repository": {
     "type": "git",
@@ -45,14 +46,11 @@
   },
   "homepage": "https://github.com/capsule-corp-ternoa/ternoa-js#readme",
   "devDependencies": {
-    "@babel/preset-env": "^7.23.6",
-    "@babel/preset-typescript": "^7.23.3",
     "@jest/test-sequencer": "29.5.x",
     "@types/jest": "29.5.x",
     "@types/mime-types": "2.1.x",
     "@typescript-eslint/eslint-plugin": "5.59.x",
     "@typescript-eslint/parser": "5.59.x",
-    "babel-jest": "29.5.x",
     "dotenv": "16.0.x",
     "eslint": "8.40.x",
     "eslint-config-prettier": "8.8.x",
