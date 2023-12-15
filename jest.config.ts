@@ -5,8 +5,10 @@ export default async (): Promise<Config> => {
     preset: "ts-jest",
     testEnvironment: "node",
     detectOpenHandles: true,
-    silent: true,
     forceExit: true,
-    // isSerial:true, 
+    testTimeout: 30000,
+    silent: true,
+    globalSetup: "./src/_misc/scripts/test-setup.ts",
+    globalTeardown: "./src/_misc/scripts/test-teardown.ts",
   }
 }

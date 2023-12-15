@@ -86,7 +86,7 @@ it("submitTxBlocking should contain BalancesTransfer and ExtrinsicSuccess events
     Boolean(events.findEvent(BalancesTransferEvent)) &&
     Boolean(events.findEvent(ExtrinsicSuccessEvent))
   expect(isSuccess).toBe(true)
-}, 60000)
+})
 
 describe("Constants", (): void => {
   it("Should get the correct existensial deposit", async (): Promise<void> => {
