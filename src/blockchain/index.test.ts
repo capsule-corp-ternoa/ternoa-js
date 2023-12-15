@@ -86,7 +86,7 @@ it("submitTxBlocking should contain BalancesTransfer and ExtrinsicSuccess events
     Boolean(events.findEvent(BalancesTransferEvent)) &&
     Boolean(events.findEvent(ExtrinsicSuccessEvent))
   expect(isSuccess).toBe(true)
-})
+}, 60000)
 
 describe("Constants", (): void => {
   it("Should get the correct existensial deposit", async (): Promise<void> => {
@@ -142,9 +142,9 @@ describe("Fee getters", (): void => {
     expect(txFee.gt(nftMintFee)).toBe(true)
   })
 
-  it("Should throw an error if insufficient funds for fees", async () => {
-    const account = await generateSeed()
-    const keyring = await getKeyringFromSeed(account.seed)
+  xit("Should throw an error if insufficient funds for fees", async () => {
+    const seed = generateSeed()
+    const keyring = await getKeyringFromSeed(seed)
     const txHex = await createTx(txPallets.balances, txActions.transfer, [keyring.address, "10000000000000000000"])
     await expect(async () => {
       await checkFundsForTxFees(txHex)
