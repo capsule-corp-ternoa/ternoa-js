@@ -3,11 +3,6 @@ on:
   push:
     branches:
       - "**"
-  pull_request:
-    branches:
-      - dev
-      - next
-      - main
 
 jobs:
   push:
@@ -27,11 +22,6 @@ jobs:
 
       - run: npm ci --ignore-scripts
       - run: npm run lint && npm run format && npm run build
-
-      - name: test name
-        # if: github.event_name == 'push' && github.event.push.base.ref == 'ci-update'
-        if: ${{ github.event_name == 'push' && github.event.push.base.ref == 'ci-update' }}
-        run: echo "Ceci est un test sur la branche ci-update."
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
