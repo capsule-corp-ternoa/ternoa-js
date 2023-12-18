@@ -29,7 +29,8 @@ jobs:
       - run: npm run lint && npm run format && npm run build
 
       - name: test name
-        if: github.event_name == 'push' && github.event.pull_request.base.ref == 'ci-update'
+        if: github.event_name == 'push' && github.event.push.base.ref == 'ci-update'
+        # if: ${{ github.event_name == 'pull_request' && github.event.action == 'unassigned' }}
         run: echo "Ceci est un test sur la branche ci-update."
           
       - name: Commit changes
