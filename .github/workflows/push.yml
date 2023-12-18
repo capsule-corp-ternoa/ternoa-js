@@ -1,6 +1,6 @@
 name: CI_PUSH
 on:
-  push:
+  [push, pull_request]:
     branches:
       - ci-update
 
