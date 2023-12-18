@@ -13,10 +13,9 @@ jobs:
   push:
     strategy:
       matrix:
-        step: ["lint", "format", "build"]
         node-version: [16.x]
 
-    name: Push commits - ${{ matrix.step }}
+    name: Commit or PR
     runs-on: ubuntu-latest
     
     steps: 
@@ -26,14 +25,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: ${{ matrix.step }}
-        if: always()
-        run: |
-          npm ci --ignore-scripts
-          npm run ${{ matrix.step }}
+      - run: npm ci --ignore-scripts
+      - run: npm run lint && npm run format && npm run build
           
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Commit & ${{ matrix.step }} processed"
+          commit_message: "Commit or PR processed"
 
