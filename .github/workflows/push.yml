@@ -2,8 +2,7 @@ name: CI_PUSH
 on:
   push:
     branches:
-      # - "**"
-      - "ci-update"
+      - ci-update
 
 jobs:
   push:
@@ -16,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps: 
-      - name: Use Node.js ${{ matrix.node-version }}
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
