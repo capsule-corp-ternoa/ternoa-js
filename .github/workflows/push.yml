@@ -1,8 +1,13 @@
 name: CI_PUSH
 on:
-  [push, pull_request]:
+  push:
     branches:
-      - ci-update
+      - "**"
+  pull_request:
+    branches:
+      - dev
+      - next
+      - main
 
 jobs:
   push:
