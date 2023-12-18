@@ -3,7 +3,7 @@ on:
   push:
     branches:
       # - "**"
-      - ci-update
+      - "ci-update"
 
 jobs:
   push:
