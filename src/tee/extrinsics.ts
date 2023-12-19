@@ -2,7 +2,7 @@ import { IKeyringPair } from "@polkadot/types/types"
 import { ReportParamsType } from "./types"
 import { TransactionHashType, createTxHex, submitTxBlocking } from "../blockchain"
 import { txActions, txPallets, WaitUntil } from "../constants"
-import { MetricsServerReportSubmittedEvent } from "../events"
+import { MetricsServerReportSubmittedEvent, RewardsClaimedEvent } from "../events"
 
 /**
  * @name submitMetricsServerReportTx
@@ -36,4 +36,32 @@ export const submitMetricsServerReport = async (
   const tx = await submitMetricsServerReportTx(operatorAddress, metricsServerReport)
   const { events } = await submitTxBlocking(tx, waitUntil, keyring)
   return events.findEventOrThrow(MetricsServerReportSubmittedEvent)
+}
+
+/**
+ * @name claimTeeRewardsTx
+ * @summary                         Creates an unsigned unsubmitted Claim Tee Rewards Transaction Hash for an Era.
+ * @param era                       The era to claim the rewards.
+ * @returns                         Unsigned unsubmitted Claim Tee Rewards Transaction Hash. The Hash is only valid for 5 minutes.
+ */
+export const claimTeeRewardsTx = async (era: number): Promise<TransactionHashType> => {
+  return await createTxHex(txPallets.tee, txActions.claimRewards, [era])
+}
+
+/**
+ * @name claimTeeRewards
+ * @summary                         Claim the operator reward for a specific era.
+ * @param era                       The era to claim the rewards.
+ * @param keyring                   Account that will sign the transaction.
+ * @param waitUntil                 Execution trigger that can be set either to BlockInclusion or BlockFinalization.
+ * @returns                         RewardsClaimedEvent Blockchain event.
+ */
+export const claimTeeRewards = async (
+  era: number,
+  keyring: IKeyringPair,
+  waitUntil: WaitUntil,
+): Promise<RewardsClaimedEvent> => {
+  const tx = await claimTeeRewardsTx(era)
+  const { events } = await submitTxBlocking(tx, waitUntil, keyring)
+  return events.findEventOrThrow(RewardsClaimedEvent)
 }
