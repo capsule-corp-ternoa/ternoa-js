@@ -49,24 +49,24 @@ describe("Testing contracts in queue and getting contract data", (): void => {
 
     expect(
       contract?.creationBlock == TEST_DATA.contractCreationBlockId &&
-      contract?.startBlock == null &&
-      contract?.startBlockDate == null &&
-      contract?.renter == testAccount.address &&
-      contract.rentee == null &&
-      DurationAction.Fixed in contract.duration &&
-      contract.duration[DurationAction.Fixed] == 1000 &&
-      contract.acceptanceType === AcceptanceAction.ManualAcceptance &&
-      contract.acceptanceList.length == 0 &&
-      contract.rentFeeType === RentFeeAction.Tokens &&
-      contract.rentFee === rentFee &&
-      contract.rentFeeRounded === 1 &&
-      contract.renterCanRevoke == false &&
-      contract.renterCancellationFeeType === CancellationFeeAction.FlexibleTokens &&
-      contract.renterCancellationFee === cancellationFee &&
-      contract.renterCancellationFeeRounded === 1 &&
-      contract.renteeCancellationFeeType === CancellationFeeAction.None &&
-      contract.renteeCancellationFee === null &&
-      contract.renteeCancellationFeeRounded === null,
+        contract?.startBlock == null &&
+        contract?.startBlockDate == null &&
+        contract?.renter == testAccount.address &&
+        contract.rentee == null &&
+        DurationAction.Fixed in contract.duration &&
+        contract.duration[DurationAction.Fixed] == 1000 &&
+        contract.acceptanceType === AcceptanceAction.ManualAcceptance &&
+        contract.acceptanceList.length == 0 &&
+        contract.rentFeeType === RentFeeAction.Tokens &&
+        contract.rentFee === rentFee &&
+        contract.rentFeeRounded === 1 &&
+        contract.renterCanRevoke == false &&
+        contract.renterCancellationFeeType === CancellationFeeAction.FlexibleTokens &&
+        contract.renterCancellationFee === cancellationFee &&
+        contract.renterCancellationFeeRounded === 1 &&
+        contract.renteeCancellationFeeType === CancellationFeeAction.None &&
+        contract.renteeCancellationFee === null &&
+        contract.renteeCancellationFeeRounded === null,
     ).toBe(true)
   })
 
@@ -128,8 +128,8 @@ describe("Testing contracts in queue and getting contract data", (): void => {
       DurationAction.Subscription in contract.duration && contract.duration[DurationAction.Subscription].periodLength
     expect(
       filteredContract[0].nftId >= TEST_DATA.nftId &&
-      periodLength &&
-      filteredContract[0].renewalOrEndBlockId >= periodLength,
+        periodLength &&
+        filteredContract[0].renewalOrEndBlockId >= periodLength,
     ).toBe(true)
   })
 })
