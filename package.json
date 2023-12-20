@@ -10,7 +10,6 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "rimraf build && tsc && node ./src/_misc/scripts/build.mjs",
-    "build:tsup": "tsup index.ts --format --minify cjs,esm --dts ",
     "docs": "typedoc ./src/index.ts",
     "lint": "eslint ./src --ext .js,.ts",
     "format": "prettier --write \"src/**/*.ts\"",

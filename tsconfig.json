@@ -11,15 +11,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false
-    // "allowJs": true,
-    // "baseUrl": "src",
-    // "rootDir": "src",
-    // "verbatimModuleSyntax": true,
-    // "moduleResolution": "node16",
-    // "moduleDetection": "force",
-    // "resolveJsonModule": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
   },
   "include": ["src"],
-  "exclude": ["node_modules", "build"] // "**/*.test.ts", "**/*.spec.ts", "src/_misc"
+  "exclude": ["node_modules", "build", "**/*.test.ts"] // , "**/*.spec.ts", "src/_misc"
 }
