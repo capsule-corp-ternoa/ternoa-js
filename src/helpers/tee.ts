@@ -17,8 +17,8 @@ import {
   TeeSharesRemoveType,
   RequesterType,
   ReconciliationPayloadType,
-  NFTListType,
   TeeReconciliationType,
+  NFTListType,
 } from "./types"
 import { ensureHttps, removeURLSlash, retryPost } from "./utils"
 
