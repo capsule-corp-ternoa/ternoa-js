@@ -1,4 +1,3 @@
-import { BN } from "bn.js"
 import { initializeApi } from "../blockchain"
 import {
   getCollectionOffchainDataLimit,

@@ -32,7 +32,7 @@ import {
   NFTShareAvailableType,
   PopulatedEnclavesDataType,
   ClusterDataType,
-} from "tee/types"
+} from "../tee/types"
 import { isValidAddress, query } from "../blockchain"
 
 export const SSSA_NUMSHARES = 5

@@ -848,8 +848,8 @@ export class MetricsServerReportSubmittedEvent extends BlockchainEvent {
 export class RewardsClaimedEvent extends BlockchainEvent {
   era: number
   operatorAddress: string
-  amount: string | number 
-  amountRounded:number
+  amount: string | number
+  amountRounded: number
   /**
    * Construct the data object from the RewardsClaimedEvent event
    * @param event The RewardsClaimedEvent event

@@ -46,12 +46,14 @@ describe("Testing contracts in queue and getting contract data", (): void => {
     const contract = await getRentalContractData(TEST_DATA.nftId)
     const rentFee = numberToBalance(1).toString()
     const cancellationFee = numberToBalance(1).toString()
+
     expect(
       contract?.creationBlock == TEST_DATA.contractCreationBlockId &&
         contract?.startBlock == null &&
         contract?.startBlockDate == null &&
         contract?.renter == testAccount.address &&
         contract.rentee == null &&
+        DurationAction.Fixed in contract.duration &&
         contract.duration[DurationAction.Fixed] == 1000 &&
         contract.acceptanceType === AcceptanceAction.ManualAcceptance &&
         contract.acceptanceList.length == 0 &&
@@ -122,9 +124,12 @@ describe("Testing contracts in queue and getting contract data", (): void => {
     await rent(TEST_DATA.nftId, contract.creationBlockId, destAccount, WaitUntil.BlockInclusion)
     const { subscriptionQueue } = await getRentingQueues()
     const filteredContract = subscriptionQueue.filter((x) => x.nftId === TEST_DATA.nftId)
+    const periodLength =
+      DurationAction.Subscription in contract.duration && contract.duration[DurationAction.Subscription].periodLength
     expect(
       filteredContract[0].nftId >= TEST_DATA.nftId &&
-        filteredContract[0].renewalOrEndBlockId >= contract.duration[DurationAction.Subscription].periodLength,
+        periodLength &&
+        filteredContract[0].renewalOrEndBlockId >= periodLength,
     ).toBe(true)
   })
 })
