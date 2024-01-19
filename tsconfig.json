@@ -1,20 +1,19 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "baseUrl": "src",
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es2017", "es7", "es6", "dom"],
+    "target": "es2016",
+    "module": "commonjs", // "node16",
+    "lib": ["es2023"], // "dom", "dom.iterable"
     "declaration": true,
     "outDir": "build",
-    "rootDir": "src",
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
-
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts", "build", "src/_misc"]
+  "exclude": ["node_modules", "build", "**/*.test.ts"] // , "**/*.spec.ts", "src/_misc"
 }

@@ -125,6 +125,6 @@ export const formatProtocolCancellation = (
   return cancellation === TransmissionCancellationAction.Anytime
     ? { [TransmissionCancellationAction.Anytime]: null }
     : cancellation === TransmissionCancellationAction.UntilBlock && UntilBlock
-    ? { [TransmissionCancellationAction.UntilBlock]: UntilBlock }
-    : { [TransmissionCancellationAction.None]: null }
+      ? { [TransmissionCancellationAction.UntilBlock]: UntilBlock }
+      : { [TransmissionCancellationAction.None]: null }
 }

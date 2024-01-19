@@ -54,6 +54,7 @@ describe("Testing Rent extrinsics", (): void => {
       contractEvent.nftId === TEST_DATA.nftId &&
         contractEvent.renter === testAccount.address &&
         contractEvent.creationBlockId > 0 &&
+        DurationAction.Subscription in contractEvent.duration &&
         contractEvent.duration[DurationAction.Subscription].periodLength === 30 &&
         contractEvent.duration[DurationAction.Subscription].maxDuration === 100 &&
         contractEvent.duration[DurationAction.Subscription].isChangeable === true &&

@@ -80,9 +80,11 @@ describe("Testing to get transmission protocols data", (): void => {
     const data = await getTransmissions(TEST_DATA.nftId)
     expect(
       data?.recipient == destAccount.address &&
+        ProtocolAction.OnConsentAtBlock in data.protocol &&
         data.protocol[ProtocolAction.OnConsentAtBlock].consentList.length == 2 &&
         data.protocol[ProtocolAction.OnConsentAtBlock].threshold == TEST_DATA.transmissionThreshold &&
         data.protocol[ProtocolAction.OnConsentAtBlock].block == TEST_DATA.transmissionBlock &&
+        TransmissionCancellationAction.Anytime in data.cancellation &&
         data.cancellation[TransmissionCancellationAction.Anytime] == null,
     ).toBe(true)
   })
