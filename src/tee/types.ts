@@ -13,18 +13,19 @@ export type EnclaveHealthType = {
 }
 
 export type PopulatedEnclavesDataType = {
+  clusterId: number
+  clusterType: "Disabled" | "Admin" | "Public" | "Private"
   enclaveAddress: string
   operatorAddress: string
   enclaveUrl: string
   enclaveSlot: number
-  clusterId: number
-  clusterType: "Disabled" | "Admin" | "Public" | "Private"
 }
 
 export type EnclaveDataAndHealthType = PopulatedEnclavesDataType & {
+  status: number
+  blockNumber: number
   syncState: string
   description: string
-  blockNumber: number
   version?: string
 }
 
