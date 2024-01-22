@@ -1,29 +1,30 @@
-name: CI
+name: CI_DEV_PR
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
-  ci:
+  push:
     strategy:
       matrix:
-        step: ["lint", "format", "docs"]
-        node-version: [14.x]
-    name: ${{ matrix.step }}
+        node-version: [16.x]
+
+    name: PR
     runs-on: ubuntu-latest
-    steps:
+    
+    steps: 
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: ${{ matrix.step }}
-        if: always()
-        run: |
-          npm ci --ignore-scripts
-          npm run ${{ matrix.step }}
+
+      - run: npm ci --ignore-scripts
+      - run: npm run lint && npm run format && npm run build
+          
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "PR: ${{ matrix.step }} fixed"
+          commit_message: "Dev PR processed"
+

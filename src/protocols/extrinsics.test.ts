@@ -51,7 +51,9 @@ describe("Testing transmission protocols extrinsics", (): void => {
     expect(
       tEvent?.nftId === TEST_DATA.nftId &&
         tEvent.recipient == destAccount.address &&
+        ProtocolAction.AtBlockWithReset in tEvent.protocol &&
         tEvent.protocol[ProtocolAction.AtBlockWithReset] == TEST_DATA.transmissionBlock &&
+        TransmissionCancellationAction.Anytime in tEvent.cancellation &&
         tEvent.cancellation[TransmissionCancellationAction.Anytime] == null,
     ).toBe(true)
   })
