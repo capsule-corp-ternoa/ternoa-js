@@ -144,7 +144,7 @@ export const populateEnclavesData = async (clusterId = 0) => {
  */
 export const getEnclaveDataAndHealth = async (clusterId = 0): Promise<EnclaveDataAndHealthType[]> => {
   const teeEnclaves = await populateEnclavesData(clusterId)
-  const enclaveData = await Promise.all(
+  const enclaveData:EnclaveDataAndHealthType[] = await Promise.all(
     teeEnclaves.map(async (e, idx) => {
       try {
         const http = new HttpClient(ensureHttps(e.enclaveUrl))
