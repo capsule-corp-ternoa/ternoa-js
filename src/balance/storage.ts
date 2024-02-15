@@ -2,22 +2,19 @@ import BN from "bn.js"
 
 import { chainQuery, txPallets } from "../constants"
 import { query, numberToBalance } from "../blockchain"
+import { Balances } from "./types"
 
 /**
  * @name getBalances
- * @summary             Get the balances of an account including free, reserved, miscFrozen and feeFrozen balances as well as the total.
+ * @summary             Get the balances of an account including free & reserved balances as well as the total. 
+ * Currently Mainnet also returns miscFrozen & feeFrozen while alphanet returns frozen and flags. After next Mainnet runtime upgrade both miscFrozen & feeFrozen will be removed.
  * @param address       Public address of the account to get balances.
  * @returns             The balances of the account.
  */
 export const getBalances = async (
   address: string,
-): Promise<{
-  free: BN
-  reserved: BN
-  miscFrozen: BN
-  feeFrozen: BN
-}> => {
-  const balances: { free: BN; reserved: BN; miscFrozen: BN; feeFrozen: BN } = (
+): Promise<Balances> => {
+  const balances: Balances = (
     (await query(txPallets.system, chainQuery.account, [address])) as any
   ).data
   return balances
@@ -41,14 +38,21 @@ export const getTotalBalance = async (address: string): Promise<BN> => {
  * @returns             The transferrable balance of an account.
  */
 export const getTransferrableBalance = async (address: string): Promise<BN> => {
-  const { feeFrozen, free, miscFrozen } = await getBalances(address)
-  let frozen
-  if (feeFrozen.gt(miscFrozen)) {
-    frozen = feeFrozen
-  } else {
-    frozen = miscFrozen
+  const { free, miscFrozen, feeFrozen, frozen } = await getBalances(address)
+
+  let totalFrozen
+
+  if (miscFrozen !== undefined && feeFrozen !== undefined) {
+    if (feeFrozen.gt(miscFrozen)) {
+      totalFrozen = feeFrozen
+    } else {
+      totalFrozen = miscFrozen
+    }
+    return free.sub(totalFrozen)
+  } else if (frozen) {
+    return free.sub(frozen)
   }
-  return free.sub(frozen)
+  return free
 }
 
 /**
