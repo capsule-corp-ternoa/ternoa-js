@@ -70,3 +70,21 @@ export const ensureHttps = (url: string) => {
   else if (url.indexOf("http://") === 0) return url.replace("http://", "https://")
   else return "https://" + url
 }
+
+export const timeoutTrigger = <T>(fn: () => Promise<T>, duration = 10000): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error('Error: Function timed out'));
+    }, duration);
+
+    try {
+      const data = fn();
+      clearTimeout(timer);
+      resolve(data);
+    } catch (error) {
+      clearTimeout(timer);
+      reject(error);
+    }
+  });
+}
+
