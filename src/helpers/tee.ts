@@ -223,13 +223,13 @@ export const getPublicsClusters = async () => {
  */
 export const getFirstPublicClusterAvailable = async (timeout = 10000) => {
   const publicClusters = await getPublicsClusters()
-  if (publicClusters.length === 0) return undefined;
+  if (publicClusters.length === 0) return undefined
 
   for (const cluster of publicClusters) {
     try {
-      const healthData = await timeoutTrigger<EnclaveDataAndHealthType[]>(() =>
-        getEnclaveDataAndHealth(cluster, timeout),
-        timeout + 1000
+      const healthData = await timeoutTrigger<EnclaveDataAndHealthType[]>(
+        () => getEnclaveDataAndHealth(cluster, timeout),
+        timeout + 1000,
       )
       const filteredData = healthData.filter((c) => c.status === 200)
       if (filteredData.length === ENCLAVES_IN_CLUSTER) {
