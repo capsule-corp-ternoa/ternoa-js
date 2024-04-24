@@ -3,9 +3,10 @@ import axios, { AxiosInstance } from "axios"
 export class HttpClient {
   client: AxiosInstance
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, timeout?: number) {
     this.client = axios.create({
       baseURL,
+      ...(timeout && { timeout })
     })
   }
 

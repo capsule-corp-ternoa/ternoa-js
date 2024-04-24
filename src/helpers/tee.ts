@@ -20,7 +20,7 @@ import {
   TeeReconciliationType,
   NFTListType,
 } from "./types"
-import { ensureHttps, removeURLSlash, retryPost } from "./utils"
+import { ensureHttps, removeURLSlash, retryPost, timeoutTrigger } from "./utils"
 
 import { getClusterData, getEnclaveData, getNextClusterIdAvailable } from "../tee"
 import { Errors, chainQuery, txPallets } from "../constants"
@@ -92,11 +92,11 @@ export const combineKeyShares = (shares: string[]): string => {
  * @param clusterId   The TEE Cluster id.
  * @returns           An array of JSONs containing each enclave information (status, date, description, addresses)
  */
-export const getEnclaveHealthStatus = async (clusterId = 0) => {
+export const getEnclaveHealthStatus = async (clusterId = 0, timeout = 10000) => {
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   const clusterHealthCheck = await Promise.all(
     teeEnclaves.map(async (enclaveUrl, idx) => {
-      const http = new HttpClient(ensureHttps(enclaveUrl))
+      const http = new HttpClient(ensureHttps(enclaveUrl), timeout)
       const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
       const isError = enclaveData.status !== 200
       if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
@@ -142,12 +142,12 @@ export const populateEnclavesData = async (clusterId = 0) => {
  * @param clusterId   The TEE Cluster id.
  * @returns           An array of JSONs containing each enclave data populated with its health information.
  */
-export const getEnclaveDataAndHealth = async (clusterId = 0): Promise<EnclaveDataAndHealthType[]> => {
+export const getEnclaveDataAndHealth = async (clusterId = 0, timeout = 10000): Promise<EnclaveDataAndHealthType[]> => {
   const teeEnclaves = await populateEnclavesData(clusterId)
-  const enclaveData:EnclaveDataAndHealthType[] = await Promise.all(
+  const enclaveData: EnclaveDataAndHealthType[] = await Promise.all(
     teeEnclaves.map(async (e, idx) => {
       try {
-        const http = new HttpClient(ensureHttps(e.enclaveUrl))
+        const http = new HttpClient(ensureHttps(e.enclaveUrl), timeout)
         const enclaveHealthData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
         const { block_number, sync_state, version, description, status } = enclaveHealthData
         return { ...e, status, blockNumber: block_number, syncState: sync_state, description, version }
@@ -218,27 +218,28 @@ export const getPublicsClusters = async () => {
 
 /**
  * @name getFirstPublicClusterAvailable
- * @summary           Provides the id of the first available public cluster.
+ * @summary           Provides the id of the first available healthy public cluster.
  * @returns           A clusterId as a number.
  */
-export const getFirstPublicClusterAvailable = async () => {
-  const nextClusterId = await getNextClusterIdAvailable()
-  for (let i = 0; i < nextClusterId; i++) {
+export const getFirstPublicClusterAvailable = async (timeout = 10000) => {
+  const publicClusters = await getPublicsClusters()
+  if (publicClusters.length === 0) return undefined;
+
+  for (const cluster of publicClusters) {
     try {
-      const data = await query(txPallets.tee, chainQuery.clusterData, [i])
-      const result = data.toJSON() as ClusterDataType
-      if (result) {
-        const { enclaves, clusterType } = result
-        // CHECK PUBLIC CLUSTER WITH THE 5 ENCLAVES WORKING
-        if (enclaves.length === ENCLAVES_IN_CLUSTER && clusterType === "Public") {
-          return i
-        }
+      const healthData = await timeoutTrigger<EnclaveDataAndHealthType[]>(() =>
+        getEnclaveDataAndHealth(cluster, timeout),
+        timeout + 1000
+      )
+      const filteredData = healthData.filter((c) => c.status === 200)
+      if (filteredData.length === ENCLAVES_IN_CLUSTER) {
+        return cluster
       }
     } catch (error) {
-      // DO NOT THROW AN ERROR - WE WANT TO PROVIDE THE NEXT ID.
-      // console.log(`CLUSTER_${i}_UNAVAILABLE - ${error instanceof Error ? error.message : JSON.stringify(error)}`)
+      // DO NOT THROW AN ERROR - CONTINUE TO THE NEXT CLUSTER.
     }
   }
+  return undefined
 }
 
 /**
