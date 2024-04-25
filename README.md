@@ -7,7 +7,7 @@
 
 It's the easiest and fastest way to build on top of the Ternoa Chain. Based on Javascript and the Polkadot.js API, it offers developers a seamless experience in the Domain of Web 3.
 
-You can start by familiarizing yourself with the architecture and playing around with the ternoa.js [test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) to get a good grasp of the Ternoa SDK.
+You can start by familiarizing yourself with the architecture and playing around with the ternoa.js [test-dapp](https://github.com/capsule-corp-ternoa/ternoa-js-test-dapp) to get a good grasp of the Ternoa SDK. You can also take a look at the [Ternoa SDK Starter](https://github.com/capsule-corp-ternoa/ternoa-sdk-starter) for a guided quick start tutorial.
 
 Lastly, don’t forget to have a good time, that's like the most important thing. Cheers 🍻
 
@@ -395,7 +395,7 @@ const create createNFTManually = async () => {
 
 ### Wiki
 
-Check out our [Wiki](https://github.com/capsule-corp-ternoa/chain/wiki) page. We are constantly adding new pages and guides there.
+Check out our [Wiki](https://github.com/capsule-corp-ternoa/ternoa-js/wiki) page. We are constantly adding new pages and guides there.
 
 ### Typescript documentation
 
