@@ -6,17 +6,13 @@ import { Balances } from "./types"
 
 /**
  * @name getBalances
- * @summary             Get the balances of an account including free & reserved balances as well as the total. 
+ * @summary             Get the balances of an account including free & reserved balances as well as the total.
  * Currently Mainnet also returns miscFrozen & feeFrozen while alphanet returns frozen and flags. After next Mainnet runtime upgrade both miscFrozen & feeFrozen will be removed.
  * @param address       Public address of the account to get balances.
  * @returns             The balances of the account.
  */
-export const getBalances = async (
-  address: string,
-): Promise<Balances> => {
-  const balances: Balances = (
-    (await query(txPallets.system, chainQuery.account, [address])) as any
-  ).data
+export const getBalances = async (address: string): Promise<Balances> => {
+  const balances: Balances = ((await query(txPallets.system, chainQuery.account, [address])) as any).data
   return balances
 }
 
