@@ -74,17 +74,16 @@ export const ensureHttps = (url: string) => {
 export const timeoutTrigger = <T>(fn: () => Promise<T>, duration = 10000): Promise<T> => {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error('Error: Function timed out'));
-    }, duration);
+      reject(new Error("Error: Function timed out"))
+    }, duration)
 
     try {
-      const data = fn();
-      clearTimeout(timer);
-      resolve(data);
+      const data = fn()
+      clearTimeout(timer)
+      resolve(data)
     } catch (error) {
-      clearTimeout(timer);
-      reject(error);
+      clearTimeout(timer)
+      reject(error)
     }
-  });
+  })
 }
-

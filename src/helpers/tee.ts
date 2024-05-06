@@ -34,6 +34,8 @@ import {
   ClusterDataType,
 } from "../tee/types"
 import { isValidAddress, query } from "../blockchain"
+import { getBalances } from "../balance"
+import { BN } from "bn.js"
 
 export const SSSA_NUMSHARES = 5
 export const SSSA_THRESHOLD = 3
@@ -94,15 +96,24 @@ export const combineKeyShares = (shares: string[]): string => {
  */
 export const getEnclaveHealthStatus = async (clusterId = 0, timeout = 10000) => {
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
+  const lastBlock = await getLastBlock()
   const clusterHealthCheck = await Promise.all(
     teeEnclaves.map(async (enclaveUrl, idx) => {
       const http = new HttpClient(ensureHttps(enclaveUrl), timeout)
       const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
       const isError = enclaveData.status !== 200
-      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
-        throw new Error(
-          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
-        )
+      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup") throw new Error(
+        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
+      )
+      // ADDITIONAL CHECKS
+      if ((lastBlock - enclaveData.block_number) > 4) throw new Error(
+        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
+      )
+      const { free } = await getBalances(enclaveData.enclave_address)
+      const ONE_CAPS = new BN("1000000000000000000")
+      if (free.lt(ONE_CAPS)) throw new Error(
+        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave balance too low`,
+      )
       return enclaveData
     }),
   )
@@ -223,16 +234,15 @@ export const getPublicsClusters = async () => {
  */
 export const getFirstPublicClusterAvailable = async (timeout = 10000) => {
   const publicClusters = await getPublicsClusters()
-  if (publicClusters.length === 0) return undefined;
+  if (publicClusters.length === 0) return undefined
 
   for (const cluster of publicClusters) {
     try {
-      const healthData = await timeoutTrigger<EnclaveDataAndHealthType[]>(() =>
-        getEnclaveDataAndHealth(cluster, timeout),
+      const healthData = await timeoutTrigger<EnclaveHealthType[]>(() =>
+        getEnclaveHealthStatus(cluster, timeout),
         timeout + 1000
       )
-      const filteredData = healthData.filter((c) => c.status === 200)
-      if (filteredData.length === ENCLAVES_IN_CLUSTER) {
+      if (healthData.length === ENCLAVES_IN_CLUSTER) {
         return cluster
       }
     } catch (error) {
