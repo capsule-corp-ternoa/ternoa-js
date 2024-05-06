@@ -6,7 +6,7 @@ export class HttpClient {
   constructor(baseURL: string, timeout?: number) {
     this.client = axios.create({
       baseURL,
-      ...(timeout && { timeout })
+      ...(timeout && { timeout }),
     })
   }
 
