@@ -44,8 +44,8 @@ export class TernoaIPFS {
    * @param hash
    * @returns IPFS file
    */
-  static get = async ({ apiUrl }: IServiceIPFS, hash: string) => {
-    const httpClient = new HttpClient(apiUrl.toString())
+  static get = async ({ apiUrl }: IServiceIPFS, hash: string, timeout?: number) => {
+    const httpClient = new HttpClient(apiUrl.toString(), timeout)
     const endpoint = `/ipfs/${hash}`
     return httpClient.get(endpoint)
   }
@@ -57,8 +57,8 @@ export class TernoaIPFS {
    * @param form
    * @returns IPFS data (hash, size, name)
    */
-  static upload = async ({ apiKey, apiUrl }: IServiceIPFS, form: FormData) => {
-    const httpClient = new HttpClient(apiUrl.toString())
+  static upload = async ({ apiKey, apiUrl }: IServiceIPFS, form: FormData, timeout?: number) => {
+    const httpClient = new HttpClient(apiUrl.toString(), timeout)
     const endpoint = "/api/v0/add"
     let headers = { ...(apiKey && { apiKey }) }
     let data: FormData | Readable = form
@@ -85,10 +85,10 @@ export class TernoaIPFS {
    * @param file
    * @returns IPFS data (hash, size, name)
    */
-  static storeFile = async (service: IServiceIPFS, file: File) => {
+  static storeFile = async (service: IServiceIPFS, file: File, timeout?: number) => {
     const form = new FormData()
     form.append("file", file)
-    return await TernoaIPFS.upload(service, form)
+    return await TernoaIPFS.upload(service, form, timeout)
   }
 
   /**
@@ -99,7 +99,7 @@ export class TernoaIPFS {
    * @param metadata  Ternoa basic NFT metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-100-Basic-NFT.md#metadata here}.
    * @returns         IPFS data (Hash, Size, Name)
    */
-  static storeNFT = async (service: IServiceIPFS, file: File, metadata: NftMetadataType) => {
+  static storeNFT = async (service: IServiceIPFS, file: File, metadata: NftMetadataType, timeout?: number) => {
     validateNFTMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload NFT's asset`)
@@ -120,7 +120,7 @@ export class TernoaIPFS {
     }
     const metadataBlob = new Blob([JSON.stringify(nftMetadata)], { type: "application/json" })
     const metadataFile = new File([metadataBlob], "NFT metadata")
-    return await TernoaIPFS.storeFile(service, metadataFile)
+    return await TernoaIPFS.storeFile(service, metadataFile, timeout)
   }
 
   /**
@@ -141,19 +141,20 @@ export class TernoaIPFS {
     publicKey: string,
     nftMetadata?: Partial<NftMetadataType>,
     mediaMetadata?: MediaMetadataType,
+    IPFSTimeout?: number
   ) => {
     if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
     if (typeof publicKey !== "string")
       throw new TypeError(`${Errors.IPFS_METADATA_VALIDATION_ERROR} : Secret NFT's publicKey must be a string`)
     const publicKeyBlob = new Blob([publicKey], { type: "text/plain" })
     const publicKeyFile = new File([publicKeyBlob], "SecretNFT public key")
-    const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile)
+    const publicKeyRes = await TernoaIPFS.storeFile(service, publicKeyFile, IPFSTimeout)
     if (!publicKeyRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's public key`)
     const nftPublicKeyHash = publicKeyRes.Hash
 
     const blob = new Blob([encryptedFile], { type: "text/plain" })
     const file = new File([blob], "SecretNFT metadata")
-    const secretNFTRes = await TernoaIPFS.storeFile(service, file)
+    const secretNFTRes = await TernoaIPFS.storeFile(service, file, IPFSTimeout)
     if (!secretNFTRes) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload secret NFT's asset`)
     const { Hash: secretNFTHash, Size: secretNFTSize } = secretNFTRes
 
@@ -173,7 +174,7 @@ export class TernoaIPFS {
     }
     const secretNFTMetadataBlob = new Blob([JSON.stringify(secretNFTMetadata)], { type: "application/json" })
     const secretNFTMetadataFile = new File([secretNFTMetadataBlob], "secretNFT metadata")
-    return await TernoaIPFS.storeFile(service, secretNFTMetadataFile)
+    return await TernoaIPFS.storeFile(service, secretNFTMetadataFile, IPFSTimeout)
   }
 
   /**
@@ -185,6 +186,7 @@ export class TernoaIPFS {
    * @param nftMetadata       (Optional) Capsule NFT metadata {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-530-Capsule.md here}.
    * @returns                 IPFS Capsule data (Hash, Size, Name).
    */
+  //TODO: add timeout for ipfs upload
   static storeCapsuleNFT = async (
     service: IServiceIPFS,
     publicKey: string,
@@ -247,6 +249,7 @@ export class TernoaIPFS {
     profileFile: File,
     bannerFile: File,
     metadata: CollectionMetadataType,
+    IPFSTimeout?: number
   ) => {
     validateCollectionMetadata(metadata)
     const profileRes = await TernoaIPFS.storeFile(service, profileFile)
@@ -260,7 +263,7 @@ export class TernoaIPFS {
     }
     const metadataBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
     const metadataFile = new File([metadataBlob], "Collection metadata")
-    return await TernoaIPFS.storeFile(service, metadataFile)
+    return await TernoaIPFS.storeFile(service, metadataFile, IPFSTimeout)
   }
 
   /**
@@ -271,7 +274,7 @@ export class TernoaIPFS {
    * @param metadata  Ternoa Marketplace metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-200-Marketplace.md#metadata here}.
    * @returns         IPFS data (Hash, Size, Name)
    */
-  static storeMarketplace = async (service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType) => {
+  static storeMarketplace = async (service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType, IPFSTimeout?: number) => {
     validateMarketplaceMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload marketplace's logo asset`)
@@ -281,19 +284,19 @@ export class TernoaIPFS {
     }
     const metadataBlob = new Blob([JSON.stringify(collectionMetadata)], { type: "application/json" })
     const metadataFile = new File([metadataBlob], "Collection metadata")
-    return await TernoaIPFS.storeFile(service, metadataFile)
+    return await TernoaIPFS.storeFile(service, metadataFile, IPFSTimeout)
   }
 
-  getFile(hash: string) {
-    return TernoaIPFS.get(this, hash)
+  getFile(hash: string, timeout?: number) {
+    return TernoaIPFS.get(this, hash, timeout)
   }
 
-  storeFile(file: File) {
-    return TernoaIPFS.storeFile(this, file)
+  storeFile(file: File, timeout?: number) {
+    return TernoaIPFS.storeFile(this, file, timeout)
   }
 
-  storeNFT(file: File, metadata: NftMetadataType) {
-    return TernoaIPFS.storeNFT(this, file, metadata)
+  storeNFT(file: File, metadata: NftMetadataType, IPFSTimeout?: number) {
+    return TernoaIPFS.storeNFT(this, file, metadata, IPFSTimeout)
   }
 
   storeSecretNFT(
@@ -302,20 +305,22 @@ export class TernoaIPFS {
     publicKey: string,
     nftMetadata?: Partial<NftMetadataType>,
     mediaMetadata?: MediaMetadataType,
+    IPFSTimeout?: number
   ) {
-    return TernoaIPFS.storeSecretNFT(this, encryptedFile, encryptedFileType, publicKey, nftMetadata, mediaMetadata)
+    return TernoaIPFS.storeSecretNFT(this, encryptedFile, encryptedFileType, publicKey, nftMetadata, mediaMetadata, IPFSTimeout)
   }
 
+  //TODO: add IPFSTimeout
   storeCapsuleNFT(publicKey: string, encryptedMedia: CapsuleMedia[], nftMetadata?: Partial<NftMetadataType>) {
     return TernoaIPFS.storeCapsuleNFT(this, publicKey, encryptedMedia, nftMetadata)
   }
 
-  storeCollection(profileFile: File, bannerFile: File, metadata: CollectionMetadataType) {
-    return TernoaIPFS.storeCollection(this, profileFile, bannerFile, metadata)
+  storeCollection(profileFile: File, bannerFile: File, metadata: CollectionMetadataType, IPFSTimeout?: number) {
+    return TernoaIPFS.storeCollection(this, profileFile, bannerFile, metadata, IPFSTimeout)
   }
 
-  storeMarketplace(file: File, metadata: MarketplaceMetadataType) {
-    return TernoaIPFS.storeMarketplace(this, file, metadata)
+  storeMarketplace(file: File, metadata: MarketplaceMetadataType, IPFSTimeout?: number) {
+    return TernoaIPFS.storeMarketplace(this, file, metadata, IPFSTimeout)
   }
 }
 
