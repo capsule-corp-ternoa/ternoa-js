@@ -102,18 +102,19 @@ export const getClusterHealthStatus = async (clusterId = 0, timeout = 10000) => 
       const http = new HttpClient(ensureHttps(enclaveUrl), timeout)
       const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
       const isError = enclaveData.status !== 200
-      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup") throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
-      )
+      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
+        throw new Error(
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
+        )
       // ADDITIONAL CHECKS
-      if ((lastBlock - enclaveData.block_number) > 4) throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
-      )
+      if (lastBlock - enclaveData.block_number > 4)
+        throw new Error(
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
+        )
       const { free } = await getBalances(enclaveData.enclave_address)
       const ONE_CAPS = new BN("1000000000000000000")
-      if (free.lt(ONE_CAPS)) throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave balance too low`,
-      )
+      if (free.lt(ONE_CAPS))
+        throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave balance too low`)
       return { ...enclaveData, enclaveUrl, balance: balanceToNumber(free) }
     }),
   )
@@ -131,18 +132,17 @@ export const _getEnclaveHealthStatus = async (enclaveUrl: string, timeout = 1000
   const http = new HttpClient(ensureHttps(enclaveUrl), timeout)
   const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
   const isError = enclaveData.status !== 200
-  if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup") throw new Error(
-    `${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. ${enclaveData.description}`,
-  )
+  if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
+    throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. ${enclaveData.description}`)
   // ADDITIONAL CHECKS
-  if ((lastBlock - enclaveData.block_number) > 4) throw new Error(
-    `${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
-  )
+  if (lastBlock - enclaveData.block_number > 4)
+    throw new Error(
+      `${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
+    )
   const { free } = await getBalances(enclaveData.enclave_address)
   const ONE_CAPS = new BN("1000000000000000000")
-  if (free.lt(ONE_CAPS)) throw new Error(
-    `${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. Enclave balance too low`,
-  )
+  if (free.lt(ONE_CAPS))
+    throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE}, URL: ${enclaveUrl}. Enclave balance too low`)
   return { ...enclaveData, enclaveUrl, balance: balanceToNumber(free) }
 }
 
@@ -153,7 +153,9 @@ export const _getEnclaveHealthStatus = async (enclaveUrl: string, timeout = 1000
  * @returns           An array of JSONs containing each enclave information (status, date, description, addresses)
  */
 export const getEnclaveHealthStatus = async (clusterId = 0, timeout = 10000) => {
-  console.warn('getEnclaveHealthStatus will be changed to get health of a signle enclage rather than whole cluster\nPlease use getClusterHealthStatus')
+  console.warn(
+    "getEnclaveHealthStatus will be changed to get health of a signle enclage rather than whole cluster\nPlease use getClusterHealthStatus",
+  )
   const teeEnclaves = await getTeeEnclavesBaseUrl(clusterId)
   const lastBlock = await getLastBlock()
   const clusterHealthCheck = await Promise.all(
@@ -161,18 +163,19 @@ export const getEnclaveHealthStatus = async (clusterId = 0, timeout = 10000) => 
       const http = new HttpClient(ensureHttps(enclaveUrl), timeout)
       const enclaveData: EnclaveHealthType = await http.getRaw(TEE_HEALTH_ENDPOINT)
       const isError = enclaveData.status !== 200
-      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup") throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
-      )
+      if (isError || !enclaveData.sync_state.length || enclaveData.sync_state == "setup")
+        throw new Error(
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. ${enclaveData.description}`,
+        )
       // ADDITIONAL CHECKS
-      if ((lastBlock - enclaveData.block_number) > 4) throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
-      )
+      if (lastBlock - enclaveData.block_number > 4)
+        throw new Error(
+          `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave blocks not synchornized with chain`,
+        )
       const { free } = await getBalances(enclaveData.enclave_address)
       const ONE_CAPS = new BN("1000000000000000000")
-      if (free.lt(ONE_CAPS)) throw new Error(
-        `${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave balance too low`,
-      )
+      if (free.lt(ONE_CAPS))
+        throw new Error(`${Errors.TEE_ENCLAVE_NOT_AVAILBLE} - ID ${idx}, URL: ${enclaveUrl}. Enclave balance too low`)
       return { ...enclaveData, enclaveUrl, balance: balanceToNumber(free) }
     }),
   )
@@ -239,7 +242,9 @@ export const getClusterDataAndHealth = async (clusterId = 0, timeout = 10000): P
  * @returns           An array of JSONs containing each enclave data populated with its health information.
  */
 export const getEnclaveDataAndHealth = async (clusterId = 0, timeout = 10000): Promise<EnclaveDataAndHealthType[]> => {
-  console.warn('getEnclaveDataAndHealth will be changed to get health of a signle enclave rather than whole cluster\nPlease use getClusterDataAndHealth')
+  console.warn(
+    "getEnclaveDataAndHealth will be changed to get health of a signle enclave rather than whole cluster\nPlease use getClusterDataAndHealth",
+  )
   const teeEnclaves = await populateEnclavesData(clusterId)
   const enclaveData: EnclaveDataAndHealthType[] = await Promise.all(
     teeEnclaves.map(async (e, idx) => {
@@ -324,9 +329,9 @@ export const getFirstPublicClusterAvailable = async (timeout = 10000) => {
 
   for (const cluster of publicClusters) {
     try {
-      const healthData = await timeoutTrigger<EnclaveHealthType[]>(() =>
-        getClusterHealthStatus(cluster, timeout),
-        timeout + 1000
+      const healthData = await timeoutTrigger<EnclaveHealthType[]>(
+        () => getClusterHealthStatus(cluster, timeout),
+        timeout + 1000,
       )
       if (healthData.length === ENCLAVES_IN_CLUSTER) {
         return cluster
@@ -516,9 +521,9 @@ export const teeKeySharesStore = async (
   )
 
   return teeRes.map((enclaveRes) => {
-
     if ("isRetryError" in enclaveRes) {
-      const { message, status, enclaveAddress, operatorAddress, enclaveSlot, clusterId, enclaveUrl, payload, kind } = enclaveRes
+      const { message, status, enclaveAddress, operatorAddress, enclaveSlot, clusterId, enclaveUrl, payload, kind } =
+        enclaveRes
       return {
         enclaveAddress,
         operatorAddress,
@@ -526,7 +531,7 @@ export const teeKeySharesStore = async (
         clusterId,
         enclaveUrl,
         description: message,
-        nft_id: Number(payload.data[0] === '<' ? payload.data.substring(7).split("_")[0] : payload.data.split("_")[0]),
+        nft_id: Number(payload.data[0] === "<" ? payload.data.substring(7).split("_")[0] : payload.data.split("_")[0]),
         kind,
         share: payload.data.split("_")[1],
         status: status,
@@ -534,7 +539,18 @@ export const teeKeySharesStore = async (
         ...payload,
       }
     }
-    const { description, status, nft_id, enclaveAddress, operatorAddress, enclaveSlot, clusterId, enclaveUrl, payload, kind } = enclaveRes
+    const {
+      description,
+      status,
+      nft_id,
+      enclaveAddress,
+      operatorAddress,
+      enclaveSlot,
+      clusterId,
+      enclaveUrl,
+      payload,
+      kind,
+    } = enclaveRes
     return {
       enclaveAddress,
       operatorAddress,
@@ -570,7 +586,7 @@ export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, 
   let isShareAvailable = false
   let i = 0
   while (isShareAvailable !== true && i <= teeEnclaves.length - 1) {
-    console.log('checking enclave i', i, '---', teeEnclaves[i])
+    console.log("checking enclave i", i, "---", teeEnclaves[i])
     const { exists } = await getTeeEnclaveSharesAvailablility(teeEnclaves[i], nftId, kind)
     isShareAvailable = exists
     i += 1
@@ -620,7 +636,7 @@ export const teeKeySharesRetrieve = async (
 
   shares = shares.filter((x) => x !== undefined)
   if (shares.length < SSSA_THRESHOLD) {
-    throw ({ error: `${Errors.TEE_RETRIEVE_ERROR} - Shares could not be retrieved`, details: errors })
+    throw { error: `${Errors.TEE_RETRIEVE_ERROR} - Shares could not be retrieved`, details: errors }
   }
   return shares as string[]
 }
@@ -657,7 +673,7 @@ export const teeKeySharesRemove = async (
       try {
         const res = await teePost<TeeSharesRemoveType, TeeGenericDataResponseType>(http, endpoint, payload)
         return res
-      } catch (err:any) {
+      } catch (err: any) {
         return {
           status: Errors.TEE_REMOVE_ERROR,
           nft_id: nftId,

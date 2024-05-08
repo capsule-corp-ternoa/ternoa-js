@@ -87,9 +87,9 @@ export type TeeSharesStoreType = {
   enclaveAddress: string
   operatorAddress: string
   enclaveSlot: number
-  clusterId: number,
-  share: string,
-  kind: "secret" | "capsule",
+  clusterId: number
+  share: string
+  kind: "secret" | "capsule"
 } & Omit<TeeGenericDataResponseType, "enclave_id"> &
   StorePayloadType
 

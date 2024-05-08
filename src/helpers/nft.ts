@@ -14,7 +14,15 @@ import {
   teeKeySharesStore,
   SIGNER_BLOCK_VALIDITY,
 } from "./tee"
-import { CapsuleMedia, MediaMetadataType, NftMetadataType, PGPKeysType, RequesterType, StorePayloadType, TeeSharesStoreType } from "./types"
+import {
+  CapsuleMedia,
+  MediaMetadataType,
+  NftMetadataType,
+  PGPKeysType,
+  RequesterType,
+  StorePayloadType,
+  TeeSharesStoreType,
+} from "./types"
 import { getLastBlock, getSignatureFromExtension, getSignatureFromKeyring } from "./crypto"
 
 import { getKeyringFromSeed } from "../account"
@@ -89,7 +97,6 @@ export const prepareAndStoreKeyShares = async (
   return await teeKeySharesStore(clusterId, kind, payloads)
 }
 
-
 /**
  * @name prepareAndStoreKeyShares
  * @summary                  Takes the shares and prepares the store payload with signatures of owner and authSigner.
@@ -105,7 +112,6 @@ export const prepareStoreablePayloadForShares = async (
   nftId: number,
   extensionInjector?: Record<string, any>,
 ): Promise<StorePayloadType[]> => {
-
   if (typeof signer === "string" && !extensionInjector)
     throw new Error(
       `${Errors.TEE_UPLOAD_ERROR} - INJECTOR_SIGNER_MISSING : injectorSigner must be provided when signer is of type string`,
@@ -155,32 +161,32 @@ export const identifyAndStoreFailedShares = async (
   if (typeof signer === "string" && !isValidAddress(signer)) throw new Error("INVALID_ADDRESS_FORMAT")
 
   //0. get details from response, these should be available even on errored response
-  const clusterId = prepareAndStoreKeySharesResponse[0].clusterId;
-  const kind: "secret" | "capsule" = prepareAndStoreKeySharesResponse[0].kind;
-  const nftId: number = prepareAndStoreKeySharesResponse[0].nft_id;
-  const nftOwner: string = prepareAndStoreKeySharesResponse[0].owner_address;
+  const clusterId = prepareAndStoreKeySharesResponse[0].clusterId
+  const kind: "secret" | "capsule" = prepareAndStoreKeySharesResponse[0].kind
+  const nftId: number = prepareAndStoreKeySharesResponse[0].nft_id
+  const nftOwner: string = prepareAndStoreKeySharesResponse[0].owner_address
 
   //1. check is current signer is the owner of nft because if nft is not synced the owenr cannot change
   if (typeof signer === "string") {
-    if (signer !== nftOwner) throw new Error("Signer is not the owner of NFT");
+    if (signer !== nftOwner) throw new Error("Signer is not the owner of NFT")
   } else {
-    if (signer.address !== nftOwner) throw new Error("Signer is not the owner of NFT");
+    if (signer.address !== nftOwner) throw new Error("Signer is not the owner of NFT")
   }
 
   const shares: string[] = []
-  const enclaveSlots: number[] = [];
+  const enclaveSlots: number[] = []
   //2. get failed shares and the respective enclave slots
-  prepareAndStoreKeySharesResponse.forEach(r => {
+  prepareAndStoreKeySharesResponse.forEach((r) => {
     if (r.isError) {
       shares.push(r.share)
       enclaveSlots.push(r.enclaveSlot)
     }
   })
   //if no failed shares, throw error
-  if (shares.length < 1) throw new Error("No faild responses found in the input data");
+  if (shares.length < 1) throw new Error("No faild responses found in the input data")
 
   //3. prepare the shares again with signing the data
-  const payloads = await prepareStoreablePayloadForShares(shares, signer, nftId, extensionInjector);
+  const payloads = await prepareStoreablePayloadForShares(shares, signer, nftId, extensionInjector)
 
   //4. request to store failed shares to the respective enclaves
   return await teeKeySharesStore(clusterId, kind, payloads, 2, enclaveSlots)

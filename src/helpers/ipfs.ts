@@ -141,7 +141,7 @@ export class TernoaIPFS {
     publicKey: string,
     nftMetadata?: Partial<NftMetadataType>,
     mediaMetadata?: MediaMetadataType,
-    IPFSTimeout?: number
+    IPFSTimeout?: number,
   ) => {
     if (nftMetadata) validateOptionalNFTMetadata(nftMetadata)
     if (typeof publicKey !== "string")
@@ -249,7 +249,7 @@ export class TernoaIPFS {
     profileFile: File,
     bannerFile: File,
     metadata: CollectionMetadataType,
-    IPFSTimeout?: number
+    IPFSTimeout?: number,
   ) => {
     validateCollectionMetadata(metadata)
     const profileRes = await TernoaIPFS.storeFile(service, profileFile)
@@ -274,7 +274,12 @@ export class TernoaIPFS {
    * @param metadata  Ternoa Marketplace metadata structure {@link https://github.com/capsule-corp-ternoa/ternoa-proposals/blob/main/TIPs/tip-200-Marketplace.md#metadata here}.
    * @returns         IPFS data (Hash, Size, Name)
    */
-  static storeMarketplace = async (service: IServiceIPFS, file: File, metadata: MarketplaceMetadataType, IPFSTimeout?: number) => {
+  static storeMarketplace = async (
+    service: IServiceIPFS,
+    file: File,
+    metadata: MarketplaceMetadataType,
+    IPFSTimeout?: number,
+  ) => {
     validateMarketplaceMetadata(metadata)
     const res = await TernoaIPFS.storeFile(service, file)
     if (!res) throw new Error(`${Errors.IPFS_FILE_UPLOAD_ERROR} - Unable to upload marketplace's logo asset`)
@@ -305,9 +310,17 @@ export class TernoaIPFS {
     publicKey: string,
     nftMetadata?: Partial<NftMetadataType>,
     mediaMetadata?: MediaMetadataType,
-    IPFSTimeout?: number
+    IPFSTimeout?: number,
   ) {
-    return TernoaIPFS.storeSecretNFT(this, encryptedFile, encryptedFileType, publicKey, nftMetadata, mediaMetadata, IPFSTimeout)
+    return TernoaIPFS.storeSecretNFT(
+      this,
+      encryptedFile,
+      encryptedFileType,
+      publicKey,
+      nftMetadata,
+      mediaMetadata,
+      IPFSTimeout,
+    )
   }
 
   //TODO: add IPFSTimeout
