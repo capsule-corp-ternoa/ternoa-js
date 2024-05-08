@@ -55,8 +55,8 @@ export const retryPost = async <T>(fn: () => Promise<any>, n: number): Promise<T
     } catch (err: any) {
       lastError = {
         isRetryError: true,
-        status: "SDK_RETRY_POST_ERROR",
-        message: err?.message ? err.message : JSON.stringify(err),
+        status: err.status,
+        message: JSON.stringify(err.data),
       }
     }
   }
