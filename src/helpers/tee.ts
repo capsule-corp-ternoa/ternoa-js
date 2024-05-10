@@ -586,7 +586,6 @@ export const sharesAvailableOnTeeCluster = async (clusterId = 0, nftId: number, 
   let isShareAvailable = false
   let i = 0
   while (isShareAvailable !== true && i <= teeEnclaves.length - 1) {
-    console.log("checking enclave i", i, "---", teeEnclaves[i])
     const { exists } = await getTeeEnclaveSharesAvailablility(teeEnclaves[i], nftId, kind)
     isShareAvailable = exists
     i += 1
