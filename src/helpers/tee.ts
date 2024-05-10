@@ -622,11 +622,12 @@ export const teeKeySharesRetrieve = async (
       const endpoint = kind === "secret" ? TEE_RETRIEVE_SECRET_NFT_ENDPOINT : TEE_RETRIEVE_CAPSULE_NFT_ENDPOINT
       try {
         const res = await teePost<RetrievePayloadType, TeeRetrieveDataResponseType>(http, endpoint, payload)
-        if (res.status !== TEE_RETRIEVE_STATUS_SUCCESS)
+        if (res.status === TEE_RETRIEVE_STATUS_SUCCESS && res.keyshare_data) {
+          return res.keyshare_data.split("_")[1]
+        } else {
           errors.push(res.description ? res.description.split(":")[1] : "Share could not be retrieved")
-        return res.status === TEE_RETRIEVE_STATUS_SUCCESS && res.keyshare_data
-          ? res.keyshare_data.split("_")[1]
-          : undefined
+          return undefined
+        }
       } catch (err: any) {
         errors.push(JSON.stringify(err))
       }
@@ -635,7 +636,7 @@ export const teeKeySharesRetrieve = async (
 
   shares = shares.filter((x) => x !== undefined)
   if (shares.length < SSSA_THRESHOLD) {
-    throw { error: `${Errors.TEE_RETRIEVE_ERROR} - Shares could not be retrieved`, details: errors }
+    throw new Error(`${Errors.TEE_RETRIEVE_ERROR} - Shares could not be retrieved: ${errors[0]}`)
   }
   return shares as string[]
 }
